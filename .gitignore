@@ -1,0 +1,13 @@
+# Ignore bin and pkg folders.
+**/bin/*
+**/pkg/*
+
+# Visual Studio Code
+/.vscode/
+/src/.vscode/
+
+# Emacs.
+*~
+
+# Vim
+*.sw[a-p]
