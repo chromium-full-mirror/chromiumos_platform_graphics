@@ -102,3 +102,125 @@ When analyzing two related profiles, it is even more important to use option
 without it, `glretrace` will filter out different calls on each platform. You will
 likely end up with non-matching subsets of GL calls in each profile. They will
 still load in analyze successfully, but they will be harder to compare accurately.
+
+
+## Trace Profiler
+The trace profiler is a tool for gathering trace-based profiles from remote
+devices reached through SSH. The entire profiling activity is initiated from
+a host machine, which provides the binaries for the profiling tools, the trace
+files and storage space for receiving the profile data.
+
+Run `profile --help` to print information about the available cmd-line
+options.
+
+### Reaching target devices through SSH
+The trace profiler uses SSH both to run command on the target device and to
+copy files to and from the device. SSH is configure through a JSON file, such
+as the following:
+
+``` json
+{
+  "addr": "100.107.108.177",
+  "port": 22,
+  "username": "root",
+  "password": "test0000",
+  "publicKeyFilepath": "/usr/local/google/home/gwink/.ssh/testing_rsa"
+}
+```
+
+By default, trace_profiler reads the SSH configuration from file `ssh_config.json`
+in the current directory. Use cmd-line option `-ssh-config=[filepath]` to override
+the default.
+
+### SSH tunneling
+SSH tunneling is useful to gather trace profiles from Crostini or Crouton instances
+that cannot be reached with a direct SSH connection. By default, the trace profiler
+doesn't use tunneling. However, if a JSON file with tunneling parameters is
+specified on the command line with `-tunne-config=[filepath]`, then the trace
+profiler will attempt to setup a tunnel before establishing the SSH connection.
+
+For example, a tunnel JSON configuration to a Crostini instance might look as follows:
+
+``` json
+{
+  "localPort": 9922,
+  "targetHostAddr": "penguin.linux.test",
+  "targetPort": 22,
+  "server": {
+    "addr": "100.107.108.177",
+    "port": 22,
+    "username": "root",
+    "password": "test0000",
+    "publicKeyFilepath": "/usr/local/google/home/gwink/.ssh/testing_rsa"
+  }
+}
+```
+
+In this example, we use the SSH server on the Chromebook device at IP address
+`100.107.108.177`. The tunnel forwards connections from port 9922 on the local host,
+to port 22 in the Crostini instance, refered to with its standard address
+`penguin.linux.test`.
+
+Once the tunnel is established, a SSH connection from the host to the Crostini
+instance is setup with the following SSH parameters:
+
+``` json
+{
+  "addr": "localhost",
+  "port": 9922,
+  "username": "<crostini username>",
+  "password": "<crostini password>",
+  "publicKeyFilepath": ""
+}
+```
+
+Note: You may need to provide a path to a public key file, depending how the
+sshd server is setup in Crostini.
+
+### Generating profiles
+Once the host can establish a connection to the target device, it is time to
+collect profiles. That process too is configured through a JSON file. By default
+it is read from file `profile_config.json`, but a different file can be specified
+with cmd-line option `-profile-config=[filepath]`.
+
+The profile configuration JSON looks as follows:
+
+``` json
+{
+  "localTraceDir": "/usr/local/google/home/<username>/sd-gfx/Gaming/traces/",
+  "targetTraceDir": "/home/<username>/traces/",
+  "traces": ["traces_linux_10127_borderlands2.trace"],
+  "keepTraceOnTarget": false,
+  "localProfileDir": "/usr/local/google/home/<username>/profiles",
+  "profileNameSuffix": ".prof",
+  "localProfAppPath": "/usr/local/google/home/<username/src/apitrace/build/",
+  "targetProfAppPath": "/home/<username>/apitrace/",
+  "profCommand": "/home/<username>/apitrace/glretrace --pcpu --pgpu --min-cpu-time=0 [[trace-file]] > [[prof-file]]",
+  "targetDisplay": "0"
+}
+```
+
+Here's more info about each option:
+* **localTraceDir**: path to the directory that holds the trace files on the host.
+* **targetTraceDir**: path to directory to receive the trace files on the target.
+* **traces**: list of trace file names.
+* **keepTraceOnTarget**: set this to true to keep the trace files on the target device
+  after each profile run. (Beware, trace files can be quite large.) Otherwise,
+  the trace files are deleted immediately after each profile run.
+* **localProfileDir**: path of directory where to store the gernerated profile files
+  the on host.
+* **profileNameSuffix**: append this to the trace file name to generate profile file name.
+  For example, with ".prof", `traces_linux_10127_borderlands2.trace` becomes
+  `traces_linux_10127_borderlands2.trace.prof`.
+* **localProfAppPath**: Path to binaries, compiled for the target device, for the
+  profiling tool. If this path points to a binary file, that single file is copied
+  to the target device. If the path is for a directory, the entire directory
+  content is copied to the device, albeit non-recursively.
+* **targetProfAppPath**: Path to directory where to copy the tool's binaries on
+  the target device.
+* **profCommand**: This parameter is used to construct the command line to invoke
+  to generate the profile. Placeholder `[[trace-file]]` is replaced by the path
+  to the input trace file on the target device. Placeholder `[[prof-file]]` is
+  replaced by the output profile filepath on the target device.
+* **targetDisplay**: This is the DISPLAY to use when running the profile command,
+  usually `"0"` or `"1"`.

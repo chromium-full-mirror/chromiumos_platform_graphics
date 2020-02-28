@@ -9,36 +9,27 @@ GOGET = $(GOCMD) get
 GOFORMAT = $(GOCMD) fmt
 GOENV = $(GOCMD) env
 
-REMOTE_PACKS= \
-	golang.org/x/image/colornames \
-	gonum.org/v1/plot \
-	gonum.org/v1/plot/plotter \
-	github.com/chzyer/readline
-
-ANALYZE_SRCS=./cmd/analyze/main.go
-ANALYZE_BIN=./bin/analyze
+SRCS=main.go profiler.go
+BIN=../../bin/profile
 
 all: build
-build: import
-import: env
+build: env
 format: env
 clean: env
 
-import:
-	$(GOGET) $(REMOTE_PACKS)
 build:
-	$(GOBUILD) -o $(ANALYZE_BIN) $(ANALYZE_SRCS)
+	$(GOBUILD) -o $(BIN) $(SRCS)
 
 clean:
 	$(GOCLEAN)
-	rm -f $(ANALYZE_BIN)
+	rm -f $(BIN)
 
 format:
-	$(GOFORMAT) ./cmd/analyze/main.go
-	$(GOFORMAT) ./cmd/analyze/analyze/*.go
+	$(GOFORMAT) $(SRCS)
+	$(GOFORMAT) remote/*.go
 
 env:
 	# Restore GOROOT to default.
 	$(GOENV) -u GOROOT
 	# Custom GOPATH for compatibility with emerge build.
-	$(GOENV) -w GOPATH=$$HOME/go:$$PWD/../..
+	$(GOENV) -w GOPATH=$$HOME/go:$$PWD/../../../..
