@@ -49,7 +49,7 @@ func (console *Console) StartInteractive(prof1 *ProfileData, prof2 *ProfileData)
 		if len(tokens) > 0 {
 			err := ExecCommand(tokens, &console.profiles)
 			if err != nil {
-				if err == QUIT_REQUESTED {
+				if err == ErrQuitRequest {
 					break
 				}
 				fmt.Println(err.Error())

@@ -27,8 +27,8 @@ func printUsage() {
 }
 
 func readProfile(filename string, readDone chan bool) (*profileData, error) {
-	var profData *profileData = nil
-	var err error = nil
+	var profData *profileData
+	var err error
 
 	if filename != "" {
 		var reader = new(profileReader)
@@ -45,8 +45,8 @@ func readProfile(filename string, readDone chan bool) (*profileData, error) {
 }
 
 func readProfileOrExitOnFailure(filename string, readDone chan bool) *profileData {
-	var err error = nil
-	var profData *profileData = nil
+	var err error
+	var profData *profileData
 	if profData, err = readProfile(filename, readDone); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
@@ -89,8 +89,8 @@ func main() {
 
 	// Read and parse profiles.
 	var waitReadDone = make(chan bool, 2)
-	var profData1 *profileData = nil
-	var profData2 *profileData = nil
+	var profData1 *profileData
+	var profData2 *profileData
 	go func() {
 		profData1 = readProfileOrExitOnFailure(argProfileFile1, waitReadDone)
 	}()

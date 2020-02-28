@@ -39,50 +39,50 @@ type cmdOptions struct {
 	cpuThresholdNs int
 }
 
-// QUIT_REQUESTED isn't really an error but instead a request to exit the application.
-var QUIT_REQUESTED error = errors.New("quit-requested")
+// ErrQuitRequest isn't really an error but instead a request to exit the application.
+var ErrQuitRequest = errors.New("quit-requested")
 
 // Dispatch table for all the available command except help. (Help is handled
 // separately because go doesn't like to create a loop this table and the
 // doPrintHelp that iterates over this table.)
 var cmdDispatchTable = map[string]cmdDispatch{
-	"quit": cmdDispatch{
+	"quit": {
 		"Exit the console and go back to your regular life.",
-		func(args []string, _ *Profiles) error { return QUIT_REQUESTED },
+		func(args []string, _ *Profiles) error { return ErrQuitRequest },
 		nil},
-	"call-stats": cmdDispatch{
+	"call-stats": {
 		"(call-stats [p1|p2] f=regex) Print call stats for the calls identified by a regex.",
 		doCallStats,
 		moreHelpForCallStats},
-	"swap-prof": cmdDispatch{
+	"swap-prof": {
 		"Swap profile1 and profile2, a no-op if there's only one profile.",
 		doSwapProfiles,
 		nil},
-	"show-prof": cmdDispatch{
+	"show-prof": {
 		"(show-prof) Show basic information for the available profile(s).",
 		doShowProfileInfo,
 		nil},
-	"show-calls": cmdDispatch{
+	"show-calls": {
 		"(show-calls [p1|p2]  [n=xx] [s=byGpuAvg|byCpuAvg]) Show information for xx\n" +
 			"        most expensive calls for the selected profile",
 		doShowCalls,
 		moreHelpForShowCalls},
-	"show-frames": cmdDispatch{
+	"show-frames": {
 		"(show-frames [p1|p2]  [n=xx] [s=byGpuAvg|byCpuAvg]) Show information for xx\n" +
 			"        most expensive frames for the selected profile",
 		doShowFrames,
 		moreHelpForShowFrame},
-	"show-frame-details": cmdDispatch{
+	"show-frame-details": {
 		"(show-frame-details N1[-N2]  [gt=xxx] [ct=xxx]) Show detailed call\n" +
 			"        information for frame N1 to N2.",
 		doShowFrameDetail,
 		moreHelpForShowFrameDetails},
-	"compare-profiles": cmdDispatch{
+	"compare-profiles": {
 		"(compare-profiles [n=xx] [s=byGpuAvg|byCpuAvg]) Show timing comparison information for xx\n" +
 			"        most expensive calls for prof1 / prof2",
 		doCompareProfiles,
 		showMoreHelpForCompareProfile},
-	"plot-calls": cmdDispatch{
+	"plot-calls": {
 		"(plot-calls [p1|p2] f=regex) Plot call-name usage per frames.",
 		doGraphCallUsage,
 		nil},
@@ -92,7 +92,7 @@ var cmdDispatchTable = map[string]cmdDispatch{
 // args: the command and options as an array of string tokens.
 // profiles: the profile(s) the command acts on.
 // Returns nil if the command executes successfully or an error otherwise.
-// Error QUIT_REQUESTED indicates the user want sto exit the app.
+// Error ErrQuitRequest indicates the user want to exit the app.
 func ExecCommand(args []string, profiles *Profiles) error {
 	if args[0] == "help" {
 		return doPrintHelp(args[1:])

@@ -48,8 +48,8 @@ func CheckProfileEquivalence(prof1 *ProfileData, prof2 *ProfileData) bool {
 	}()
 
 	// Compare calls selected above with the corresponding calls in profile2.
-	var numCallsMatch int32 = 0
-	var numCallsMismatch int32 = 0
+	var numCallsMatch int32
+	var numCallsMismatch int32
 	for c := range callsFromProf1 {
 		go func(c callInfo) {
 			if prof2.VerifyCallNum(c.callNum, c.callName) {
