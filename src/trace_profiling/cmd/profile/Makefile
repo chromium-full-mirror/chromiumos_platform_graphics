@@ -9,7 +9,7 @@ GOGET = $(GOCMD) get
 GOFORMAT = $(GOCMD) fmt
 GOENV = $(GOCMD) env
 
-SRCS=main.go profiler.go
+SRCS=main.go
 BIN=../../bin/profile
 
 all: build
@@ -26,6 +26,7 @@ clean:
 
 format:
 	$(GOFORMAT) $(SRCS)
+	$(GOFORMAT) profile/*.go
 	$(GOFORMAT) remote/*.go
 
 env:

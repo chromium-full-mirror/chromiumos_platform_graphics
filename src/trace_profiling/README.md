@@ -224,3 +224,38 @@ Here's more info about each option:
   replaced by the output profile filepath on the target device.
 * **targetDisplay**: This is the DISPLAY to use when running the profile command,
   usually `"0"` or `"1"`.
+
+### Configuration bundle
+A configuration bundle is a handy way to specify all configuration properties
+in a single JSON bundle togather with the ability to override individual
+properties. A configuration bundle might look as follows:
+
+``` json
+{
+  "files": {
+    "sshConfigFile": "ssh_config.json",
+    "tunnelConfigFile": "tunnel_config.json",
+    "profileConfigFile": "profile_config.json"
+  },
+  "configs": {
+    "profile": {
+      "traces": [
+        "traces_linux_10127_borderlands2.trace"
+      ],
+      "profCommand": "/home/gwink/apitrace/glretrace [[trace-file]] > [[prof-file]]"
+    }
+  }
+}
+```
+
+In this example, the base ssh, tunnel and profile configurations are read from the
+files specified in the `files` section. However, the `configs` section overrides
+two properties in the `profile` configuration, namely `traces` and `profCommand`.
+
+Either section is optional. That is, the configurations could be specified
+entirely with the files without any ovveride in `configs`. Or the configurations
+could be fully specified with the `configs` section without needing to read data
+from any file.
+
+The file containing the configuration bundle is specified with cmd-line option
+`-config-bundle`.

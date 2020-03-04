@@ -9,10 +9,11 @@ import (
 	"fmt"
 	"os"
 
+	"trace_profiling/cmd/profile/profile"
 	"trace_profiling/cmd/profile/remote"
 )
 
-func runProfiling(prof *Profiler, target *remote.SSHTarget, tunnel *remote.Tunnel) {
+func runProfiling(prof *profile.Profiler, target *remote.SSHTarget, tunnel *remote.Tunnel) {
 	tunnelReady := make(chan bool, 1)
 	tunnelError := make(chan error, 1)
 	if tunnel != nil {
@@ -52,9 +53,44 @@ func runProfiling(prof *Profiler, target *remote.SSHTarget, tunnel *remote.Tunne
 	}
 }
 
+// Retrieve the configuration parameters from a single Bundle JSON file.
+func getParamsFromBundle(bundleFilePath string) (
+	*remote.SSHParams, *remote.TunnelParams, *profile.ProfileParams, error) {
+	sshParams, tunnelParams, profileParams, err := profile.ReadConfigBundle(bundleFilePath)
+	return sshParams, tunnelParams, profileParams, err
+}
+
+// Retrieve the configuration parameters from individual JSON files for
+// ssh, tunnel and profile configurations.
+func getParamsFromFiles(sshConfigFile, tunnelConfigFile, profileConfigFile string) (
+	*remote.SSHParams, *remote.TunnelParams, *profile.ProfileParams, error) {
+
+	var tunnelConfig *remote.TunnelParams
+	var err error
+	if tunnelConfigFile != "" && tunnelConfigFile != "/no-tunnel/" {
+		tunnelConfig, err = remote.ReadTunnelParamsFromJSON(tunnelConfigFile)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+	}
+
+	sshConfig, err := remote.CreateSSHParamsFromJSON(sshConfigFile)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	profConfig, err := profile.CreateProfileParamsFromJSON(profileConfigFile)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return sshConfig, tunnelConfig, profConfig, nil
+}
+
 func main() {
 	var argTunnelConfigFilepath string
 	var argSSHConfigFilepath string
+	var argBundleConfigFilePath string
 	var argProfileConfigFilepath string
 	var argForceInstallTools bool
 	var argAlwaysCopyTraces bool
@@ -66,6 +102,8 @@ func main() {
 		"SSH configuration file")
 	flag.StringVar(&argProfileConfigFilepath, "profile-config", "profile_config.json",
 		"Profile configuration file")
+	flag.StringVar(&argBundleConfigFilePath, "config-bundle", "",
+		"Configuration-bundle file (other files ignored when specified)")
 	flag.BoolVar(&argForceInstallTools, "reinstall-tools", false,
 		"Re-install the profiling tools on the remote device, even if they are already there")
 	flag.BoolVar(&argAlwaysCopyTraces, "always-copy-traces", false,
@@ -74,42 +112,42 @@ func main() {
 		"Enable verbose mode, to see more info during profiling")
 	flag.Parse()
 
+	// If a bundle is specified, it takes precedence over individual config files.
+	var sshParams *remote.SSHParams
+	var tunnelParams *remote.TunnelParams
+	var profParams *profile.ProfileParams
+	var err error
+	if argBundleConfigFilePath != "" {
+		sshParams, tunnelParams, profParams, err = getParamsFromBundle(argBundleConfigFilePath)
+	} else {
+		sshParams, tunnelParams, profParams, err = getParamsFromFiles(
+			argSSHConfigFilepath, argTunnelConfigFilepath, argProfileConfigFilepath)
+	}
+
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		return
+	}
+
 	// Tunneling is optional. If no tunnel parameters are provided, the SHH
 	// connection to the target device will be direct.
 	var tunnel *remote.Tunnel
-	if argTunnelConfigFilepath != "" && argTunnelConfigFilepath != "/no-tunnel/" {
-		tunnelConfig, err := remote.ReadTunnelParamsFromJSON(argTunnelConfigFilepath)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-			return
-		}
-
-		tunnel, err = remote.CreateTunnel(tunnelConfig)
+	if tunnelParams != nil {
+		tunnel, err = remote.CreateTunnel(tunnelParams)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Create tunnel %s\n", err.Error())
 			return
 		}
 	}
 
-	sshConfig, err := remote.CreateSSHParamsFromJSON(argSSHConfigFilepath)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		return
-	}
-
 	var target *remote.SSHTarget
-	target, err = remote.CreateSSHTargetWithParams(sshConfig)
+	target, err = remote.CreateSSHTargetWithParams(sshParams)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		return
 	}
 
-	profConfig, err := CreateProfileParamsFromJSON(argProfileConfigFilepath)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		return
-	}
-	var prof = CreateProfiler(profConfig, target)
+	var prof = profile.CreateProfiler(profParams, target)
 	prof.SetEnableVerbose(argEnableVerbose)
 	prof.SetAlwaysCopyTraces(argAlwaysCopyTraces)
 	prof.SetForceInstallTools(argForceInstallTools)
