@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -22,57 +23,20 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"trace_replay/cmd/trace_replay/comm"
+	"trace_replay/cmd/trace_replay/repo"
 )
 
 const (
-	defaultRepeatCount = 1
-	apitraceAppName    = "apitrace"
-	apitraceOutputRE   = `Rendered (\d+) frames in (\d*\.?\d*) secs, average of (\d*\.?\d*) fps`
+	tempFolder       = "/tmp"
+	apitraceAppName  = "apitrace"
+	apitraceOutputRE = `Rendered (\d+) frames in (\d*\.?\d*) secs, average of (\d*\.?\d*) fps`
 )
 
 var (
 	apitraceArgs     = []string{"replay", "--benchmark"}
 	requiredPackages = []string{"apitrace", "zstd"}
 )
-
-// ProxyServerInfo is used as a container for a proxy sever information
-type ProxyServerInfo struct {
-	URL string `json:"url"`
-}
-
-// FileInfo is used to specify trace replay test storage artifact info
-type FileInfo struct {
-	GSURL     string `json:"gsURL"`
-	Size      uint64 `json:"size,string"`
-	SHA256Sum string `json:"sha256sum"`
-	MD5Sum    string `json:"md5sum"`
-}
-
-// TestSettings is used to configure trace replay test settings
-type TestSettings struct {
-	RepeatCount    uint32 `json:"RepeatCount,string"`
-	CoolDownIntSec uint32 `json:"CoolDownIntSec,string"`
-}
-
-// Config is used to define trace replay config entries
-type Config struct {
-	Name         string          `json:"Name"`
-	ProxyServer  ProxyServerInfo `json:"ProxyServer"`
-	StorageFile  FileInfo        `json:"StorageFile"`
-	TestSettings TestSettings    `json:"TestSettings"`
-}
-
-type replayResult struct {
-	TotalFrames       uint32  `json:"TotalFrames,string"`
-	AverageFPS        float32 `json:"AverageFPS,string"`
-	DurationInSeconds float32 `json:"DurationInSeconds,string"`
-}
-
-type testResult struct {
-	Result       string         `json:"Result"`
-	ErrorMessage string         `json:"ErrorMessage"`
-	Values       []replayResult `json:"Values"`
-}
 
 type werror struct {
 	err  error
@@ -154,8 +118,8 @@ func decompressFile(fileName, expectedExt string) (string, *werror) {
 	default:
 		return "", wrapError(nil, "Unknown trace extension: %s", fileExt)
 	}
-	if err := decompressCmd.Run(); err != nil {
-		return "", wrapError(err, "Unable to decompress <%s>.", fileName)
+	if out, err := decompressCmd.CombinedOutput(); err != nil {
+		return "", wrapError(err, "Unable to decompress <%s>. Combined output: %s", fileName, string(out))
 	}
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName)), nil
 }
@@ -182,19 +146,19 @@ func httpRequestToFile(request, outFile string) *werror {
 	return wrapError(nil, "HTTP status code isn't OK: %d!", httpResponse.StatusCode)
 }
 
-// Downloads a file using gs url [gsURL] via proxy http server [proxyURL]
-// and saves it to the specified directory [localPath]
-// returns the full name to the result file or error
-func downloadFile(localPath, proxyURL, gsURL string) (string, *werror) {
+// Downloads a file using relative file path [filePath] via proxy http server
+// [proxyURL] and saves it to the specified directory [localPath]
+// returns the full name to the local result file or error
+func downloadFile(localPath, proxyURL, filePath string) (string, *werror) {
 	downloadURL, e := url.Parse(proxyURL)
 	if e != nil {
-		return "", wrapError(e, "Unable to parse proxy server url <%s>", proxyURL)
+		return "", wrapError(e, "Unable to parse proxy server URL <%s>", proxyURL)
 	}
 	downloadURLParams := url.Values{}
-	// Use only one URL argument for now: d={$gsURL}
-	downloadURLParams.Add("d", gsURL)
+	// Use only one URL argument for now: d=filePath
+	downloadURLParams.Add("d", filePath)
 	downloadURL.RawQuery = downloadURLParams.Encode()
-	localFileName := path.Join(localPath, path.Base(gsURL))
+	localFileName := path.Join(localPath, path.Base(filePath))
 	err := httpRequestToFile(downloadURL.String(), localFileName)
 	if err != nil {
 		return "", err
@@ -202,7 +166,65 @@ func downloadFile(localPath, proxyURL, gsURL string) (string, *werror) {
 	return localFileName, nil
 }
 
-func parseReplayOutput(output string) (*replayResult, *werror) {
+// getTraceList function retreives the list of all traces for the repository specified
+// in the TestGroupConfig
+func getTraceList(config *comm.TestGroupConfig) (*repo.TraceList, *werror) {
+	traceListFileName := fmt.Sprintf("repo.%d.json", config.Repository.Version)
+	fileName, err := downloadFile(tempFolder, config.ProxyServer.URL, traceListFileName)
+	if err != nil {
+		return nil, err
+	}
+	defer os.Remove(fileName)
+
+	file, e := os.Open(fileName)
+	if e != nil {
+		return nil, wrapError(e, "Unable to open downloaded <%s>", fileName)
+	}
+	defer file.Close()
+
+	bytes, _ := ioutil.ReadAll(file)
+	var traceList repo.TraceList
+	e = json.Unmarshal(bytes, &traceList)
+	if e != nil {
+		return nil, wrapError(e, "Unable to parse trace list")
+	}
+
+	return &traceList, nil
+}
+
+// checks if a set of labels |a| is a subset of labels |b|
+func matchLabels(a *[]string, b *[]string) bool {
+	if len(*a) == 0 || len(*b) == 0 {
+		return false
+	}
+
+	for _, aval := range *a {
+		bFound := false
+		for _, bval := range *b {
+			if strings.EqualFold(aval, bval) {
+				bFound = true
+				break
+			}
+		}
+		if bFound == false {
+			return false
+		}
+	}
+	return true
+}
+
+// getTraceEntries function selects the trace entries for the specified labels
+func getTraceEntries(traceList *repo.TraceList, queryLabels *[]string) ([]repo.TraceListEntry, *werror) {
+	var result []repo.TraceListEntry
+	for _, entry := range traceList.Entries {
+		if matchLabels(queryLabels, &entry.Labels) == true {
+			result = append(result, entry)
+		}
+	}
+	return result, nil
+}
+
+func parseReplayOutput(output string) (*comm.ReplayResult, *werror) {
 	re := regexp.MustCompile(apitraceOutputRE)
 	match := re.FindStringSubmatch(output)
 	if match == nil {
@@ -220,49 +242,31 @@ func parseReplayOutput(output string) (*replayResult, *werror) {
 	if err != nil {
 		return nil, wrapError(err, "failed to parse fps %q", match[3])
 	}
-	return &replayResult{uint32(totalFrames), float32(averageFPS), float32(durationInSeconds)}, nil
+	return &comm.ReplayResult{
+		TotalFrames:       uint32(totalFrames),
+		AverageFPS:        float32(averageFPS),
+		DurationInSeconds: float32(durationInSeconds),
+	}, nil
 }
 
-func replayTrace(traceFileName string) (*replayResult, *werror) {
-	cmd := exec.Command(apitraceAppName, append(apitraceArgs, traceFileName)...)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return nil, wrapError(err, "Failed to replay trace file [%s]", traceFileName)
-	}
-	return parseReplayOutput(string(out))
-}
-
-func outputResult(replayResults []replayResult, err *werror) {
-	if err == nil && len(replayResults) == 0 {
-		err = wrapError(nil, "no replay results")
-	}
-
-	resultValue := func(err *werror) string {
-		if err != nil {
-			return "error"
-		}
-		return "ok"
-	}
-
-	errorMessage := func(err *werror) string {
-		if err != nil {
-			return err.String()
-		}
-		return ""
-	}
-
-	testResult := testResult{
-		Result:       resultValue(err),
-		ErrorMessage: errorMessage(err),
-		Values:       replayResults,
-	}
-
-	output, _ := json.Marshal(testResult)
+func outputResult(result comm.TestGroupResult) {
+	output, _ := json.Marshal(result)
 	fmt.Println(string(output))
 }
 
 func exitWithError(err *werror) {
-	outputResult([]replayResult{}, err)
+	formatMessage := func(err *werror) string {
+		if err != nil {
+			return err.String()
+		}
+		return "Unknown error"
+	}
+
+	result := comm.TestGroupResult{
+		Result:  comm.TestResultFailure,
+		Message: formatMessage(err),
+	}
+	outputResult(result)
 	os.Exit(0)
 }
 
@@ -273,31 +277,85 @@ func checkPackageInstalled(name string) *werror {
 	return nil
 }
 
+func replayTrace(traceFileName string) (*comm.ReplayResult, *werror) {
+	cmd := exec.Command(apitraceAppName, append(apitraceArgs, traceFileName)...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, wrapError(err, "Failed to replay trace file [%s]", traceFileName)
+	}
+	return parseReplayOutput(string(out))
+}
+
+func runTest(config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (*[]comm.ReplayResult, *werror) {
+	//TODO(tutankhamen): Check for free space (container file size + trace file size + some extra?)
+
+	// Download trace file via proxy server
+	downloadedFileName, err := downloadFile(tempFolder, config.ProxyServer.URL, traceEntry.StorageFile.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	// Perform integrity checks on the downloaded file
+	fileInfo, e := os.Stat(downloadedFileName)
+	if e != nil {
+		return nil, wrapError(e, "Unable to get stat for %s", downloadedFileName)
+	}
+
+	if uint64(fileInfo.Size()) != traceEntry.StorageFile.Size {
+		return nil, wrapError(nil, "Actual file size of %s is different from the value in metadata. Actual: %db, expected: %db", downloadedFileName, fileInfo.Size(), traceEntry.StorageFile.Size)
+	}
+
+	traceFileName, err := decompressFile(downloadedFileName, ".trace")
+	if err != nil {
+		return nil, err
+	}
+
+	traceFileMD5Sum, e := getFileMD5Sum(traceFileName)
+	if e != nil {
+		return nil, wrapError(e, "Unable to calculate MD5 checksum for %s", traceFileName)
+	}
+
+	if traceFileMD5Sum != traceEntry.TraceFile.MD5Sum {
+		return nil, wrapError(nil, "Actual file MD5 checksum for %s is different from the value in metadata. Actual: %s, expected: %s", downloadedFileName, traceFileMD5Sum, traceEntry.TraceFile.MD5Sum)
+	}
+
+	defer os.Remove(traceFileName)
+
+	// TODO(tutankhamen): save the trace file with meta information to the local cache
+
+	var replayResults []comm.ReplayResult
+	result, err := replayTrace(traceFileName)
+	if err != nil {
+		return nil, err
+	}
+	replayResults = append(replayResults, *result)
+
+	return &replayResults, nil
+}
+
 func main() {
 	// Check arguments and unmarshall config json
 	if len(os.Args) != 2 {
 		exitWithError(wrapError(nil, "Invalid command line arguments count.\nUsage: cros_retrace <config_json>\n"))
 	}
-	var config Config
+	var config comm.TestGroupConfig
 	e := json.Unmarshal([]byte(os.Args[1]), &config)
 	if e != nil {
-		exitWithError(wrapError(nil, "Unable to parse json <%s>: [%s]", os.Args[1], e.Error()))
+		exitWithError(wrapError(nil, "Unable to parse config <%s>: [%s]", os.Args[1], e.Error()))
 	}
 	// Validate the test config
 	if config.ProxyServer.URL == "" {
 		exitWithError(wrapError(nil, "Proxy server isn't specified"))
 	}
 
-	if config.StorageFile.GSURL == "" {
-		exitWithError(wrapError(nil, "GS url for the storage file isn't specified"))
+	if config.Repository.RootURL == "" {
+		exitWithError(wrapError(nil, "Storage repository url isn't specified"))
 	}
 
-	if config.StorageFile.MD5Sum == "" {
-		exitWithError(wrapError(nil, "MD5 checksum for the storage file isn't specified"))
-	}
-
-	if config.TestSettings.RepeatCount == 0 {
-		config.TestSettings.RepeatCount = defaultRepeatCount
+	// fetch the trace list from the repository
+	traceList, err := getTraceList(&config)
+	if err != nil {
+		exitWithError(err)
 	}
 
 	// Check prerequisites (apitrace, bz2, etc)
@@ -309,48 +367,37 @@ func main() {
 
 	// TODO(tutankhamen): check if trace file is already exist in the local cache
 
-	// Download trace file via proxy server
-	downloadedFileName, err := downloadFile("/tmp/", config.ProxyServer.URL, config.StorageFile.GSURL)
+	traceEntries, err := getTraceEntries(traceList, &config.Labels)
 	if err != nil {
 		exitWithError(err)
 	}
 
-	// Perform integrity checks on the downloaded file
-	fileInfo, e := os.Stat(downloadedFileName)
-	if e != nil {
-		exitWithError(wrapError(e, "Unable to get stat for %s", downloadedFileName))
+	if len(traceEntries) == 0 {
+		exitWithError(wrapError(nil, "No trace entries found to match the selection attributes %vs. TraceList: %v", config.Labels, *traceList))
 	}
 
-	if uint64(fileInfo.Size()) != config.StorageFile.Size {
-		exitWithError(wrapError(nil, "Actual file size %db is different from the value in metadata %db", fileInfo.Size(), config.StorageFile.Size))
-	}
-
-	downloadedFileMD5Sum, e := getFileMD5Sum(downloadedFileName)
-	if e != nil {
-		exitWithError(wrapError(e, "Unable to calculate MD5 checksum for %s", downloadedFileName))
-	}
-	if downloadedFileMD5Sum != config.StorageFile.MD5Sum {
-		exitWithError(wrapError(nil, "Actual file MD5 checksum %s is different from the value in metadata %s", downloadedFileMD5Sum, config.StorageFile.MD5Sum))
-	}
-
-	traceFileName, err := decompressFile(downloadedFileName, ".trace")
-	if err != nil {
-		exitWithError(err)
-	}
-
-	defer os.Remove(traceFileName)
-
-	// TODO: save the trace file with meta information to the local cache
-
-	// Runs apitrace 'arg_repeat_count' times.
-	var replayResults []replayResult
-	for it := uint32(0); it < config.TestSettings.RepeatCount; it++ {
-		res, err := replayTrace(traceFileName)
+	var result comm.TestGroupResult
+	passedCount := 0
+	for _, entry := range traceEntries {
+		entryResult := comm.TestEntryResult{Name: entry.Name}
+		replayValues, err := runTest(&config, &entry)
 		if err != nil {
-			exitWithError(err)
+			entryResult.Result = comm.TestResultFailure
+			entryResult.Message = err.String()
+		} else {
+			entryResult.Result = comm.TestResultSuccess
+			entryResult.Values = *replayValues
+			passedCount++
 		}
-		replayResults = append(replayResults, *res)
+		result.Entries = append(result.Entries, entryResult)
 	}
 
-	outputResult(replayResults, nil)
+	if len(traceEntries) == passedCount {
+		result.Result = comm.TestResultSuccess
+	} else {
+		result.Result = comm.TestResultFailure
+		result.Message = fmt.Sprintf("%d/%d tests passed", passedCount, len(traceEntries))
+	}
+
+	outputResult(result)
 }
