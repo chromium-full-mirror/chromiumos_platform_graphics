@@ -31,6 +31,7 @@ type cmdDispatch struct {
 // All commands tend to take similar options, encapsulated in this struct.
 type cmdOptions struct {
 	prof           *ProfileData
+	profTag        string
 	filterRegex    string
 	numItemsToShow int
 	lessThanFunc   func(dsi DualStatistics, dsj DualStatistics) bool
@@ -42,9 +43,10 @@ type cmdOptions struct {
 // ErrQuitRequest isn't really an error but instead a request to exit the application.
 var ErrQuitRequest = errors.New("quit-requested")
 
-// Dispatch table for all the available command except help. (Help is handled
-// separately because go doesn't like to create a loop this table and the
-// doPrintHelp that iterates over this table.)
+// Dispatch table for all the available command except help. (Having "help" in
+// this table creates a reference loop between function doPrintHelp, linked in
+// this table, and cmdDispatchTable, which's being used in doPrintHelp. Golang
+// doesn't like that loop.)
 var cmdDispatchTable = map[string]cmdDispatch{
 	"quit": {
 		"Exit the console and go back to your regular life.",
@@ -86,6 +88,11 @@ var cmdDispatchTable = map[string]cmdDispatch{
 		"(plot-calls [p1|p2] f=regex) Plot call-name usage per frames.",
 		doGraphCallUsage,
 		nil},
+	"plot-frame-time": {
+		"(plot-calls [p1|p2] f=cpu|gpu) Plot frame time either in the cpu or gpu. Show both profiles\n" +
+			"        on the same plot if available.\n",
+		doGraphFrameDuration,
+		nil},
 }
 
 // ExecCommand is the entry point to dispatch a command.
@@ -112,17 +119,20 @@ func ExecCommand(args []string, profiles *Profiles) error {
 
 // Look for either "p1" or "p2" in the command options and pick the appropriate
 // profile from profiles. The default is p1.
-func pickTargetProfile(args []string, profiles *Profiles) (prof *ProfileData, err error) {
+func pickTargetProfile(args []string, profiles *Profiles) (prof *ProfileData, tag string, err error) {
 	prof = profiles.p1
+	tag = "default-prof"
 	for _, arg := range args {
 		switch {
 		case arg == "p1", arg == "P1":
 			prof = profiles.p1
+			tag = "p1"
 		case arg == "p2", arg == "P2":
 			if prof = profiles.p2; prof == nil {
 				err = fmt.Errorf("profile 2 is not available: %s", arg)
 				return
 			}
+			tag = "p2"
 		default:
 		}
 	}
@@ -134,6 +144,7 @@ func pickTargetProfile(args []string, profiles *Profiles) (prof *ProfileData, er
 func parseCommandOptions(args []string, profiles *Profiles) (options cmdOptions, err error) {
 	options = cmdOptions{
 		prof:           profiles.p1,
+		profTag:        "p1",
 		numItemsToShow: 0,
 		lessThanFunc:   sortByDecCPUAvg,
 		filterRegex:    "",
@@ -142,7 +153,7 @@ func parseCommandOptions(args []string, profiles *Profiles) (options cmdOptions,
 		cpuThresholdNs: 10000,
 	}
 
-	if options.prof, err = pickTargetProfile(args, profiles); err != nil {
+	if options.prof, options.profTag, err = pickTargetProfile(args, profiles); err != nil {
 		return
 	}
 
@@ -238,15 +249,22 @@ func doPrintHelp(args []string) error {
 		}
 	}
 
-	// Print general help.
+	// Print general help, sorted by command name.
+	cmdNames := make([]string, 0, len(cmdDispatchTable))
+	for k := range cmdDispatchTable {
+		cmdNames = append(cmdNames, k)
+	}
+	sort.Strings(cmdNames)
+
 	fmt.Println(
 		"\nType commands of the form: '-> command [options]'\n" +
 			"Example: '-> show-calls p2 n=30 s=bycpuavg' shows the 30 most expensive calls in profile p2\n" +
 			" sorted by decreasing cpu average time.\n" +
 			"Type '-> help command' for more help on a specific command.\n" +
 			"\nAvailable commands:")
-	for cmdName, info := range cmdDispatchTable {
-		fmt.Println(beginBold + cmdName + endBold + ": " + info.helpInfo)
+	for _, name := range cmdNames {
+		info := cmdDispatchTable[name]
+		fmt.Println(beginBold + name + endBold + ": " + info.helpInfo)
 	}
 
 	return nil
@@ -537,6 +555,30 @@ func doGraphCallUsage(args []string, profiles *Profiles) error {
 	}
 
 	return PlotCallNameUsagePerFrame(options.prof, options.filterRegex)
+}
+
+func doGraphFrameDuration(args []string, profiles *Profiles) error {
+	var err error
+	var options cmdOptions
+	if options, err = parseCommandOptions(args, profiles); err != nil {
+		return err
+	}
+
+	// If option is to use p1 or p2, we show that profile only if available.
+	// Otherwise we show both profiles on the same graph.
+	p1 := profiles.p1
+	p2 := profiles.p2
+	if options.profTag == "p1" {
+		p2 = nil
+	} else if options.profTag == "p2" {
+		p1 = nil
+	}
+
+	plotMode := strings.ToUpper(options.filterRegex)
+	if plotMode == "" || plotMode == "CPU" || plotMode == "GPU" {
+		return PlotFrameTime(plotMode, p1, p2)
+	}
+	return fmt.Errorf("filter must be either CPU or GPU")
 }
 
 func printStats(prefix string, stats *Statistics, totalTimeNs float64) {
