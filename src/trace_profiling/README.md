@@ -259,3 +259,22 @@ from any file.
 
 The file containing the configuration bundle is specified with cmd-line option
 `-config-bundle`.
+
+
+## Merging Profiles
+In most cases, it is preferable to gather CPU and GPU profiles separately. That
+is because measuring GPU timing can significantly skew CPU timing, especially in
+Crostini. However, the analysis tool expects GPU and CPU timing data to be present
+in a same file. The **merge** tool takes a GPU and CPU profile and merge them into
+a single profile that can be consumed by the analysis tool.
+
+Example:
+``` bash
+merge --gpu profile_with_gpu_data.prof --cpu profile_with_cpu_data.prof > profile.prof
+```
+
+A few caveats:
+1. Obviously, the profiles should be gathered on the same device with the same trace.
+1. You most likely want to specify `--min-cpu-time=0` when gathering the profiles
+with `glRetrace`. That ensures that both profiles contain identical call data. Without it,
+some API calls may be in one profile and not the other, causing merge issues.
