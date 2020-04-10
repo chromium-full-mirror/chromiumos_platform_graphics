@@ -6,11 +6,9 @@ package main
 
 import (
 	"bytes"
-	"crypto/md5"
-	"encoding/hex"
+	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -23,18 +21,25 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
+
 	"trace_replay/cmd/trace_replay/comm"
 	"trace_replay/cmd/trace_replay/repo"
+	"trace_replay/cmd/trace_replay/utils"
 )
 
 const (
 	tempFolder       = "/tmp"
-	apitraceAppName  = "apitrace"
+	apitraceAppName  = "glretrace"
 	apitraceOutputRE = `Rendered (\d+) frames in (\d*\.?\d*) secs, average of (\d*\.?\d*) fps`
+	// Default application timeout in seconds
+	defaultTimeout   = 60 * 60
+	// Maximum allowed replay time for one trace in seonds
+	replayMaxTime    = 15 * 60
 )
 
 var (
-	apitraceArgs     = []string{"replay", "--benchmark"}
+	apitraceArgs     = []string{"--benchmark"}
 	requiredPackages = []string{"apitrace", "zstd"}
 )
 
@@ -60,20 +65,6 @@ func (e *werror) String() string {
 		errMsg = e.err.Error()
 	}
 	return fmt.Sprintf("ERROR: %s (%s)! [%s:%d]", e.msg, errMsg, e.file, e.line)
-}
-
-func getFileMD5Sum(fileName string) (string, error) {
-	file, err := os.Open(fileName)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-	hash := md5.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return "", err
-	}
-	hashInBytes := hash.Sum(nil)[:16]
-	return hex.EncodeToString(hashInBytes), nil
 }
 
 func runCommand(name string, args ...string) (exitCode int, stdout string, stderr string) {
@@ -104,7 +95,7 @@ func runCommand(name string, args ...string) (exitCode int, stdout string, stder
 	return
 }
 
-func decompressFile(fileName, expectedExt string) (string, *werror) {
+func decompressFile(ctx context.Context, fileName string, expectedExt string) (string, *werror) {
 	var decompressCmd *exec.Cmd
 	fileExt := filepath.Ext(fileName)
 
@@ -124,10 +115,16 @@ func decompressFile(fileName, expectedExt string) (string, *werror) {
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName)), nil
 }
 
-func httpRequestToFile(request, outFile string) *werror {
-	httpResponse, err := http.Get(request)
+func httpRequestToFile(ctx context.Context, url, outFile string) *werror {
+	httpRequest, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
-		return wrapError(err, "http.Get(%s) failed", request)
+		return wrapError(err, "http.NewRequestWithContext(%s) failed", url)
+	}
+	httpClient := &http.Client{}
+
+	httpResponse, err := httpClient.Do(httpRequest)
+	if err != nil {
+		return wrapError(err, "http.Do(%v) failed", httpRequest)
 	}
 	defer httpResponse.Body.Close()
 
@@ -137,9 +134,9 @@ func httpRequestToFile(request, outFile string) *werror {
 			return wrapError(err, "os.Create(%s) failed", outFile)
 		}
 		defer localFile.Close()
-		_, err = io.Copy(localFile, httpResponse.Body)
+		err = utils.CopyWithContext(ctx, localFile, httpResponse.Body)
 		if err != nil {
-			return wrapError(err, "io.Copy() failed 2")
+			return wrapError(err, "io.Copy() failed")
 		}
 		return nil
 	}
@@ -149,7 +146,7 @@ func httpRequestToFile(request, outFile string) *werror {
 // Downloads a file using relative file path [filePath] via proxy http server
 // [proxyURL] and saves it to the specified directory [localPath]
 // returns the full name to the local result file or error
-func downloadFile(localPath, proxyURL, filePath string) (string, *werror) {
+func downloadFile(ctx context.Context, localPath, proxyURL, filePath string) (string, *werror) {
 	downloadURL, e := url.Parse(proxyURL)
 	if e != nil {
 		return "", wrapError(e, "Unable to parse proxy server URL <%s>", proxyURL)
@@ -159,7 +156,7 @@ func downloadFile(localPath, proxyURL, filePath string) (string, *werror) {
 	downloadURLParams.Add("d", filePath)
 	downloadURL.RawQuery = downloadURLParams.Encode()
 	localFileName := path.Join(localPath, path.Base(filePath))
-	err := httpRequestToFile(downloadURL.String(), localFileName)
+	err := httpRequestToFile(ctx, downloadURL.String(), localFileName)
 	if err != nil {
 		return "", err
 	}
@@ -168,9 +165,9 @@ func downloadFile(localPath, proxyURL, filePath string) (string, *werror) {
 
 // getTraceList function retreives the list of all traces for the repository specified
 // in the TestGroupConfig
-func getTraceList(config *comm.TestGroupConfig) (*repo.TraceList, *werror) {
+func getTraceList(ctx context.Context, config *comm.TestGroupConfig) (*repo.TraceList, *werror) {
 	traceListFileName := fmt.Sprintf("repo.%d.json", config.Repository.Version)
-	fileName, err := downloadFile(tempFolder, config.ProxyServer.URL, traceListFileName)
+	fileName, err := downloadFile(ctx, tempFolder, config.ProxyServer.URL, traceListFileName)
 	if err != nil {
 		return nil, err
 	}
@@ -277,20 +274,27 @@ func checkPackageInstalled(name string) *werror {
 	return nil
 }
 
-func replayTrace(traceFileName string) (*comm.ReplayResult, *werror) {
-	cmd := exec.Command(apitraceAppName, append(apitraceArgs, traceFileName)...)
+func replayTrace(ctx context.Context, traceFileName string) (*comm.ReplayResult, *werror) {
+	cmd := exec.CommandContext(ctx, apitraceAppName, append(apitraceArgs, traceFileName)...)
 	out, err := cmd.CombinedOutput()
+
+	if ctx.Err() == context.DeadlineExceeded {
+		// In case of timeout the err is always "signal: killed", so, it's better to replace it
+		// with more informative DeadlineExceeded error
+		err = ctx.Err()
+	}
+
 	if err != nil {
 		return nil, wrapError(err, "Failed to replay trace file [%s]", traceFileName)
 	}
 	return parseReplayOutput(string(out))
 }
 
-func runTest(config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (*[]comm.ReplayResult, *werror) {
+func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (*[]comm.ReplayResult, *werror) {
 	//TODO(tutankhamen): Check for free space (container file size + trace file size + some extra?)
 
 	// Download trace file via proxy server
-	downloadedFileName, err := downloadFile(tempFolder, config.ProxyServer.URL, traceEntry.StorageFile.Name)
+	downloadedFileName, err := downloadFile(ctx, tempFolder, config.ProxyServer.URL, traceEntry.StorageFile.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -305,12 +309,12 @@ func runTest(config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (*[]
 		return nil, wrapError(nil, "Actual file size of %s is different from the value in metadata. Actual: %db, expected: %db", downloadedFileName, fileInfo.Size(), traceEntry.StorageFile.Size)
 	}
 
-	traceFileName, err := decompressFile(downloadedFileName, ".trace")
+	traceFileName, err := decompressFile(ctx, downloadedFileName, ".trace")
 	if err != nil {
 		return nil, err
 	}
 
-	traceFileMD5Sum, e := getFileMD5Sum(traceFileName)
+	traceFileMD5Sum, e := utils.GetFileMD5Sum(ctx, traceFileName)
 	if e != nil {
 		return nil, wrapError(e, "Unable to calculate MD5 checksum for %s", traceFileName)
 	}
@@ -323,8 +327,15 @@ func runTest(config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (*[]
 
 	// TODO(tutankhamen): save the trace file with meta information to the local cache
 
+	// We can't exceed replay timeout
+	var replayTimeout uint32 = replayMaxTime
+	if traceEntry.ReplayTimeout != 0 {
+		replayTimeout = traceEntry.ReplayTimeout
+	}
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(replayTimeout)*time.Second)
+	defer cancel()
 	var replayResults []comm.ReplayResult
-	result, err := replayTrace(traceFileName)
+	result, err := replayTrace(ctx, traceFileName)
 	if err != nil {
 		return nil, err
 	}
@@ -334,6 +345,7 @@ func runTest(config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (*[]
 }
 
 func main() {
+	startTime := time.Now()
 	// Check arguments and unmarshall config json
 	if len(os.Args) != 2 {
 		exitWithError(wrapError(nil, "Invalid command line arguments count.\nUsage: cros_retrace <config_json>\n"))
@@ -352,8 +364,16 @@ func main() {
 		exitWithError(wrapError(nil, "Storage repository url isn't specified"))
 	}
 
+	ctx := context.Background()
+	runTimeout := defaultTimeout
+	if  config.Timeout != 0 {
+		runTimeout = int(config.Timeout)
+	}
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(runTimeout)*time.Second)
+	defer cancel()
+
 	// fetch the trace list from the repository
-	traceList, err := getTraceList(&config)
+	traceList, err := getTraceList(ctx, &config)
 	if err != nil {
 		exitWithError(err)
 	}
@@ -377,26 +397,36 @@ func main() {
 	}
 
 	var result comm.TestGroupResult
-	passedCount := 0
+	succeededCount := 0
 	for _, entry := range traceEntries {
 		entryResult := comm.TestEntryResult{Name: entry.Name}
-		replayValues, err := runTest(&config, &entry)
+		replayValues, err := runTest(ctx, &config, &entry)
 		if err != nil {
 			entryResult.Result = comm.TestResultFailure
 			entryResult.Message = err.String()
 		} else {
 			entryResult.Result = comm.TestResultSuccess
 			entryResult.Values = *replayValues
-			passedCount++
+			succeededCount++
 		}
 		result.Entries = append(result.Entries, entryResult)
+		// Cancel all the susbsequent tests due to the main context is expired
+		if ctx.Err() != nil {
+			break
+		}
 	}
 
-	if len(traceEntries) == passedCount {
+	if len(traceEntries) == succeededCount {
 		result.Result = comm.TestResultSuccess
+		result.Message = fmt.Sprintf("Finished successfully in %v", time.Since(startTime))
 	} else {
 		result.Result = comm.TestResultFailure
-		result.Message = fmt.Sprintf("%d/%d tests passed", passedCount, len(traceEntries))
+		if ctx.Err() != nil {
+			result.Message = fmt.Sprintf("Failed with timeout. %v. ", ctx.Err())
+		} else {
+			result.Message = "Failed. Not all tests succeeded. "
+		}
+		result.Message += fmt.Sprintf("Total/Finished/Succeeded %d/%d/%d tests in %v.", len(traceEntries), len(result.Entries), succeededCount, time.Since(startTime))
 	}
 
 	outputResult(result)

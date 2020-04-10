@@ -23,14 +23,15 @@ type TraceFileInfo struct {
 
 // TraceListEntry struct contains the detailed information about one trace file
 type TraceListEntry struct {
-	Name        string          `json:"Name"`
-	Labels      []string        `json:"Labels"`
-	Board       string          `json:"Board"`
-	Model       string          `json:"Model"`
-	Chipset     string          `json:"Chipset"`
-	Time        string          `json:"Time"`
-	StorageFile StorageFileInfo `json:"StorageFile"`
-	TraceFile   TraceFileInfo   `json:"TraceFile"`
+	Name          string          `json:"Name"`
+	Labels        []string        `json:"Labels"`
+	Board         string          `json:"Board"`
+	Model         string          `json:"Model"`
+	Chipset       string          `json:"Chipset"`
+	Time          string          `json:"Time"`
+	StorageFile   StorageFileInfo `json:"StorageFile"`
+	TraceFile     TraceFileInfo   `json:"TraceFile"`
+	ReplayTimeout uint32          `json:"ReplayTimeout,string"`
 }
 
 // TraceList struct contains the list of trace entries available on repository

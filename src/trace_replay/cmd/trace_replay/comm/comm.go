@@ -39,6 +39,7 @@ type TestGroupConfig struct {
 	Repository  RepositoryInfo  `json:"Repository"`
 	Host        SystemInfo      `json:"Host"`
 	ProxyServer ProxyServerInfo `json:"ProxyServer"`
+	Timeout     uint32          `json:"Timeout,string"`
 }
 
 // ReplayResult struct contains the result of one trace replay pass
@@ -63,4 +64,3 @@ type TestGroupResult struct {
 	Message string            `json:"Message"`
 	Entries []TestEntryResult `json:"Entries"`
 }
-
