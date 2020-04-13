@@ -28,13 +28,16 @@ type cmdDispatch struct {
 	moreHelp     helpFunction // Optional function to show more help.
 }
 
+// Function type use to sort statistic objects before display.
+type displaySortFunction func(dsi DualStatistics, dsj DualStatistics) bool
+
 // All commands tend to take similar options, encapsulated in this struct.
 type cmdOptions struct {
 	prof           *ProfileData
 	profTag        string
 	filterRegex    string
 	numItemsToShow int
-	lessThanFunc   func(dsi DualStatistics, dsj DualStatistics) bool
+	lessThanFunc   displaySortFunction
 	sortByChoice   string
 	gpuThresholdNs int
 	cpuThresholdNs int
@@ -65,22 +68,22 @@ var cmdDispatchTable = map[string]cmdDispatch{
 		doShowProfileInfo,
 		nil},
 	"show-calls": {
-		"(show-calls [p1|p2]  [n=xx] [s=byGpuAvg|byCpuAvg]) Show information for xx\n" +
+		"(show-calls [p1|p2]  [n=xx] [s=<sort mode>]) Show information for xx\n" +
 			"        most expensive calls for the selected profile",
 		doShowCalls,
 		moreHelpForShowCalls},
 	"show-frames": {
-		"(show-frames [p1|p2]  [n=xx] [s=byGpuAvg|byCpuAvg]) Show information for xx\n" +
+		"(show-frames [p1|p2]  [n=xx] [s=byCPUTotal|byGPUTotal]) Show information for xx\n" +
 			"        most expensive frames for the selected profile",
 		doShowFrames,
-		moreHelpForShowFrame},
+		moreHelpForShowFrames},
 	"show-frame-details": {
 		"(show-frame-details N1[-N2]  [gt=xxx] [ct=xxx]) Show detailed call\n" +
 			"        information for frame N1 to N2.",
 		doShowFrameDetail,
 		moreHelpForShowFrameDetails},
 	"compare-profiles": {
-		"(compare-profiles [n=xx] [s=byGpuAvg|byCpuAvg]) Show timing comparison information for xx\n" +
+		"(compare-profiles [n=xx] [s=<sort mode>]) Show timing comparison information for xx\n" +
 			"        most expensive calls for prof1 / prof2",
 		doCompareProfiles,
 		showMoreHelpForCompareProfile},
@@ -93,6 +96,17 @@ var cmdDispatchTable = map[string]cmdDispatch{
 			"        on the same plot if available.\n",
 		doGraphFrameDuration,
 		nil},
+}
+
+// This table maps sort modes to the corresponding function to use to sort
+// DualStatistics objects.
+var sortFunctionTable = map[string]displaySortFunction{
+	"BYCPUAVG":   sortByDecCPUAvg,
+	"BYCPUMAX":   sortByDecCPUMax,
+	"BYCPUTOTAL": sortByDecCPUTotal,
+	"BYGPUAVG":   sortByDecGPUAvg,
+	"BYGPUMAX":   sortByDecGPUMax,
+	"BYGPUTOTAL": sortByDecGPUTotal,
 }
 
 // ExecCommand is the entry point to dispatch a command.
@@ -140,6 +154,16 @@ func pickTargetProfile(args []string, profiles *Profiles) (prof *ProfileData, ta
 	return
 }
 
+// Parse the sort options, such as "s=byCPUAvg".
+func parseSortOption(sortArg string) (choice string, sortFunc displaySortFunction, err error) {
+	choice = strings.Trim(strings.ToUpper(sortArg), "S=")
+	sortFunc = sortFunctionTable[choice]
+	if sortFunctionTable == nil {
+		err = fmt.Errorf("invalid sort option: %s", sortArg)
+	}
+	return
+}
+
 // Parse the commands options from args and return options populated accordingly.
 func parseCommandOptions(args []string, profiles *Profiles) (options cmdOptions, err error) {
 	options = cmdOptions{
@@ -173,12 +197,11 @@ func parseCommandOptions(args []string, profiles *Profiles) (options cmdOptions,
 				err = fmt.Errorf("invalid item-count option: %s", arg)
 				return
 			}
-		case strings.ToUpper(arg) == "S=BYGPUAVG":
-			options.lessThanFunc = sortByDecGPUAvg
-			options.sortByChoice = "BYGPUAVG"
-		case strings.ToUpper(arg) == "S=BYCPUAVG":
-			options.lessThanFunc = sortByDecCPUAvg
-			options.sortByChoice = "BYCPUAVG"
+		case strings.HasPrefix(arg, "s="), strings.HasPrefix(arg, "S="):
+			options.sortByChoice, options.lessThanFunc, err = parseSortOption(arg)
+			if err != nil {
+				return
+			}
 		case strings.HasPrefix(arg, "f="), strings.HasPrefix(arg, "F="):
 			options.filterRegex = arg[2:]
 		case strings.HasPrefix(arg, "gt="), strings.HasPrefix(arg, "GT="):
@@ -341,15 +364,16 @@ func doShowCalls(args []string, profiles *Profiles) error {
 
 	fmt.Printf("Profile: %s\n", options.prof.label)
 	fmt.Printf("%30s %7s %20s %20s %20s %20s\n", "call", "count", " GPU|CPU avg   ",
-		" GPU|CPU max   ", " GPU|CPU min   ", "GPU|CPU % total")
+		" GPU|CPU max   ", " GPU|CPU total   ", "GPU|CPU % total")
 	fmt.Printf("--------------------------------------------------------------" +
 		"-----------------------------------------------------------\n")
 	for n, s := range stats {
-		fmt.Printf("%30s %7d %9s |%9s %9s |%9s %9s |%9s %8.1f%% |%7.1f%%\n", s.callName,
+		fmt.Printf("%30s %7d %9s |%9s %9s |%9s %9s |%9s %8.1f%% |%7.1f%%\n",
+			s.callName,
 			s.gpuStat.numSamples,
 			timingToString(s.gpuStat.GetAverage()), timingToString(s.cpuStat.GetAverage()),
 			timingToString(s.gpuStat.GetMax()), timingToString(s.cpuStat.GetMax()),
-			timingToString(s.gpuStat.GetMin()), timingToString(s.cpuStat.GetMin()),
+			timingToString(s.gpuStat.GetSum()), timingToString(s.cpuStat.GetSum()),
 			s.gpuStat.GetSum()*gpuPerCallWeight, s.cpuStat.GetSum()*cpuPerCallWeight)
 
 		if options.numItemsToShow > 0 && n == options.numItemsToShow-1 {
@@ -371,10 +395,13 @@ func doShowFrames(args []string, profiles *Profiles) error {
 	sortFunc := func(i int, j int) bool {
 		return timing[i].cpuTimeNs > timing[j].cpuTimeNs
 	}
-	if options.sortByChoice == "BYGPUAVG" {
+	if options.sortByChoice == "BYGPUTOTAL" {
 		sortFunc = func(i int, j int) bool {
 			return timing[i].gpuTimeNs > timing[j].gpuTimeNs
 		}
+	} else if options.sortByChoice != "BYCPUTOTAL" {
+		return fmt.Errorf("invalid sort mode %s, must be byCPUTotal or byGPUTotal",
+			options.sortByChoice)
 	}
 	sort.Slice(timing, sortFunc)
 
@@ -515,8 +542,23 @@ func doCompareProfiles(args []string, profiles *Profiles) error {
 		return options.lessThanFunc(stats1[i], stats1[j])
 	})
 
+	// Setup a function that gets a value from a Statistic object, either average,
+	// max or sum, depending on the sort order.
+	var getValueFromStat = func(stat *Statistics) float64 {
+		return stat.GetAverage()
+	}
+	if strings.Index(options.sortByChoice, "MAX") != -1 {
+		getValueFromStat = func(stat *Statistics) float64 {
+			return stat.GetMax()
+		}
+	} else if strings.Index(options.sortByChoice, "TOTAL") != -1 {
+		getValueFromStat = func(stat *Statistics) float64 {
+			return stat.GetSum()
+		}
+	}
+
 	var outStats, compareStats = GatherComparativeStats(
-		stats1, profiles.p2, options.numItemsToShow)
+		stats1, profiles.p2, options.numItemsToShow, getValueFromStat)
 
 	fmt.Printf("Compare statistics: %s / %s\n", profiles.p1.label, profiles.p2.label)
 	fmt.Printf("%30s %7s %20s %20s %20s %20s\n", "", "", "Prof 1     ", "Prof 2     ",
@@ -530,10 +572,10 @@ func doCompareProfiles(args []string, profiles *Profiles) error {
 		comp := compareStats[n]
 		fmt.Printf("%30s %7d %9s |%9s %9s |%9s %9s |%9s %9s |%9s\n",
 			stat2.callName, stat2.gpuStat.numSamples,
-			timingToString(stat1.gpuStat.GetAverage()), timingToString(stat1.cpuStat.GetAverage()),
-			timingToString(stat2.gpuStat.GetAverage()), timingToString(stat2.cpuStat.GetAverage()),
-			ratioToString(comp.gpuAvgRatio), ratioToString(comp.cpuAvgRatio),
-			timingToString(comp.gpuAvgDiff), timingToString(comp.cpuAvgDiff))
+			timingToString(getValueFromStat(&stat1.gpuStat)), timingToString(getValueFromStat(&stat1.cpuStat)),
+			timingToString(getValueFromStat(&stat2.gpuStat)), timingToString(getValueFromStat(&stat2.cpuStat)),
+			ratioToString(comp.gpuRatio), ratioToString(comp.cpuRatio),
+			timingToString(comp.gpuDiff), timingToString(comp.cpuDiff))
 
 		if options.numItemsToShow > 0 && n == options.numItemsToShow-1 {
 			break
@@ -638,9 +680,14 @@ const helpForProfileOption = "  [p1 | p2] is useful when more than one profile w
 const helpForCallNameRegex = "  call-name-regex is a regular expression that specifies the call names to\n" +
 	"            gather statistics for.\n"
 
-const helpForSortOption = "  s=byGpuAvg|byCpuAvg sorts the ouput in either decreasing average GPU-time\n" +
-	"            or decreasing average CPU-time. The default is byCpuAvg. This option is not case sensitive.\n" +
-	"            I.e. s=bycpuavg is the same as s=byCpuAvg.\n"
+const helpForSortOption = "  s=<sort mode> sorts the ouput in decreasing order using the following sort values:\n" +
+	"            byCPUAvg:   average CPU time (default),\n" +
+	"            byGPUAvg:   average GPU time,\n" +
+	"            byCPUMax:   maximum CPU time,\n" +
+	"            byGPUMax:   maximum GPU time,\n" +
+	"            byCPUTotal: total (accumulated) CPU time,\n" +
+	"            byCPUTotal: total (accumulated) GPU time,\n" +
+	"            This option is not case sensitive. I.e. s=bycpuavg is the same as s=byCpuAvg.\n"
 
 func moreHelpForCallStats(args []string) {
 	fmt.Println("\nHelp for call-stats command:\n" +
@@ -654,18 +701,19 @@ func moreHelpForCallStats(args []string) {
 func moreHelpForShowCalls(args []string) {
 	fmt.Println("\nHelp for show-calls command:\n" +
 		"Print the xx most expensive calls in profile p1 or p2, sorted in decreasing order.\n" +
-		"Syntax: show-calls [p1 | p2] n=xx [s=byGpuAvg|byCpuAvg]\n" +
+		"Syntax: show-calls [p1 | p2] n=xx [s=<sort mode>]\n" +
 		helpForProfileOption +
 		helpForSortOption +
 		"\nExamples: show-calls p2 n=30 s=byCpuAvg,  show-calls n=40\n")
 }
 
-func moreHelpForShowFrame(args []string) {
+func moreHelpForShowFrames(args []string) {
 	fmt.Println("\nHelp for show-frames command:\n" +
 		"Print the xx most expensive frames in profile p1 or p2, sorted in decreasing order.\n" +
-		"Syntax: show-frames [p1 | p2] n=xx [s=byGpuAvg|byCpuAvg]\n" +
+		"Syntax: show-frames [p1 | p2] n=xx [s=byCPUTotal|byGPUTotal]\n" +
 		helpForProfileOption +
-		helpForSortOption +
+		"s=byCPUTotal|byGPUTotal  sort the output in decreasing order either by total CPU time\n" +
+		"          or total GPU time. Deafult is by total CPU time.\n" +
 		"\nExamples: show-frames p2 n=30 s=byCpuAvg,  show-frames n=20\n")
 }
 
@@ -692,7 +740,7 @@ func showMoreHelpForCompareProfile(args []string) {
 		"The comparison shows the average CPU and GPU time for each call in both profiles as well\n" +
 		"as the ratio (time-for-p1)/(time-for-p2) and difference (time-for-p1) - (time-for-p2) for both\n" +
 		"profiles for each of the calls.\n" +
-		"Syntax: compare-profiles n=xx [s=byGpuAvg|byCpuAvg]\n" +
+		"Syntax: compare-profiles n=xx [s=<sort mode>]\n" +
 		helpForProfileOption +
 		helpForSortOption +
 		"\nExample: compare-profiles n=30 s=byCpuAvg\n")

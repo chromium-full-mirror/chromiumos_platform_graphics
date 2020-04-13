@@ -9,7 +9,9 @@ import (
 )
 
 // Statistics stores sum, simple average, min, max and standard-deviation info
-// and provides convenience methods to gather and calculate these values.
+// and provides convenience methods to gather and calculate these values. Fields
+// averageAtNminus1 and varianceAtNminus1 are used to accumulate average and
+// variance values incrementally, with each added sample.
 type Statistics struct {
 	sum               float64
 	min               float64
@@ -36,12 +38,12 @@ type CallNameStatistics struct {
 	cpuStat  Statistics
 }
 
-// CompareStats encapsulates the ratio and difference of GPU and CPU averages.
+// CompareStats encapsulates the ratio and difference of GPU and CPU timing values.
 type CompareStats struct {
-	gpuAvgRatio float64
-	cpuAvgRatio float64
-	gpuAvgDiff  float64
-	cpuAvgDiff  float64
+	gpuRatio float64
+	cpuRatio float64
+	gpuDiff  float64
+	cpuDiff  float64
 }
 
 // FrameTiming encapsulates a frame number with the number of api calls that
@@ -121,14 +123,28 @@ func (ds CallNameStatistics) cpuStats() *Statistics {
 	return &ds.cpuStat
 }
 
-// A sort-compare function for sorting DualStatistics samples by decreasing
-// average GPU time.
+// The sort functions below are used to sort statistics in decreasing order
+// by CPU/GPU average/max/total value.
 func sortByDecGPUAvg(dsi DualStatistics, dsj DualStatistics) bool {
 	return dsi.gpuStats().averageAtN > dsj.gpuStats().averageAtN
 }
 
-// A sort-compare function for sorting DualStatistics samples by decreasing
-// average CPU time.
 func sortByDecCPUAvg(dsi DualStatistics, dsj DualStatistics) bool {
 	return dsi.cpuStats().averageAtN > dsj.cpuStats().averageAtN
+}
+
+func sortByDecGPUMax(dsi DualStatistics, dsj DualStatistics) bool {
+	return dsi.gpuStats().max > dsj.gpuStats().max
+}
+
+func sortByDecCPUMax(dsi DualStatistics, dsj DualStatistics) bool {
+	return dsi.cpuStats().max > dsj.cpuStats().max
+}
+
+func sortByDecGPUTotal(dsi DualStatistics, dsj DualStatistics) bool {
+	return dsi.gpuStats().sum > dsj.gpuStats().sum
+}
+
+func sortByDecCPUTotal(dsi DualStatistics, dsj DualStatistics) bool {
+	return dsi.cpuStats().sum > dsj.cpuStats().sum
 }

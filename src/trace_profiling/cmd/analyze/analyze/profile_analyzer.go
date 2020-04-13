@@ -157,9 +157,12 @@ func GatherStatisticsForAllCallNames(prof *ProfileData) (stats []CallNameStatist
 
 // GatherComparativeStats gathers comparative statistics for two profiles.
 // Comparative statistics consists of the ratio and difference between the
-// average GPU and CPU time by call name for up to <count> calls in the profiles.
+// GPU and CPU time by call name for up to <count> calls in the profiles.
+// Function pickValue is used to pick a value from the Statistic object to use
+// for comparison, such as max, average or sum.
 func GatherComparativeStats(
-	statsProf1 []CallNameStatistics, prof2 *ProfileData, count int) (
+	statsProf1 []CallNameStatistics, prof2 *ProfileData, count int,
+	pickValue func(s *Statistics) float64) (
 	statsProf2 []CallNameStatistics, compareStats []CompareStats) {
 
 	for i, callStats := range statsProf1 {
@@ -175,22 +178,22 @@ func GatherComparativeStats(
 			}
 		}
 
-		comparison.gpuAvgDiff = callStats.gpuStat.GetAverage() - gpuStat2.GetAverage()
-		comparison.cpuAvgDiff = callStats.cpuStat.GetAverage() - cpuStat2.GetAverage()
+		comparison.gpuDiff = pickValue(&callStats.gpuStat) - pickValue(&gpuStat2)
+		comparison.cpuDiff = pickValue(&callStats.cpuStat) - pickValue(&cpuStat2)
 
 		// Avoid divide by zero, when there's no GPU stats.
-		if math.Abs(gpuStat2.GetAverage()) >= 1e-6 {
-			comparison.gpuAvgRatio = callStats.gpuStat.GetAverage() / gpuStat2.GetAverage()
+		if math.Abs(pickValue(&gpuStat2)) >= 1e-6 {
+			comparison.gpuRatio = pickValue(&callStats.gpuStat) / pickValue(&gpuStat2)
 		} else {
 			// A very large number that the console knows to ignore.
-			comparison.gpuAvgRatio = 1e200
+			comparison.gpuRatio = 1e200
 		}
 		// Avoid divide by zero, when there's no CPU stats.
-		if math.Abs(cpuStat2.GetAverage()) >= 1e-6 {
-			comparison.cpuAvgRatio = callStats.cpuStat.GetAverage() / cpuStat2.GetAverage()
+		if math.Abs(pickValue(&cpuStat2)) >= 1e-6 {
+			comparison.cpuRatio = pickValue(&callStats.cpuStat) / pickValue(&cpuStat2)
 		} else {
 			// A very large number that the console knows to ignore.
-			comparison.cpuAvgRatio = 1e200
+			comparison.cpuRatio = 1e200
 		}
 
 		statsProf2 = append(statsProf2, CallNameStatistics{callName, gpuStat2, cpuStat2})
