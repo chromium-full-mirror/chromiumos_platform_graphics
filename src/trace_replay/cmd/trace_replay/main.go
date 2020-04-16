@@ -17,7 +17,6 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
@@ -26,6 +25,7 @@ import (
 	"trace_replay/cmd/trace_replay/comm"
 	"trace_replay/cmd/trace_replay/repo"
 	"trace_replay/cmd/trace_replay/utils"
+	"trace_replay/pkg/werror"
 )
 
 const (
@@ -44,30 +44,6 @@ var (
 	apitraceArgs     = []string{"--benchmark"}
 	requiredPackages = []string{"apitrace", "zstd"}
 )
-
-type werror struct {
-	err  error
-	msg  string
-	file string
-	line int
-}
-
-func wrapError(err error, format string, args ...interface{}) *werror {
-	_, file, line, ok := runtime.Caller(1)
-	if !ok {
-		file = "unknown"
-	}
-	msg := fmt.Sprintf(format, args...)
-	return &werror{err, msg, path.Base(file), line}
-}
-
-func (e *werror) String() string {
-	errMsg := "nil"
-	if e.err != nil {
-		errMsg = e.err.Error()
-	}
-	return fmt.Sprintf("ERROR: %s (%s)! [%s:%d]", e.msg, errMsg, e.file, e.line)
-}
 
 func runCommand(name string, args ...string) (exitCode int, stdout string, stderr string) {
 	var outbuf, errbuf bytes.Buffer
@@ -97,7 +73,7 @@ func runCommand(name string, args ...string) (exitCode int, stdout string, stder
 	return
 }
 
-func decompressFile(ctx context.Context, fileName string, expectedExt string) (string, *werror) {
+func decompressFile(ctx context.Context, fileName string, expectedExt string) (string, *werror.Werror) {
 	var decompressCmd *exec.Cmd
 	fileExt := filepath.Ext(fileName)
 
@@ -109,49 +85,49 @@ func decompressFile(ctx context.Context, fileName string, expectedExt string) (s
 	case ".zst", ".xz":
 		decompressCmd = exec.Command("zstd", "-d", "-f", "--rm", "-T0", fileName)
 	default:
-		return "", wrapError(nil, "Unknown trace extension: %s", fileExt)
+		return "", werror.WrapError(nil, "Unknown trace extension: %s", fileExt)
 	}
 	if out, err := decompressCmd.CombinedOutput(); err != nil {
-		return "", wrapError(err, "Unable to decompress <%s>. Combined output: %s", fileName, string(out))
+		return "", werror.WrapError(err, "Unable to decompress <%s>. Combined output: %s", fileName, string(out))
 	}
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName)), nil
 }
 
-func httpRequestToFile(ctx context.Context, url, outFile string) *werror {
+func httpRequestToFile(ctx context.Context, url, outFile string) *werror.Werror {
 	httpRequest, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
-		return wrapError(err, "http.NewRequestWithContext(%s) failed", url)
+		return werror.WrapError(err, "http.NewRequestWithContext(%s) failed", url)
 	}
 	httpClient := &http.Client{}
 
 	httpResponse, err := httpClient.Do(httpRequest)
 	if err != nil {
-		return wrapError(err, "http.Do(%v) failed", httpRequest)
+		return werror.WrapError(err, "http.Do(%v) failed", httpRequest)
 	}
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode == http.StatusOK {
 		localFile, err := os.Create(outFile)
 		if err != nil {
-			return wrapError(err, "os.Create(%s) failed", outFile)
+			return werror.WrapError(err, "os.Create(%s) failed", outFile)
 		}
 		defer localFile.Close()
 		err = utils.CopyWithContext(ctx, localFile, httpResponse.Body)
 		if err != nil {
-			return wrapError(err, "io.Copy() failed")
+			return werror.WrapError(err, "io.Copy() failed")
 		}
 		return nil
 	}
-	return wrapError(nil, "HTTP status code isn't OK: %d!", httpResponse.StatusCode)
+	return werror.WrapError(nil, "HTTP status code isn't OK: %d!", httpResponse.StatusCode)
 }
 
 // Downloads a file using relative file path [filePath] via proxy http server
 // [proxyURL] and saves it to the specified directory [localPath]
 // returns the full name to the local result file or error
-func downloadFile(ctx context.Context, localPath, proxyURL, filePath string) (string, *werror) {
+func downloadFile(ctx context.Context, localPath, proxyURL, filePath string) (string, *werror.Werror) {
 	downloadURL, e := url.Parse(proxyURL)
 	if e != nil {
-		return "", wrapError(e, "Unable to parse proxy server URL <%s>", proxyURL)
+		return "", werror.WrapError(e, "Unable to parse proxy server URL <%s>", proxyURL)
 	}
 	downloadURLParams := url.Values{}
 	// Use only one URL argument for now: d=filePath
@@ -167,7 +143,7 @@ func downloadFile(ctx context.Context, localPath, proxyURL, filePath string) (st
 
 // getTraceList function retreives the list of all traces for the repository specified
 // in the TestGroupConfig
-func getTraceList(ctx context.Context, config *comm.TestGroupConfig) (*repo.TraceList, *werror) {
+func getTraceList(ctx context.Context, config *comm.TestGroupConfig) (*repo.TraceList, *werror.Werror) {
 	traceListFileName := fmt.Sprintf("repo.%d.json", config.Repository.Version)
 	fileName, err := downloadFile(ctx, tempFolder, config.ProxyServer.URL, traceListFileName)
 	if err != nil {
@@ -177,7 +153,7 @@ func getTraceList(ctx context.Context, config *comm.TestGroupConfig) (*repo.Trac
 
 	file, e := os.Open(fileName)
 	if e != nil {
-		return nil, wrapError(e, "Unable to open downloaded <%s>", fileName)
+		return nil, werror.WrapError(e, "Unable to open downloaded <%s>", fileName)
 	}
 	defer file.Close()
 
@@ -185,7 +161,7 @@ func getTraceList(ctx context.Context, config *comm.TestGroupConfig) (*repo.Trac
 	var traceList repo.TraceList
 	e = json.Unmarshal(bytes, &traceList)
 	if e != nil {
-		return nil, wrapError(e, "Unable to parse trace list")
+		return nil, werror.WrapError(e, "Unable to parse trace list")
 	}
 
 	return &traceList, nil
@@ -213,7 +189,7 @@ func matchLabels(a *[]string, b *[]string) bool {
 }
 
 // getTraceEntries function selects the trace entries for the specified labels
-func getTraceEntries(traceList *repo.TraceList, queryLabels *[]string) ([]repo.TraceListEntry, *werror) {
+func getTraceEntries(traceList *repo.TraceList, queryLabels *[]string) ([]repo.TraceListEntry, *werror.Werror) {
 	var result []repo.TraceListEntry
 	for _, entry := range traceList.Entries {
 		if matchLabels(queryLabels, &entry.Labels) == true {
@@ -223,23 +199,23 @@ func getTraceEntries(traceList *repo.TraceList, queryLabels *[]string) ([]repo.T
 	return result, nil
 }
 
-func parseReplayOutput(output string) (*comm.ReplayResult, *werror) {
+func parseReplayOutput(output string) (*comm.ReplayResult, *werror.Werror) {
 	re := regexp.MustCompile(apitraceOutputRE)
 	match := re.FindStringSubmatch(output)
 	if match == nil {
-		return nil, wrapError(nil, "Unable to parse apitrace output <%s>", output)
+		return nil, werror.WrapError(nil, "Unable to parse apitrace output <%s>", output)
 	}
 	totalFrames, err := strconv.ParseUint(match[1], 10, 32)
 	if err != nil {
-		return nil, wrapError(err, "failed to parse frames %q", match[1])
+		return nil, werror.WrapError(err, "failed to parse frames %q", match[1])
 	}
 	durationInSeconds, err := strconv.ParseFloat(match[2], 32)
 	if err != nil {
-		return nil, wrapError(err, "failed to parse duration %q", match[2])
+		return nil, werror.WrapError(err, "failed to parse duration %q", match[2])
 	}
 	averageFPS, err := strconv.ParseFloat(match[3], 32)
 	if err != nil {
-		return nil, wrapError(err, "failed to parse fps %q", match[3])
+		return nil, werror.WrapError(err, "failed to parse fps %q", match[3])
 	}
 	return &comm.ReplayResult{
 		TotalFrames:       uint32(totalFrames),
@@ -253,8 +229,8 @@ func outputResult(result comm.TestGroupResult) {
 	fmt.Println(string(output))
 }
 
-func exitWithError(err *werror) {
-	formatMessage := func(err *werror) string {
+func exitWithError(err *werror.Werror) {
+	formatMessage := func(err *werror.Werror) string {
 		if err != nil {
 			return err.String()
 		}
@@ -269,14 +245,14 @@ func exitWithError(err *werror) {
 	os.Exit(0)
 }
 
-func checkPackageInstalled(name string) *werror {
+func checkPackageInstalled(name string) *werror.Werror {
 	if exitCode, _, stderr := runCommand("dpkg", "-l", name); exitCode != 0 {
-		return wrapError(fmt.Errorf("%s", stderr), "dpkg for %s failed with exit code %d!", name, exitCode)
+		return werror.WrapError(fmt.Errorf("%s", stderr), "dpkg for %s failed with exit code %d!", name, exitCode)
 	}
 	return nil
 }
 
-func replayTrace(ctx context.Context, traceFileName string) (*comm.ReplayResult, *werror) {
+func replayTrace(ctx context.Context, traceFileName string) (*comm.ReplayResult, *werror.Werror) {
 	cmd := exec.CommandContext(ctx, apitraceAppName, append(apitraceArgs, traceFileName)...)
 	out, err := cmd.CombinedOutput()
 
@@ -287,12 +263,12 @@ func replayTrace(ctx context.Context, traceFileName string) (*comm.ReplayResult,
 	}
 
 	if err != nil {
-		return nil, wrapError(err, "Failed to replay trace file [%s]", traceFileName)
+		return nil, werror.WrapError(err, "Failed to replay trace file [%s]", traceFileName)
 	}
 	return parseReplayOutput(string(out))
 }
 
-func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (*[]comm.ReplayResult, *werror) {
+func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (*[]comm.ReplayResult, *werror.Werror) {
 	//TODO(tutankhamen): Check for free space (container file size + trace file size + some extra?)
 
 	// Download trace file via proxy server
@@ -305,11 +281,11 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	// Perform integrity checks on the downloaded file
 	fileInfo, e := os.Stat(downloadedFileName)
 	if e != nil {
-		return nil, wrapError(e, "Unable to get stat for %s", downloadedFileName)
+		return nil, werror.WrapError(e, "Unable to get stat for %s", downloadedFileName)
 	}
 
 	if uint64(fileInfo.Size()) != traceEntry.StorageFile.Size {
-		return nil, wrapError(nil, "Actual file size of %s is different from the value in metadata. Actual: %db, expected: %db", downloadedFileName, fileInfo.Size(), traceEntry.StorageFile.Size)
+		return nil, werror.WrapError(nil, "Actual file size of %s is different from the value in metadata. Actual: %db, expected: %db", downloadedFileName, fileInfo.Size(), traceEntry.StorageFile.Size)
 	}
 
 	traceFileName, err := decompressFile(ctx, downloadedFileName, ".trace")
@@ -320,11 +296,11 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 
 	traceFileMD5Sum, e := utils.GetFileMD5Sum(ctx, traceFileName)
 	if e != nil {
-		return nil, wrapError(e, "Unable to calculate MD5 checksum for %s", traceFileName)
+		return nil, werror.WrapError(e, "Unable to calculate MD5 checksum for %s", traceFileName)
 	}
 
 	if traceFileMD5Sum != traceEntry.TraceFile.MD5Sum {
-		return nil, wrapError(nil, "Actual file MD5 checksum for %s is different from the value in metadata. Actual: %s, expected: %s", downloadedFileName, traceFileMD5Sum, traceEntry.TraceFile.MD5Sum)
+		return nil, werror.WrapError(nil, "Actual file MD5 checksum for %s is different from the value in metadata. Actual: %s, expected: %s", downloadedFileName, traceFileMD5Sum, traceEntry.TraceFile.MD5Sum)
 	}
 
 	// Cooling down
@@ -356,20 +332,20 @@ func main() {
 	startTime := time.Now()
 	// Check arguments and unmarshall config json
 	if len(os.Args) != 2 {
-		exitWithError(wrapError(nil, "Invalid command line arguments count.\nUsage: cros_retrace <config_json>\n"))
+		exitWithError(werror.WrapError(nil, "Invalid command line arguments count.\nUsage: cros_retrace <config_json>\n"))
 	}
 	var config comm.TestGroupConfig
 	e := json.Unmarshal([]byte(os.Args[1]), &config)
 	if e != nil {
-		exitWithError(wrapError(nil, "Unable to parse config <%s>: [%s]", os.Args[1], e.Error()))
+		exitWithError(werror.WrapError(nil, "Unable to parse config <%s>: [%s]", os.Args[1], e.Error()))
 	}
 	// Validate the test config
 	if config.ProxyServer.URL == "" {
-		exitWithError(wrapError(nil, "Proxy server isn't specified"))
+		exitWithError(werror.WrapError(nil, "Proxy server isn't specified"))
 	}
 
 	if config.Repository.RootURL == "" {
-		exitWithError(wrapError(nil, "Storage repository url isn't specified"))
+		exitWithError(werror.WrapError(nil, "Storage repository url isn't specified"))
 	}
 
 	ctx := context.Background()
@@ -401,7 +377,7 @@ func main() {
 	}
 
 	if len(traceEntries) == 0 {
-		exitWithError(wrapError(nil, "No trace entries found to match the selection attributes %vs. TraceList: %v", config.Labels, *traceList))
+		exitWithError(werror.WrapError(nil, "No trace entries found to match the selection attributes %vs. TraceList: %v", config.Labels, *traceList))
 	}
 
 	var result comm.TestGroupResult
