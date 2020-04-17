@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -59,6 +60,11 @@ var cmdDispatchTable = map[string]cmdDispatch{
 		"(call-stats [p1|p2] f=regex) Print call stats for the calls identified by a regex.",
 		doCallStats,
 		moreHelpForCallStats},
+	"list-calls": {
+		"(list-calls [p1|p2] N1[-N2] [gt=xxx] [ct=xxx] f=regex) List calls that match the regex,\n" +
+			"         in chronological order, showing only the calls in frames N1 to N2.",
+		doListCalls,
+		moreHelpForListCalls},
 	"swap-prof": {
 		"Swap profile1 and profile2, a no-op if there's only one profile.",
 		doSwapProfiles,
@@ -78,7 +84,7 @@ var cmdDispatchTable = map[string]cmdDispatch{
 		doShowFrames,
 		moreHelpForShowFrames},
 	"show-frame-details": {
-		"(show-frame-details N1[-N2]  [gt=xxx] [ct=xxx]) Show detailed call\n" +
+		"(show-frame-details N1[-N2] [gt=xxx] [ct=xxx]) Show detailed call\n" +
 			"        information for frame N1 to N2.",
 		doShowFrameDetail,
 		moreHelpForShowFrameDetails},
@@ -323,6 +329,77 @@ func doCallStats(args []string, profiles *Profiles) error {
 	} else {
 		fmt.Printf("CPU timing not available for %s:\n", options.prof.label)
 	}
+	return nil
+}
+
+func doListCalls(args []string, profiles *Profiles) error {
+	if len(args) < 1 {
+		return fmt.Errorf("no frame number specified")
+	}
+
+	var frameN1, frameN2 int
+	var err error
+	if frameN1, frameN2, err = parseFrameRange(args); err != nil {
+		return err
+	}
+
+	var options cmdOptions
+	if options, err = parseCommandOptions(args[1:], profiles); err != nil {
+		return err
+	}
+
+	var re *regexp.Regexp
+	if re, err = regexp.Compile(options.filterRegex); err != nil {
+		return err
+	}
+
+	// Gather the number of times the call is called within each frame.
+	var numCallPerFrame []int
+	numCallPerFrame, err = GatherNumCallsPerFrame(options.prof, options.filterRegex)
+	if err != nil {
+		return err
+	}
+
+	// Get the total number of times the call is called before frame frameN1.
+	// We need this to number the calls sequentially from frame 0.
+	var numCallsToFrameN1 = 0
+	for i := 0; i < frameN1; i++ {
+		numCallsToFrameN1 += numCallPerFrame[i]
+	}
+
+	// Print the header.
+	fmt.Printf("%30s %6s %5s %9s %9s\n",
+		"call name", "call #", "frame", "GPU time", "CPU time")
+	fmt.Printf("---------------------------------------------------------------\n")
+
+	// Print the matching calls that occur in frame N1 to N2.
+	var callIndex = numCallsToFrameN1
+	for frameNum := frameN1; frameNum <= frameN2; frameNum++ {
+		callRange := options.prof.GetCallRangeForFrame(frameNum)
+		for c := callRange.firstIndex; c <= callRange.lastIndex; c++ {
+			call := options.prof.GetCallDataByIndex(c)
+			// Filter by call name regex.
+			if re.MatchString(call.callName) {
+				// Filter by CPU and GPU duration thresholds.
+				if call.gpuDurationNs >= options.gpuThresholdNs &&
+					call.cpuDurationNs >= options.cpuThresholdNs {
+
+					fmt.Printf("%30s %6d %5d %9s %9s\n",
+						call.callName, callIndex, frameNum,
+						timingToString(float64(call.gpuDurationNs)),
+						timingToString(float64(call.cpuDurationNs)))
+
+					// Sanity check: verify that the call's frame number matches the frame we're in.
+					if call.frameNum != frameNum {
+						fmt.Printf("Warning: frame number mismatch - call's frame #%d, actual frame #%d\n",
+							call.frameNum, frameNum)
+					}
+				}
+				callIndex++
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -670,24 +747,31 @@ func ratioToString(ratio float64) string {
 
 // The moreHelpFor<CmdName> functions below print extra help info for
 // command CmdName.
-const beginBold = "\033[1m"
-const endBold = "\033[0m"
+const (
+	beginBold = "\033[1m"
+	endBold   = "\033[0m"
 
-const helpForProfileOption = "  [p1 | p2] is useful when more than one profile was given when launching\n" +
-	"            the analyzer tool. Use 'p1' to select the first profile or 'p2'\n" +
-	"            to select the second profile. Default is p1.\n"
+	helpForProfileOption = "  [p1 | p2] is useful when more than one profile was given when launching\n" +
+		"            the analyzer tool. Use 'p1' to select the first profile or 'p2'\n" +
+		"            to select the second profile. Default is p1.\n"
 
-const helpForCallNameRegex = "  call-name-regex is a regular expression that specifies the call names to\n" +
-	"            gather statistics for.\n"
+	helpForCallNameRegex = "  call-name-regex is a regular expression that specifies the call names to\n" +
+		"            use or show.\n"
 
-const helpForSortOption = "  s=<sort mode> sorts the ouput in decreasing order using the following sort values:\n" +
-	"            byCPUAvg:   average CPU time (default),\n" +
-	"            byGPUAvg:   average GPU time,\n" +
-	"            byCPUMax:   maximum CPU time,\n" +
-	"            byGPUMax:   maximum GPU time,\n" +
-	"            byCPUTotal: total (accumulated) CPU time,\n" +
-	"            byCPUTotal: total (accumulated) GPU time,\n" +
-	"            This option is not case sensitive. I.e. s=bycpuavg is the same as s=byCpuAvg.\n"
+	helpForSortOption = "  s=<sort mode> sorts the ouput in decreasing order using the following sort values:\n" +
+		"            byCPUAvg:   average CPU time (default),\n" +
+		"            byGPUAvg:   average GPU time,\n" +
+		"            byCPUMax:   maximum CPU time,\n" +
+		"            byGPUMax:   maximum GPU time,\n" +
+		"            byCPUTotal: total (accumulated) CPU time,\n" +
+		"            byCPUTotal: total (accumulated) GPU time,\n" +
+		"            This option is not case sensitive. I.e. s=bycpuavg is the same as s=byCpuAvg.\n"
+
+	helpForThresholdOptions = "  gt=nnn  only show calls that spend nnn nanoseconds or more in the GPU.\n" +
+		"          Default is 100000 or 0 if no GPU timing data is available.\n" +
+		"  ct=mmm  only show calls that spend mmm nanoseconds or more in the CPU.\n" +
+		"          Default is 100000 or 0 if no CPU timing data is available.\n"
+)
 
 func moreHelpForCallStats(args []string) {
 	fmt.Println("\nHelp for call-stats command:\n" +
@@ -696,6 +780,19 @@ func moreHelpForCallStats(args []string) {
 		helpForProfileOption +
 		helpForCallNameRegex +
 		"\nExamples: call-stats p1 f=glDraw  or  call-stats f=glDraw")
+}
+
+func moreHelpForListCalls(args []string) {
+	fmt.Println("\nHelp for list-calls command:\n" +
+		"List all calls that match regex in chronological order, starting at frame 0. The calls\n" +
+		"are numbered sequentially. Only the calls that occur within frames N1 to N2 are shown.\n" +
+		"Furthermore, only the calls that match the CPU and GPU threshold are shown. (However, they\n" +
+		"are still numbered from frame 0.)\n" +
+		"Syntax: list-calls N1[-N2] [p1|p2] [gt=xxx] [ct=xxx] f=regex\n" +
+		helpForProfileOption +
+		helpForCallNameRegex +
+		helpForThresholdOptions +
+		"\nExample: list-calls 100-200 f=glDrawRangeElements ct=100000\n")
 }
 
 func moreHelpForShowCalls(args []string) {
@@ -724,13 +821,10 @@ func moreHelpForShowFrameDetails(args []string) {
 		"of the frame time spent in that call for the GPU and CPU. If a second profile is\n" +
 		"available, the corresponding information for that profile is printed side-by-side.\n" +
 		"The calls are printed in the order in which they occur in the frame.\n" +
-		"Syntax: show-frame-details N1[-N2] gt=nnn ct=mmm\n" +
+		"Syntax: show-frame-details N1[-N2] [gt=xxx] [ct=xxx]\n" +
 		helpForProfileOption +
 		helpForSortOption +
-		"  gt=nnn  only show calls that spend nnn nanoseconds or more in the GPU.\n" +
-		"          Default is 100000 or 0 if no GPU timing data is available.\n" +
-		"  ct=mmm  only show calls that spend mmm nanoseconds or more in the CPU.\n" +
-		"          Default is 100000 or 0 if no CPU timing data is available.\n" +
+		helpForThresholdOptions +
 		"\nExample: show-frame-details 100-120 gt=100000 ct=500000\n")
 }
 
