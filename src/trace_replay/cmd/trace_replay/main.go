@@ -33,9 +33,11 @@ const (
 	apitraceAppName  = "glretrace"
 	apitraceOutputRE = `Rendered (\d+) frames in (\d*\.?\d*) secs, average of (\d*\.?\d*) fps`
 	// Default application timeout in seconds
-	defaultTimeout   = 60 * 60
+	defaultTimeout = 60 * 60
 	// Maximum allowed replay time for one trace in seonds
-	replayMaxTime    = 15 * 60
+	replayMaxTime = 15 * 60
+	// Cooling down time before each trace replay in seconds
+	replayCoolDownTime = 30
 )
 
 var (
@@ -298,6 +300,7 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	if err != nil {
 		return nil, err
 	}
+	defer os.Remove(downloadedFileName)
 
 	// Perform integrity checks on the downloaded file
 	fileInfo, e := os.Stat(downloadedFileName)
@@ -313,6 +316,7 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	if err != nil {
 		return nil, err
 	}
+	defer os.Remove(traceFileName)
 
 	traceFileMD5Sum, e := utils.GetFileMD5Sum(ctx, traceFileName)
 	if e != nil {
@@ -323,7 +327,11 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 		return nil, wrapError(nil, "Actual file MD5 checksum for %s is different from the value in metadata. Actual: %s, expected: %s", downloadedFileName, traceFileMD5Sum, traceEntry.TraceFile.MD5Sum)
 	}
 
-	defer os.Remove(traceFileName)
+	// Cooling down
+	time.Sleep(time.Duration(replayCoolDownTime) * time.Second)
+
+	// Execute all pending file system reads and writes
+	exec.Command("sync").Run()
 
 	// TODO(tutankhamen): save the trace file with meta information to the local cache
 
@@ -366,7 +374,7 @@ func main() {
 
 	ctx := context.Background()
 	runTimeout := defaultTimeout
-	if  config.Timeout != 0 {
+	if config.Timeout != 0 {
 		runTimeout = int(config.Timeout)
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(runTimeout)*time.Second)
