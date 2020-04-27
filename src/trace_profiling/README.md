@@ -278,3 +278,95 @@ A few caveats:
 1. You most likely want to specify `--min-cpu-time=0` when gathering the profiles
 with `glRetrace`. That ensures that both profiles contain identical call data. Without it,
 some API calls may be in one profile and not the other, causing merge issues.
+
+
+## Harvest
+Harvest is a multifaceted tool that works with trace archives in Google storage and can
+perform the following tasks:
+* Dowload archives, extract trace files and verify them.
+* Run the trace on attached Crouton and Crostini devices and collect profile data.
+* Extract the FPS data from the profile, compare and print the output to another file.
+
+Havest is configure through a JSON file that takes the following form:
+
+``` json
+harvest-config.json:
+{
+  "traces": [
+    "gs://chromeos-gfx-traces-incoming/steam.copied/final/steam_440-team_fortress_2-nami-20200116_165325.tar",
+    "gs://chromeos-gfx-traces-incoming/steam.copied/final/steam_49520-borderlands_2-nami-20200122_153040.tar"
+  ],
+  "traceCacheDir": "<path to a dir where game archives and traces are downloaded and cached>",
+	"keepTracesInCache": true,
+	"profileBinPath": "<path to exe for companion profile application>",
+	"crostiniBundleTemplate": "<path to profile configuration-bundle template for crostini>",
+  "croutonBundleTemplate": "<path to profile configuration-bundle template for crouton>"
+}
+```
+Note that Harvest tries to run several actions simultaneously. For instance,
+if you specify several traces, it will download the next trace while the current
+trace is being profiles on the DUTs. Likewise, it will profile a trace simultaneously
+on attached crostini and crouton devices.
+
+### Bundle Templates
+The configuration JSON file has two properties named *__crostiniBundleTemplate__* and
+*__croutonBundleTemplate__*. These properties point to template files that are used
+to generate config JSON files for the companion Profile application. These template
+files look as follows:
+``` json
+crostini_bundle_template.json:
+{
+  "files": {
+    "sshConfigFile": "ssh_crostini_config.json",
+    "tunnelConfigFile": "crostini_tunnel_config.json",
+    "profileConfigFile": "crostini_profile_config.json"
+  },
+  "configs": {
+    "profile": {
+      "localTraceDir": "<<trace-dir>>",
+      "localProfileDir": "/path/to/profiles/dir/",
+      "profileNameSuffix": ".crostini.prof",
+          "traces": [
+        "<<trace-file>>"],
+      "profCommand": "/home/gwink/apitrace/glretrace -b [[trace-file]] > [[prof-file]]"
+    }
+  }
+}
+```
+
+Much of that file is exactly like the config-bundle JSON file shown for the Profile
+application, a bit earlier in this document. However,there are templates entries,
+**\<\<trace-dir\>\>** and **\<\<trace-file\>\>** we must be left as-is; Harvest
+will substitute the actual dir and file paths into these entries when running the
+profiles.
+
+### Command-line options
+Harvest takes several command-line options. They are:
+
+* -**config**: specify path to configuration JSON file.
+* --**no-crostini**: when set, do not run the trace on the Crostini device.
+* --**no-crouton**: when set, do not run the trace on the Crouton device.
+* --**compare-fps**: enable FPS comparison step after profiling.
+* -**out**: specify path the comparison-output file (default "compare_out.prof")
+* --**verbose**: enable verbose mode
+
+If both options *no-crostini* and *no-crouton* are set, then Harvest effectively
+becomes an automatic trace downloader and unarchiver.
+
+### FPS comparison
+When FPS-comparison is enabled, through the command-line option *compare-fps*,
+harvest output FPS data in the following form:
+```
+                      Trace name  Crostini   Crouton      %
+           RimWorld-294100.trace     42.20    108.33     38.95%
+Euro_Truck_Simulator_2-227300.trace     25.16     45.45     55.37%
+American_Truck_Simulator-270880.trace     26.58     42.46     62.61%
+Kerbal_Space_Program-220200.trace     37.42     50.94     73.46%
+           Unturned-304930.trace     27.68     36.79     75.24%
+  Crusader_Kings_II-203770.trace     37.87     41.05     92.24%
+         Counter-Strike-10.trace     55.06    149.01     36.95%
+         Counter-Strike-10.trace     55.69    149.42     37.27%
+         Counter-Strike-10.trace     55.23    144.98     38.10%
+```
+
+New FPS data is always appended to the file.
