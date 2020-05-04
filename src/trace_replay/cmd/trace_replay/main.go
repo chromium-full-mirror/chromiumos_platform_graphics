@@ -93,51 +93,56 @@ func decompressFile(ctx context.Context, fileName string, expectedExt string) (s
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName)), nil
 }
 
-func httpRequestToFile(ctx context.Context, url, outFile string) error {
-	httpRequest, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+// httpRequestWrapper request the server and return the http.Response. Caller must close the response once finished processing.
+func httpRequestWrapper(ctx context.Context, proxyURL string, params url.Values) (*http.Response, error) {
+	parsedURL, err := url.Parse(proxyURL)
 	if err != nil {
-		return errors.Wrap(err, "http.NewRequestWithContext(%s) failed", url)
+		return nil, errors.Wrap(err, "Unable to parse server URL <%s>", proxyURL)
+	}
+	parsedURL.RawQuery = params.Encode()
+
+	httpRequest, err := http.NewRequestWithContext(ctx, "GET", parsedURL.String(), nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "http.NewRequestWithContext(%s) failed", parsedURL)
 	}
 	httpClient := &http.Client{}
 
 	httpResponse, err := httpClient.Do(httpRequest)
 	if err != nil {
-		return errors.Wrap(err, "http.Do(%v) failed", httpRequest)
+		return nil, errors.Wrap(err, "http.Do(%v) failed", httpRequest)
 	}
-	defer httpResponse.Body.Close()
-
-	if httpResponse.StatusCode == http.StatusOK {
-		localFile, err := os.Create(outFile)
-		if err != nil {
-			return errors.Wrap(err, "os.Create(%s) failed", outFile)
-		}
-		defer localFile.Close()
-		err = utils.CopyWithContext(ctx, localFile, httpResponse.Body)
-		if err != nil {
-			return errors.Wrap(err, "io.Copy() failed")
-		}
-		return nil
+	// We decide to let the caller process to close the body.
+	// defer httpResponse.Body.Close()
+	if httpResponse.StatusCode != http.StatusOK {
+		return nil, errors.New("http status code isn't OK: %d", httpResponse.StatusCode)
 	}
-	return errors.New("http status code isn't OK: %d", httpResponse.StatusCode)
+	return httpResponse, nil
 }
 
-// Downloads a file using relative file path [filePath] via proxy http server
+// downloadFile downloads a file using relative file path [filePath] via proxy http server
 // [proxyURL] and saves it to the specified directory [localPath]
 // returns the full name to the local result file or error
 func downloadFile(ctx context.Context, localPath, proxyURL, filePath string) (string, error) {
-	downloadURL, err := url.Parse(proxyURL)
+	// Send http GET download=filePath request to the server
+	params := url.Values{}
+	params.Add("download", filePath)
+	httpResponse, err := httpRequestWrapper(ctx, proxyURL, params)
 	if err != nil {
-		return "", errors.Wrap(err, "Unable to parse proxy server URL <%s>", proxyURL)
+		return "", errors.Wrap(err, "failed to download file: %v", filePath)
 	}
-	downloadURLParams := url.Values{}
-	// Use only one URL argument for now: d=filePath
-	downloadURLParams.Add("d", filePath)
-	downloadURL.RawQuery = downloadURLParams.Encode()
-	localFileName := path.Join(localPath, path.Base(filePath))
-	if err := httpRequestToFile(ctx, downloadURL.String(), localFileName); err != nil {
-		return "", err
+	defer httpResponse.Body.Close()
+
+	outFile := path.Join(localPath, path.Base(filePath))
+	localFile, err := os.Create(outFile)
+	if err != nil {
+		return "", errors.Wrap(err, "os.Create(%s) failed", outFile)
 	}
-	return localFileName, nil
+	defer localFile.Close()
+	err = utils.CopyWithContext(ctx, localFile, httpResponse.Body)
+	if err != nil {
+		return "", errors.Wrap(err, "io.Copy() failed")
+	}
+	return outFile, nil
 }
 
 // getTraceList function retreives the list of all traces for the repository specified
