@@ -145,6 +145,19 @@ func downloadFile(ctx context.Context, localPath, proxyURL, filePath string) (st
 	return outFile, nil
 }
 
+// logMsg sends log the message to the host via proxy.
+func logMsg(ctx context.Context, proxyURL, message string) error {
+	// Send http Get log=message request to the server
+	params := url.Values{}
+	params.Add("log", message)
+	httpResponse, err := httpRequestWrapper(ctx, proxyURL, params)
+	if err != nil {
+		return errors.Wrap(err, "failed to log message: %v", message)
+	}
+	defer httpResponse.Body.Close()
+	return nil
+}
+
 // getTraceList function retreives the list of all traces for the repository specified
 // in the TestGroupConfig
 func getTraceList(ctx context.Context, config *comm.TestGroupConfig) (*repo.TraceList, error) {
@@ -374,11 +387,12 @@ func main() {
 	}
 
 	// TODO(tutankhamen): check if trace file is already exist in the local cache
-
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Filter test entries based on label: %v", config.Labels))
 	traceEntries, err := getTraceEntries(traceList, &config.Labels)
 	if err != nil {
 		exitWithError(err)
 	}
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Number of filtered entries: %v", len(traceEntries)))
 
 	if len(traceEntries) == 0 {
 		exitWithError(errors.New("No trace entries found to match the selection attributes %vs. TraceList: %v", config.Labels, *traceList))
