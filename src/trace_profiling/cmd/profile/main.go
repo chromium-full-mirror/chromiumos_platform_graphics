@@ -88,6 +88,7 @@ func getParamsFromFiles(sshConfigFile, tunnelConfigFile, profileConfigFile strin
 }
 
 func main() {
+	var argUnifiedConfigFilePath string
 	var argTunnelConfigFilepath string
 	var argSSHConfigFilepath string
 	var argBundleConfigFilePath string
@@ -96,6 +97,8 @@ func main() {
 	var argAlwaysCopyTraces bool
 	var argEnableVerbose bool
 
+	flag.StringVar(&argUnifiedConfigFilePath, "config", "",
+		"A single, unified configuration file")
 	flag.StringVar(&argTunnelConfigFilepath, "tunnel-config", "/no-tunnel/",
 		"Optional tunnel (port-forwarding) configuration file")
 	flag.StringVar(&argSSHConfigFilepath, "ssh-config", "ssh_config.json",
@@ -112,12 +115,17 @@ func main() {
 		"Enable verbose mode, to see more info during profiling")
 	flag.Parse()
 
-	// If a bundle is specified, it takes precedence over individual config files.
+	// Unidied configuration takes precendence, then a config bundle if available.
+	// Otherwise, we look for individual SSH, tunnel and profile config files.
 	var sshParams *remote.SSHParams
 	var tunnelParams *remote.TunnelParams
 	var profParams *profile.ProfileParams
+	var profilerConfig *profile.ProfilerConfig
 	var err error
-	if argBundleConfigFilePath != "" {
+	if argUnifiedConfigFilePath != "" {
+		profilerConfig = profile.CreateProfilerConfig()
+		err = profilerConfig.ParseJSONFile(argUnifiedConfigFilePath)
+	} else if argBundleConfigFilePath != "" {
 		sshParams, tunnelParams, profParams, err = getParamsFromBundle(argBundleConfigFilePath)
 	} else {
 		sshParams, tunnelParams, profParams, err = getParamsFromFiles(
@@ -129,13 +137,28 @@ func main() {
 		return
 	}
 
+	if profilerConfig != nil {
+		sshParams = profilerConfig.GetSSHParams()
+		tunnelParams = profilerConfig.GetTunnelParams()
+		profParams = profilerConfig.GetProfilerParams()
+
+		if sshParams == nil {
+			fmt.Fprintf(os.Stderr, "No SSH configuration in %s\n", argUnifiedConfigFilePath)
+			return
+		}
+		if profParams == nil {
+			fmt.Fprintf(os.Stderr, "No Profiler configuration in %s\n", argUnifiedConfigFilePath)
+			return
+		}
+	}
+
 	// Tunneling is optional. If no tunnel parameters are provided, the SHH
 	// connection to the target device will be direct.
 	var tunnel *remote.Tunnel
 	if tunnelParams != nil {
 		tunnel, err = remote.CreateTunnel(tunnelParams)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Create tunnel %s\n", err.Error())
+			fmt.Fprintf(os.Stderr, "Error creating tunnel %s\n", err.Error())
 			return
 		}
 	}
