@@ -109,6 +109,9 @@ func (p *Profiler) GatherProfiles() error {
 			return err
 		}
 
+		// Other tools, such as Harvest, rely on this output to locate the profile output.
+		fmt.Printf("OutProfile=%s\n", localProf)
+
 		if !p.params.KeepTraceOnTarget {
 			p.target.DelFile(dstTrace)
 		}
