@@ -8,40 +8,42 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 )
 
 // ConfigPropertyHandler is an interfaces for handlers associated with top-level
 // properties in the config file. Handlers are associated with top-level
-// properties by calling function AddHandler on JSONConfig.
+// properties by calling function AddHandler on JSONConfigParser.
 type ConfigPropertyHandler interface {
-	parseJSONData(jsonData string) error
+	ParseJSONData(jsonData string) error
 }
 
-// JSONConfig is a helper class for parsing JSON configuration files. By iteself,
-// JSONConfig scan top-level properties JSON files and recursively processes
-// config files listed in top-level property with name "include". It becomes more
-// useful when handlers are associated with top-level properties other than
-// "include".
-type JSONConfig struct {
+// JSONConfigParser is a helper class for parsing JSON configuration files. By
+// itself, JSONConfigParser scans top-level properties JSON files and recursively
+// processes config files listed in property with name "include". To be useful
+// handlers must be associated with top-level properties other than "include".
+type JSONConfigParser struct {
 	handlers     map[string]ConfigPropertyHandler
 	jsonData     map[string]interface{}
 	includeDepth int
 }
 
-// CreateJSONConfig creates and returns a JSONConfig instance.
-func CreateJSONConfig() *JSONConfig {
-	var jc = JSONConfig{}
-	jc.handlers = make(map[string]ConfigPropertyHandler)
-	return &jc
+// CreateJSONConfigParser creates and returns a JSONConfigParser instance.
+func CreateJSONConfigParser() *JSONConfigParser {
+	return &JSONConfigParser{
+		handlers: make(map[string]ConfigPropertyHandler),
+	}
 }
 
-// AddHandler adds a handler for property with name <fieldName> to the JSONConfig
-// object. The handler will be invoked each time a top-level property with that
-// name is found in the config file or in the included files.
-func (jc *JSONConfig) AddHandler(fieldName string, handler ConfigPropertyHandler) error {
+// AddHandler adds a handler for property with name <fieldName> to the
+// JSONConfigParser instance. The handler will be invoked each time a top-level
+// property with that name is found in the config file or in the included files.
+func (jc *JSONConfigParser) AddHandler(
+	fieldName string, handler ConfigPropertyHandler) error {
+
 	if fieldName == "include" {
-		return fmt.Errorf("invalid field name for custom handler: %s", fieldName)
+		return fmt.Errorf("handlers may not be associated with property \"include\"")
 	}
 
 	jc.handlers[fieldName] = handler
@@ -50,21 +52,28 @@ func (jc *JSONConfig) AddHandler(fieldName string, handler ConfigPropertyHandler
 
 // OpenJSONConfigFile open json file with path <jsonFile> and ensures it is ready
 // for processing. If the file doesn't look like a file that can be processed
-// with this JSONConfig instance, an error is returned.
-func (jc *JSONConfig) OpenJSONConfigFile(jsonFile string) error {
+// with this JSONConfigParser instance, an error is returned.
+func (jc *JSONConfigParser) OpenJSONConfigFile(jsonFile string) error {
 	file, err := os.Open(jsonFile)
 	if err != nil {
 		return fmt.Errorf("cannot open config file <%s>; error=%w", jsonFile, err)
 	}
 	defer file.Close()
 
-	var decode = json.NewDecoder(file)
+	return jc.OpenJSONFromReader(file)
+}
+
+// OpenJSONFromReader opens the parser with JSON data from the given reader and
+// ensures it is ready for processing. If the JSON data doesn't look like it
+// can be processed with this JSONConfigParser instance, an error is returned.
+func (jc *JSONConfigParser) OpenJSONFromReader(jsonReader io.Reader) error {
+	var decode = json.NewDecoder(jsonReader)
 	if err := decode.Decode(&jc.jsonData); err != nil {
 		return err
 	}
 
 	if !jc.canProcessData(jc.jsonData) {
-		return fmt.Errorf("unable to process JSON data in %s", jsonFile)
+		return fmt.Errorf("unable to process JSON data from reader")
 	}
 
 	return nil
@@ -72,7 +81,7 @@ func (jc *JSONConfig) OpenJSONConfigFile(jsonFile string) error {
 
 // Process processes a json config file that was successfully opened with
 // OpenJSONConfigFile.
-func (jc *JSONConfig) Process() error {
+func (jc *JSONConfigParser) Process() error {
 	return jc.processJSONData(jc.jsonData)
 }
 
@@ -80,7 +89,7 @@ func (jc *JSONConfig) Process() error {
 // that can be processed by JSNConfig. That is so when the json data has either
 // an "include" property or at least one property that can be processed by one
 // of the available handlers.
-func (jc *JSONConfig) canProcessData(jsonData map[string]interface{}) bool {
+func (jc *JSONConfigParser) canProcessData(jsonData map[string]interface{}) bool {
 	if jsonData != nil {
 		if _, ok := jsonData["include"]; ok {
 			return true
@@ -97,7 +106,7 @@ func (jc *JSONConfig) canProcessData(jsonData map[string]interface{}) bool {
 }
 
 // Process config json data that is represented as a map of property names to values.
-func (jc *JSONConfig) processJSONData(data map[string]interface{}) error {
+func (jc *JSONConfigParser) processJSONData(data map[string]interface{}) error {
 	// Process the include files first.
 	if includes, ok := data["include"]; ok {
 		if err := jc.includeFiles(includes); err != nil {
@@ -118,7 +127,7 @@ func (jc *JSONConfig) processJSONData(data map[string]interface{}) error {
 }
 
 // Process included files up to the maximum include depth.
-func (jc *JSONConfig) includeFiles(files interface{}) error {
+func (jc *JSONConfigParser) includeFiles(files interface{}) error {
 	// The include property value may be either a single file (a string) or
 	// a list of files (array of strings). Map either into a file list.
 	fileList := make([]string, 0, 16)
@@ -158,7 +167,7 @@ func (jc *JSONConfig) includeFiles(files interface{}) error {
 }
 
 // Process a json file.
-func (jc *JSONConfig) parseFile(file *os.File) error {
+func (jc *JSONConfigParser) parseFile(file *os.File) error {
 	var decode = json.NewDecoder(file)
 	var data map[string]interface{}
 	if err := decode.Decode(&data); err != nil {
@@ -169,7 +178,7 @@ func (jc *JSONConfig) parseFile(file *os.File) error {
 }
 
 // Look for a handler associated with a top-level property and invoke it if found.
-func (jc *JSONConfig) invokeHandler(handler ConfigPropertyHandler, data interface{}) error {
+func (jc *JSONConfigParser) invokeHandler(handler ConfigPropertyHandler, data interface{}) error {
 	// The handler expect the json data as a string. So we must map the interface{} value
 	// back to a string. We can do that with the json encoder.
 	var buffer = new(bytes.Buffer)
@@ -178,5 +187,5 @@ func (jc *JSONConfig) invokeHandler(handler ConfigPropertyHandler, data interfac
 		return err
 	}
 
-	return handler.parseJSONData(buffer.String())
+	return handler.ParseJSONData(buffer.String())
 }

@@ -98,7 +98,8 @@ func main() {
 	var argEnableVerbose bool
 
 	flag.StringVar(&argUnifiedConfigFilePath, "config", "",
-		"A single, unified configuration file")
+		"Specify the SSH, tunneling and profiling parameters in a unified config json file.\n"+
+			"(Other config files are ignored when this is specified.)")
 	flag.StringVar(&argTunnelConfigFilepath, "tunnel-config", "/no-tunnel/",
 		"Optional tunnel (port-forwarding) configuration file")
 	flag.StringVar(&argSSHConfigFilepath, "ssh-config", "ssh_config.json",
@@ -106,7 +107,7 @@ func main() {
 	flag.StringVar(&argProfileConfigFilepath, "profile-config", "profile_config.json",
 		"Profile configuration file")
 	flag.StringVar(&argBundleConfigFilePath, "config-bundle", "",
-		"Configuration-bundle file (other files ignored when specified)")
+		"Configuration-bundle file (deprecated, use -config with new json format instead)")
 	flag.BoolVar(&argForceInstallTools, "reinstall-tools", false,
 		"Re-install the profiling tools on the remote device, even if they are already there")
 	flag.BoolVar(&argAlwaysCopyTraces, "always-copy-traces", false,
@@ -115,15 +116,15 @@ func main() {
 		"Enable verbose mode, to see more info during profiling")
 	flag.Parse()
 
-	// Unidied configuration takes precendence, then a config bundle if available.
+	// Unified configuration takes precedence, then a config bundle if available.
 	// Otherwise, we look for individual SSH, tunnel and profile config files.
 	var sshParams *remote.SSHParams
 	var tunnelParams *remote.TunnelParams
 	var profParams *profile.ProfileParams
-	var profilerConfig *profile.ProfilerConfig
+	var profilerConfig *profile.ProfilerConfigParser
 	var err error
 	if argUnifiedConfigFilePath != "" {
-		profilerConfig = profile.CreateProfilerConfig()
+		profilerConfig = profile.CreateProfilerConfigParser()
 		err = profilerConfig.ParseJSONFile(argUnifiedConfigFilePath)
 	} else if argBundleConfigFilePath != "" {
 		sshParams, tunnelParams, profParams, err = getParamsFromBundle(argBundleConfigFilePath)
@@ -140,7 +141,7 @@ func main() {
 	if profilerConfig != nil {
 		sshParams = profilerConfig.GetSSHParams()
 		tunnelParams = profilerConfig.GetTunnelParams()
-		profParams = profilerConfig.GetProfilerParams()
+		profParams = profilerConfig.GetProfileParams()
 
 		if sshParams == nil {
 			fmt.Fprintf(os.Stderr, "No SSH configuration in %s\n", argUnifiedConfigFilePath)

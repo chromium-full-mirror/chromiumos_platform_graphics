@@ -136,7 +136,7 @@ the default.
 SSH tunneling is useful to gather trace profiles from Crostini or Crouton instances
 that cannot be reached with a direct SSH connection. By default, the trace profiler
 doesn't use tunneling. However, if a JSON file with tunneling parameters is
-specified on the command line with `-tunne-config=[filepath]`, then the trace
+specified on the command line with `-tunnel-config=[filepath]`, then the trace
 profiler will attempt to setup a tunnel before establishing the SSH connection.
 
 For example, a tunnel JSON configuration to a Crostini instance might look as follows:
@@ -158,7 +158,7 @@ For example, a tunnel JSON configuration to a Crostini instance might look as fo
 
 In this example, we use the SSH server on the Chromebook device at IP address
 `100.107.108.177`. The tunnel forwards connections from port 9922 on the local host,
-to port 22 in the Crostini instance, refered to with its standard address
+to port 22 in the Crostini instance, referred to with its standard address
 `penguin.linux.test`.
 
 Once the tunnel is established, a SSH connection from the host to the Crostini
@@ -207,7 +207,7 @@ Here's more info about each option:
 * **keepTraceOnTarget**: set this to true to keep the trace files on the target device
   after each profile run. (Beware, trace files can be quite large.) Otherwise,
   the trace files are deleted immediately after each profile run.
-* **localProfileDir**: path of directory where to store the gernerated profile files
+* **localProfileDir**: path of directory where to store the generated profile files
   the on host.
 * **profileNameSuffix**: append this to the trace file name to generate profile file name.
   For example, with ".prof", `traces_linux_10127_borderlands2.trace` becomes
@@ -221,13 +221,16 @@ Here's more info about each option:
 * **profCommand**: This parameter is used to construct the command line to invoke
   to generate the profile. Placeholder `[[trace-file]]` is replaced by the path
   to the input trace file on the target device. Placeholder `[[prof-file]]` is
-  replaced by the output profile filepath on the target device.
+  replaced by the output profile file path on the target device.
 * **targetDisplay**: This is the DISPLAY to use when running the profile command,
   usually `"0"` or `"1"`.
 
-### Configuration bundle
+### Configuration bundle (deprecated)
+*Note: config bundles are deprecated. See Unified Configuration further down for
+a simpler way to configure the Profiler.*
+
 A configuration bundle is a handy way to specify all configuration properties
-in a single JSON bundle togather with the ability to override individual
+in a single JSON bundle together with the ability to override individual
 properties. A configuration bundle might look as follows:
 
 ``` json
@@ -253,13 +256,185 @@ files specified in the `files` section. However, the `configs` section overrides
 two properties in the `profile` configuration, namely `traces` and `profCommand`.
 
 Either section is optional. That is, the configurations could be specified
-entirely with the files without any ovveride in `configs`. Or the configurations
+entirely with the files without any override in `configs`. Or the configurations
 could be fully specified with the `configs` section without needing to read data
 from any file.
 
 The file containing the configuration bundle is specified with cmd-line option
 `-config-bundle`.
 
+### Unified Configuration
+A much easier to configure the Profiler is through a unified config json file.
+A unified config file brings all the parameters for SSH, tunneling and profiling
+into a single file. It is specified to the Profile tool with with the "-config"
+cmd-line option, as in ```-config <path-to-json-config-file>```.
+
+The structure of the file is as follows:
+``` json
+profile_config.json:
+{
+  "Profile": {
+    "tunnelConfig": {
+      "localPort": 9922,
+      "targetHostAddr": "0.0.0.0",
+      "targetPort": 9922,
+      "server": {
+        "addr": "192.168.1.45",
+        "port": 22,
+        "username": "root",
+        "password": "test0000",
+        "publicKeyFilepath": "/home/gwink/.ssh/testing_rsa"
+      }
+    },
+    "sshConfig": {
+      "addr": "localhost",
+      "port": 9922,
+      "username": "gwink",
+      "password": "test0000",
+      "publicKeyFilepath": ""
+    },
+    "profilerConfig": {
+      "localTraceDir": "/home/gwink/Gaming/profiles/cache/",
+      "targetTraceDir": "/home/gwink/traces/",
+      "traces": [
+        "Borderlands_2-49520.trace",
+        "Left_4_Dead_2-550.trace"
+      ],
+      "keepTraceOnTarget": false,
+      "localProfileDir": "/home/gwink/Gaming/profiles/fps/prof",
+      "profileNameSuffix": ".crouton.prof",
+      "localProfAppPath": "/home/gwink/Gaming/apitrace/usr/bin/",
+      "targetProfAppPath": "/home/gwink/apitrace/",
+      "profCommand": "/home/gwink/apitrace/glretrace -b [[trace-file]] > [[prof-file]]",
+      "targetDisplay": "1"
+    }
+  }
+}
+```
+
+An optional "include" section is available to merge config files. For example, in
+the example above, we can pull out the SSH and tunneling params into their own
+file, for sharing, as follows:
+``` json
+target_config.json:
+{
+  "Profile": {
+    "tunnelConfig": {
+      "localPort": 9922,
+      "targetHostAddr": "0.0.0.0",
+      "targetPort": 9922,
+      "server": {
+        "addr": "192.168.1.45",
+        "port": 22,
+        "username": "root",
+        "password": "test0000",
+        "publicKeyFilepath": "/home/gwink/.ssh/testing_rsa"
+      }
+    },
+    "sshConfig": {
+      "addr": "localhost",
+      "port": 9922,
+      "username": "gwink",
+      "password": "test0000",
+      "publicKeyFilepath": ""
+    }
+  }
+}
+
+profile_config.json:
+{
+  "include": "target_config.json",
+  "Profile": {
+    "profilerConfig": {
+      "localTraceDir": "/home/gwink/Gaming/profiles/cache/",
+      "targetTraceDir": "/home/gwink/traces/",
+      "traces": [
+        "Borderlands_2-49520.trace",
+        "Left_4_Dead_2-550.trace"
+      ],
+      "keepTraceOnTarget": false,
+      "localProfileDir": "/home/gwink/Gaming/profiles/fps/prof",
+      "profileNameSuffix": ".crouton.prof",
+      "localProfAppPath": "/home/gwink/Gaming/apitrace/usr/bin/",
+      "targetProfAppPath": "/home/gwink/apitrace/",
+      "profCommand": "/home/gwink/apitrace/glretrace -b [[trace-file]] > [[prof-file]]",
+      "targetDisplay": "1"
+    }
+  }
+}
+
+```
+
+We can take this idea further and share the traces between config files by
+pulling them out into their own file:
+``` json
+target_config.json:
+{
+  "Profile": {
+    "tunnelConfig": {
+      "localPort": 9922,
+      "targetHostAddr": "0.0.0.0",
+      "targetPort": 9922,
+      "server": {
+        "addr": "192.168.1.45",
+        "port": 22,
+        "username": "root",
+        "password": "test0000",
+        "publicKeyFilepath": "/home/gwink/.ssh/testing_rsa"
+      }
+    },
+    "sshConfig": {
+      "addr": "localhost",
+      "port": 9922,
+      "username": "gwink",
+      "password": "test0000",
+      "publicKeyFilepath": ""
+    }
+  }
+}
+
+trace_config.json
+{
+  "Profile": {
+    "profilerConfig": {
+      "traces": [
+        "Borderlands_2-49520.trace",
+        "Left_4_Dead_2-550.trace"
+      ]
+    }
+  }
+}
+
+profile_config.json:
+{
+  "include": [
+    "target_config.json",
+    "trace_config.json"
+  ],
+  "Profile": {
+    "profilerConfig": {
+      "localTraceDir": "/home/gwink/Gaming/profiles/cache/",
+      "targetTraceDir": "/home/gwink/traces/",
+      "keepTraceOnTarget": false,
+      "localProfileDir": "/home/gwink/Gaming/profiles/fps/prof",
+      "profileNameSuffix": ".crouton.prof",
+      "localProfAppPath": "/home/gwink/Gaming/apitrace/usr/bin/",
+      "targetProfAppPath": "/home/gwink/apitrace/",
+      "profCommand": "/home/gwink/apitrace/glretrace -b [[trace-file]] > [[prof-file]]",
+      "targetDisplay": "1"
+    }
+  }
+}
+
+```
+
+There are a couple of simple rules to remember when combining config files with
+includes:
+1. All config files must have the same structure. Included files are merged
+structurally into the current file.
+2. When collisions arise, values from included files take precedence over values
+in the current file. Likewise, the latest included values take precedence over
+values included earlier.
 
 ## Merging Profiles
 In most cases, it is preferable to gather CPU and GPU profiles separately. That
@@ -283,11 +458,11 @@ some API calls may be in one profile and not the other, causing merge issues.
 ## Harvest
 Harvest is a multifaceted tool that works with trace archives in Google storage and can
 perform the following tasks:
-* Dowload archives, extract trace files and verify them.
+* Download archives, extract trace files and verify them.
 * Run the trace on attached Crouton and Crostini devices and collect profile data.
 * Extract the FPS data from the profile, compare and print the output to another file.
 
-Havest is configure through a JSON file that takes the following form:
+Harvest is configure through a JSON file that takes the following form:
 
 ``` json
 harvest-config.json:
@@ -307,38 +482,6 @@ Note that Harvest tries to run several actions simultaneously. For instance,
 if you specify several traces, it will download the next trace while the current
 trace is being profiles on the DUTs. Likewise, it will profile a trace simultaneously
 on attached crostini and crouton devices.
-
-### Bundle Templates
-The configuration JSON file has two properties named *__crostiniBundleTemplate__* and
-*__croutonBundleTemplate__*. These properties point to template files that are used
-to generate config JSON files for the companion Profile application. These template
-files look as follows:
-``` json
-crostini_bundle_template.json:
-{
-  "files": {
-    "sshConfigFile": "ssh_crostini_config.json",
-    "tunnelConfigFile": "crostini_tunnel_config.json",
-    "profileConfigFile": "crostini_profile_config.json"
-  },
-  "configs": {
-    "profile": {
-      "localTraceDir": "<<trace-dir>>",
-      "localProfileDir": "/path/to/profiles/dir/",
-      "profileNameSuffix": ".crostini.prof",
-          "traces": [
-        "<<trace-file>>"],
-      "profCommand": "/home/gwink/apitrace/glretrace -b [[trace-file]] > [[prof-file]]"
-    }
-  }
-}
-```
-
-Much of that file is exactly like the config-bundle JSON file shown for the Profile
-application, a bit earlier in this document. However,there are templates entries,
-**\<\<trace-dir\>\>** and **\<\<trace-file\>\>** we must be left as-is; Harvest
-will substitute the actual dir and file paths into these entries when running the
-profiles.
 
 ### Command-line options
 Harvest takes several command-line options. They are:
@@ -370,3 +513,72 @@ Kerbal_Space_Program-220200.trace     37.42     50.94     73.46%
 ```
 
 New FPS data is always appended to the file.
+
+### Configuring Analyze
+Analyze uses the same json config file format that we introduced earlier for the
+Profiler. Here's an example:
+``` json
+harvest_config.json:
+{
+  "Harvest": {
+    "traces": [
+      "gs://chromeos-gfx-traces-incoming/steam.copied/final/steam_550-left_4_dead_2-20200408_033201.tar",
+      "gs://chromeos-gfx-traces-incoming/steam.copied/final/steam_457140-oxygen_not_included-20200407_200110.tar"
+    ],
+    "traceCacheDir": "/home/gwink/Gaming/profiles/cache",
+    "keepTracesInCache": true,
+    "profileBinPath": "/home/gwink/Gaming/profiles/bin/profile"
+  },
+  "CrostiniProfilerConfig": {
+    "Profile": {
+      "tunnelConfig": {
+        < tunnel params for crostini >
+      },
+      "sshConfig": {
+        < SSH params for crostini >
+      },
+      "profilerConfig": {
+        < profiler params for crostini >
+      }
+    }
+  },
+  "CroutonProfilerConfig": {
+    "Profile": {
+      "tunnelConfig": {
+        < tunnel params for crouton >
+      },
+      "sshConfig": {
+        < SSH params for crouton >
+      },
+      "profilerConfig": {
+        < profiler params for crouton >
+      }
+    }
+  }
+}
+```
+
+Note that the parameters within the "CrostiniProfilerConfig" and
+"CroutonProfilerConfig" sections use the unified-config format introduced earlier
+for the Profiler. Thus, a more succinct approach is to use the include syntax to
+bring in these Profiler parameters from other files, as follows:
+``` json
+harvest_config.json:
+{
+  "Harvest": {
+    "traces": [
+      "gs://chromeos-gfx-traces-incoming/steam.copied/final/steam_550-left_4_dead_2-20200408_033201.tar",
+      "gs://chromeos-gfx-traces-incoming/steam.copied/final/steam_457140-oxygen_not_included-20200407_200110.tar"
+    ],
+    "traceCacheDir": "/home/gwink/Gaming/profiles/cache",
+    "keepTracesInCache": true,
+    "profileBinPath": "/home/gwink/Gaming/profiles/bin/profile"
+  },
+  "CrostiniProfilerConfig": {
+    "include": "/path/to/crostini_profiler_config.json"
+  },
+  "CroutonProfilerConfig": {
+    "include": "/path/to/crouton_unified_profiler_config.json"
+  }
+}
+```

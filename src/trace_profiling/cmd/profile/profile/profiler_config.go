@@ -6,63 +6,81 @@ package profile
 
 import (
 	"encoding/json"
+	"io"
 	"trace_profiling/cmd/profile/remote"
 )
 
-// All the config data relevant to Profiler in one place, for parsing from json.
-type allProfilerConfigs struct {
-	TunnelConfig   *remote.TunnelParams `json:"tunnelConfig"`
-	SSHConfig      *remote.SSHParams    `json:"sshConfig"`
-	ProfilerConfig *ProfileParams       `json:"profilerConfig"`
+// ProfilerConfigRecord encapsulates all the parameters needed for profiling in
+// one place, convenient for un-marshalling from JSON.
+type ProfilerConfigRecord struct {
+	TunnelConfig  *remote.TunnelParams `json:"tunnelConfig"`
+	SSHConfig     *remote.SSHParams    `json:"sshConfig"`
+	ProfileParams *ProfileParams       `json:"profilerConfig"`
 }
 
-// ProfilerConfig is a helper for parsing Profiler configuration data from json
-// config files.
-type ProfilerConfig struct {
-	jsonConfig *JSONConfig
-	configData allProfilerConfigs
+// ProfilerConfigParser helps parse Profiler configuration data from json
+// config files and makes the result accessible through accessors.
+type ProfilerConfigParser struct {
+	jsonParser *JSONConfigParser
+	configData ProfilerConfigRecord
 }
 
-// CreateProfilerConfig creates and returns a ProfilerConfig instance.
-func CreateProfilerConfig() *ProfilerConfig {
-	pc := ProfilerConfig{
-		jsonConfig: CreateJSONConfig(),
+// CreateProfilerConfigParser creates and returns a ProfilerConfigParser instance.
+func CreateProfilerConfigParser() *ProfilerConfigParser {
+	pc := ProfilerConfigParser{
+		jsonParser: CreateJSONConfigParser(),
 	}
 
-	pc.jsonConfig.AddHandler("Profile", &pc)
+	pc.jsonParser.AddHandler("Profile", &pc)
 	return &pc
 }
 
 // ParseJSONFile parse json file with path <jsonFile>. When this function is
 // successful, the parsed data may be retrieved with functions GetSSHParams,
 // GetTunnelParams and GetProfilerParams.
-func (pc *ProfilerConfig) ParseJSONFile(jsonFile string) error {
-	if err := pc.jsonConfig.OpenJSONConfigFile(jsonFile); err != nil {
+func (pc *ProfilerConfigParser) ParseJSONFile(jsonFile string) error {
+	if err := pc.jsonParser.OpenJSONConfigFile(jsonFile); err != nil {
 		return err
 	}
 
-	return pc.jsonConfig.Process()
+	return pc.jsonParser.Process()
 }
 
-// GetProfilerParams returns the ProfilerParams parsed from the json file.
+// ParseJSONFromReader parse json data from the given reader. When this function
+// is successful, the parsed data may be retrieved with functions GetSSHParams,
+// GetTunnelParams and GetProfilerParams.
+func (pc *ProfilerConfigParser) ParseJSONFromReader(jsonReader io.Reader) error {
+	if err := pc.jsonParser.OpenJSONFromReader(jsonReader); err != nil {
+		return err
+	}
+
+	return pc.jsonParser.Process()
+}
+
+// GetProfilerConfig returns the profiler config data parsed from json.
+func (pc *ProfilerConfigParser) GetProfilerConfig() *ProfilerConfigRecord {
+	return &pc.configData
+}
+
+// GetProfileParams returns the ProfileParams parsed from the json file.
 // May return nil.
-func (pc *ProfilerConfig) GetProfilerParams() *ProfileParams {
-	return pc.configData.ProfilerConfig
+func (pc *ProfilerConfigParser) GetProfileParams() *ProfileParams {
+	return pc.configData.ProfileParams
 }
 
 // GetSSHParams returns the SSHParams parsed from the json file. May return nil.
-func (pc *ProfilerConfig) GetSSHParams() *remote.SSHParams {
+func (pc *ProfilerConfigParser) GetSSHParams() *remote.SSHParams {
 	return pc.configData.SSHConfig
 }
 
 // GetTunnelParams returns the TunnelParams parsed from the json file.
 // May return nil.
-func (pc *ProfilerConfig) GetTunnelParams() *remote.TunnelParams {
+func (pc *ProfilerConfigParser) GetTunnelParams() *remote.TunnelParams {
 	return pc.configData.TunnelConfig
 }
 
-// parseJSONData is the handler function for interface ConfigPropertyHandler.
-func (pc *ProfilerConfig) parseJSONData(jsonData string) error {
+// ParseJSONData is the handler function for interface ConfigPropertyHandler.
+func (pc *ProfilerConfigParser) ParseJSONData(jsonData string) error {
 	if err := json.Unmarshal([]byte(jsonData), &pc.configData); err != nil {
 		return err
 	}
