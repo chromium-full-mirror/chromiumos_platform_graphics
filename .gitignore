@@ -12,3 +12,7 @@
 
 # Vim
 *.sw[a-p]
+
+# Python
+__pycache__
+*.pyc
