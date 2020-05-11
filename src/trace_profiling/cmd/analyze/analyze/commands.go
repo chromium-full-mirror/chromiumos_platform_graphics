@@ -49,7 +49,7 @@ var ErrQuitRequest = errors.New("quit-requested")
 
 // Dispatch table for all the available command except help. (Having "help" in
 // this table creates a reference loop between function doPrintHelp, linked in
-// this table, and cmdDispatchTable, which's being used in doPrintHelp. Golang
+// this table, and cmdDispatchTable, which is being used in doPrintHelp. Golang
 // doesn't like that loop.)
 var cmdDispatchTable = map[string]cmdDispatch{
 	"quit": {
@@ -107,12 +107,14 @@ var cmdDispatchTable = map[string]cmdDispatch{
 // This table maps sort modes to the corresponding function to use to sort
 // DualStatistics objects.
 var sortFunctionTable = map[string]displaySortFunction{
-	"BYCPUAVG":   sortByDecCPUAvg,
-	"BYCPUMAX":   sortByDecCPUMax,
-	"BYCPUTOTAL": sortByDecCPUTotal,
-	"BYGPUAVG":   sortByDecGPUAvg,
-	"BYGPUMAX":   sortByDecGPUMax,
-	"BYGPUTOTAL": sortByDecGPUTotal,
+	"BYCPUAVG":    sortByDecCPUAvg,
+	"BYCPUMAX":    sortByDecCPUMax,
+	"BYCPUTOTAL":  sortByDecCPUTotal,
+	"BYCPUMEDIAN": sortByDecCPUMedian,
+	"BYGPUAVG":    sortByDecGPUAvg,
+	"BYGPUMAX":    sortByDecGPUMax,
+	"BYGPUTOTAL":  sortByDecGPUTotal,
+	"BYGPUMEDIAN": sortByDecGPUMedian,
 }
 
 // ExecCommand is the entry point to dispatch a command.
@@ -439,16 +441,26 @@ func doShowCalls(args []string, profiles *Profiles) error {
 	var gpuPerCallWeight = 100.0 / math.Max(options.prof.GetTotalGPUTimeNs(), 1e-6)
 	var cpuPerCallWeight = 100.0 / math.Max(options.prof.GetTotalCPUTimeNs(), 1e-6)
 
+	// For most sort options, the 1st data column shows the GPU/CPU average.
+	// However, when the sort option is by CPU/GPU median, then we show the median
+	// values in that column instead.
+	var col1Tag = "avg   "
+	var col1Val = func(s *Statistics) float64 { return s.GetAverage() }
+	if strings.HasSuffix(options.sortByChoice, "MEDIAN") {
+		col1Tag = "median"
+		col1Val = func(s *Statistics) float64 { return s.GetMedian() }
+	}
+
 	fmt.Printf("Profile: %s\n", options.prof.label)
-	fmt.Printf("%30s %7s %20s %20s %20s %20s\n", "call", "count", " GPU|CPU avg   ",
-		" GPU|CPU max   ", " GPU|CPU total   ", "GPU|CPU % total")
+	fmt.Printf("%30s %7s %18s   %20s %20s %20s\n", "call", "count",
+		" GPU|CPU "+col1Tag, " GPU|CPU max   ", " GPU|CPU total   ", "GPU|CPU % total")
 	fmt.Printf("--------------------------------------------------------------" +
 		"-----------------------------------------------------------\n")
 	for n, s := range stats {
 		fmt.Printf("%30s %7d %9s |%9s %9s |%9s %9s |%9s %8.1f%% |%7.1f%%\n",
 			s.callName,
 			s.gpuStat.numSamples,
-			timingToString(s.gpuStat.GetAverage()), timingToString(s.cpuStat.GetAverage()),
+			timingToString(col1Val(&s.gpuStat)), timingToString(col1Val(&s.cpuStat)),
 			timingToString(s.gpuStat.GetMax()), timingToString(s.cpuStat.GetMax()),
 			timingToString(s.gpuStat.GetSum()), timingToString(s.cpuStat.GetSum()),
 			s.gpuStat.GetSum()*gpuPerCallWeight, s.cpuStat.GetSum()*cpuPerCallWeight)
@@ -764,7 +776,9 @@ const (
 		"            byCPUMax:   maximum CPU time,\n" +
 		"            byGPUMax:   maximum GPU time,\n" +
 		"            byCPUTotal: total (accumulated) CPU time,\n" +
-		"            byCPUTotal: total (accumulated) GPU time,\n" +
+		"            byGPUTotal: total (accumulated) GPU time,\n" +
+		"            byCPUMedian: median CPU time,\n" +
+		"            byGPUMedian: median GPU time,\n" +
 		"            This option is not case sensitive. I.e. s=bycpuavg is the same as s=byCpuAvg.\n"
 
 	helpForThresholdOptions = "  gt=nnn  only show calls that spend nnn nanoseconds or more in the GPU.\n" +

@@ -20,6 +20,7 @@ type Statistics struct {
 	averageAtNminus1  float64
 	varianceAtN       float64
 	varianceAtNminus1 float64
+	median            *MedianTracker
 	numSamples        int
 }
 
@@ -68,12 +69,14 @@ func (stat *Statistics) AddSample(s float64) {
 		stat.min = s
 		stat.averageAtN = s
 		stat.varianceAtN = 0
+		stat.median = CreateMedianTracker(s)
 	} else {
 		stat.max = math.Max(stat.max, s)
 		stat.min = math.Min(stat.min, s)
 		stat.sum += s
 		stat.averageAtN = stat.averageAtNminus1 + (s-stat.averageAtNminus1)/float64(stat.numSamples)
 		stat.varianceAtN = stat.varianceAtNminus1 + (s-stat.averageAtNminus1)*(s-stat.averageAtN)
+		stat.median.Add(s)
 	}
 
 	stat.averageAtNminus1 = stat.averageAtN
@@ -103,6 +106,14 @@ func (stat *Statistics) GetMin() float64 {
 // GetAverage returns the average of all samples added so far.
 func (stat *Statistics) GetAverage() float64 {
 	return stat.averageAtN
+}
+
+// GetMedian returns the average of all samples added so far.
+func (stat *Statistics) GetMedian() float64 {
+	if stat.numSamples == 0 {
+		return 0.0
+	}
+	return stat.median.Median()
 }
 
 // GetStdDeviation returns the standard deviation of all samples added so far.
@@ -147,4 +158,12 @@ func sortByDecGPUTotal(dsi DualStatistics, dsj DualStatistics) bool {
 
 func sortByDecCPUTotal(dsi DualStatistics, dsj DualStatistics) bool {
 	return dsi.cpuStats().sum > dsj.cpuStats().sum
+}
+
+func sortByDecCPUMedian(dsi DualStatistics, dsj DualStatistics) bool {
+	return dsi.cpuStats().GetMedian() > dsj.cpuStats().GetMedian()
+}
+
+func sortByDecGPUMedian(dsi DualStatistics, dsj DualStatistics) bool {
+	return dsi.gpuStats().GetMedian() > dsj.gpuStats().GetMedian()
 }
