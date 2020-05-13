@@ -6,25 +6,21 @@ package main
 
 import (
 	"bufio"
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"html"
-	"io"
 	"io/ioutil"
 	"math"
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"trace_profiling/cmd/harvest/config"
+	"trace_profiling/cmd/harvest/utils"
 	"trace_profiling/cmd/profile/profile"
 	"trace_profiling/cmd/profile/remote"
 )
@@ -45,19 +41,6 @@ type PerfConfig struct {
 	ProfileBinPath    string   `json:"profileBinPath"`
 	CrostiniBundle    string   `json:"crostiniBundleTemplate"`
 	CroutonBundle     string   `json:"croutonBundleTemplate"`
-}
-
-// GameInfo is a JSON file bundled with the traces that has info about the game
-// the trace was generated from. We only use two of the fields here.
-type GameInfo struct {
-	GameName string `json:"game_name"`
-	GameID   string `json:"gameid"`
-}
-
-// TraceInfo is also a JSON associated with some traces. We care about the MD5
-// field for the uncompressed trace file.
-type TraceInfo struct {
-	TraceFileMD5 string `json:"trace_file_md5"`
 }
 
 // FPS output for performance comparison.
@@ -82,26 +65,11 @@ var fpsData []fpsRecord
 
 var harvestConfig *config.HarvestConfigParser
 
-// Trace names often have characters that are not suitable for file paths. This
-// string replacer is used to sanitize them.
-var filenameSanitizer = strings.NewReplacer(
-	"&", "And", " ", "_", ";", "-", "/", "", "\\", "", "?", "-", "'", "", "<", "Lt", ">", "Gt")
-
-// Return whether file with path filepath exists.
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if err != nil {
-		return false
-	}
-
-	return !info.IsDir()
-}
-
 // Fetch a trace archive from Google storage.
 func fetchTraceFromStorage(cacheDir, trace string) (string, error) {
 	_, filename := path.Split(trace)
 	filepath := path.Join(cacheDir, filename)
-	if !fileExists(filepath) {
+	if !utils.FileExists(filepath) {
 		_, err := remote.FetchFromGS(filepath, trace)
 		if err != nil {
 			return "", err
@@ -111,292 +79,9 @@ func fetchTraceFromStorage(cacheDir, trace string) (string, error) {
 	return filepath, nil
 }
 
-// Read JSON data from a file and return as a byte array.
-func readJSONData(jsonFilepath string) ([]byte, error) {
-	file, err := os.Open(jsonFilepath)
-	if err != nil {
-		return nil, fmt.Errorf("Error: Cannot open JSON file <%s>; error=%w",
-			jsonFilepath, err)
-	}
-	defer file.Close()
-
-	jsonData, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("Error: Cannot read JSON file <%s>; error=%w",
-			jsonFilepath, err)
-	}
-
-	return jsonData, nil
-}
-
-// Split a filename from all its extensions and returns as pair (name, extensions).
-// E.g. filename "blahblah.txt.tar" produces "filename" and ".txt.tar".
-func splitFileExt(filename string) (string, string) {
-	ext := ""
-	for {
-		e := filepath.Ext(filename)
-		if e == "" {
-			break
-		}
-		ext = e + ext
-		filename = strings.TrimSuffix(filename, e)
-	}
-
-	return filename, ext
-}
-
-// Extract and archive and return the path to the root folder or file of the
-// extracted data. This function uses the file name, minus the extension, of
-// the archive as name for the root folder for tar and tar.bz2 archives.
-func extractArchive(fileName string) (string, error) {
-	var decompressCmd *exec.Cmd
-	dirPath, fileExt := splitFileExt(fileName)
-
-	switch fileExt {
-	case ".tar.bz2":
-		os.Mkdir(dirPath, os.ModePerm)
-		decompressCmd = exec.Command("tar", "-xjf", fileName, "-C", dirPath)
-	case ".tar":
-		os.Mkdir(dirPath, os.ModePerm)
-		decompressCmd = exec.Command("tar", "-xf", fileName, "-C", dirPath)
-	case ".bz2":
-		decompressCmd = exec.Command("bunzip2", "-f", "-k", "-d", fileName)
-	case ".zst", ".xz":
-		decompressCmd = exec.Command("zstd", "-d", "-f", "--rm", "-T0", fileName)
-	default:
-		return "", fmt.Errorf("Error: unknown trace extension: %s", fileExt)
-	}
-	if err := decompressCmd.Run(); err != nil {
-		return "", fmt.Errorf("Error: unable to decompress <%s>, err=%s", fileName, err.Error())
-	}
-
-	return dirPath, nil
-}
-
-// Look for a file with zst extension in the given directory. If found, uncompress
-// the zst archive into file "game.trace" within the same directory. Returns
-// file name "game.trace" when successful. If there is no zst archive, this
-// function doesn't fail, but return the empty string "" instead.
-func extractGameTraceFromZst(dirPath string) (string, error) {
-	files, err := ioutil.ReadDir(dirPath)
-	if err != nil {
-		return "", nil
-	}
-
-	outTrace := path.Join(dirPath, "game.trace")
-	for _, file := range files {
-		filename := path.Join(dirPath, file.Name())
-		if filepath.Ext(filename) == ".zst" {
-			printIfVerbose("Extracting %s to game.trace\n", filename)
-			cmd := exec.Command("zstd", "-df", filename, "-o", outTrace)
-			err = cmd.Run()
-			if err != nil {
-				return "", err
-			}
-			return "game.trace", nil
-		}
-	}
-
-	return "", nil
-}
-
-// Some trace archives extract directly to files within the destination folder,
-// while other extract to folder within the folder. This function regularize
-// the extracted archives so that all files of interest are directly within
-// the root folder.
-func regularizeTraceDir(dirPath string) error {
-	fileInfo, err := ioutil.ReadDir(dirPath)
-	if err != nil {
-		return err
-	}
-
-	if len(fileInfo) == 1 && fileInfo[0].IsDir() {
-		nestedDir := path.Join(dirPath, fileInfo[0].Name())
-		nestedFiles, _ := ioutil.ReadDir(nestedDir)
-		for _, f := range nestedFiles {
-			os.Rename(path.Join(nestedDir, f.Name()), path.Join(dirPath, f.Name()))
-		}
-	}
-
-	return nil
-}
-
-// Fetch the GameInfo data from game_info.json in the given dirPath.
-func fetchGameInfoFromDir(dirPath string) (GameInfo, error) {
-	jsonFilepath := path.Join(dirPath, "game_info.json")
-	jsonData, err := readJSONData(jsonFilepath)
-	if err != nil {
-		return GameInfo{}, err
-	}
-
-	var gameInfo GameInfo
-	err = json.Unmarshal(jsonData, &gameInfo)
-	if err != nil {
-		return GameInfo{}, fmt.Errorf("Error: unable to parse JSON file <%s>; error=%w",
-			jsonFilepath, err)
-	}
-
-	return gameInfo, nil
-}
-
-// Fetch the TraceInfo data from trace_info.json in the given dirPath.
-func fetchTraceInfoFromDir(dirPath string) (TraceInfo, error) {
-	// Not all game archives have trace info.
-	jsonFilepath := path.Join(dirPath, "trace_info.json")
-	if !fileExists(jsonFilepath) {
-		return TraceInfo{}, fmt.Errorf("No trace info")
-	}
-
-	jsonData, err := readJSONData(jsonFilepath)
-	if err != nil {
-		return TraceInfo{}, err
-	}
-
-	var traceInfo TraceInfo
-	err = json.Unmarshal(jsonData, &traceInfo)
-	if err != nil {
-		return TraceInfo{}, fmt.Errorf("Error: unable to parse JSON file <%s>; error=%w",
-			jsonFilepath, err)
-	}
-
-	return traceInfo, nil
-}
-
-// Return the MD5 hash from file <filename>.
-func getFileMD5Sum(fileName string) (string, error) {
-	file, err := os.Open(fileName)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	hash := md5.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return "", err
-	}
-	hashInBytes := hash.Sum(nil)[:16]
-
-	return hex.EncodeToString(hashInBytes), nil
-}
-
-// Attempt to the verify the trace file MD5 hash. The reference MD5 hash is read
-// from property "trace_file_md5" from file trace_info.json in the game dir.
-// Either may not be present, in which case this function will not fail. If the
-// reference MD5 hash is found, then it must match the MD5 hash calculated from
-// the trace file.
-func verifyTraceMD5(gameDirPath, traceFilename string) error {
-	traceInfo, err := fetchTraceInfoFromDir(gameDirPath)
-	if err != nil {
-		if err.Error() == "No trace info" {
-			printIfVerbose("Skip MD5 check for %s: no trace_info.json\n", traceFilename)
-			return nil
-		}
-		return err
-	}
-
-	// Not all trace-info have the MD5 property.
-	if traceInfo.TraceFileMD5 == "" {
-		printIfVerbose("Skip MD5 check for %s: no MD5 property in trace_info.json\n", traceFilename)
-		return nil
-	}
-
-	printIfVerbose("Verifying MD5 hash for %s\n", traceFilename)
-	traceFile := path.Join(gameDirPath, traceFilename)
-	md5, err := getFileMD5Sum(traceFile)
-	if err != nil {
-		return err
-	}
-
-	if md5 != traceInfo.TraceFileMD5 {
-		return fmt.Errorf("md5 verification failed for %s", traceFilename)
-	}
-
-	return nil
-}
-
-// Given a directory path to a folder containing data extracted from a game
-// archive, construct and return a trace filename. The filename is derived from
-// the game name, itself extracted from game_info.json, sanitized to remove
-// characters that are not suitable for file names.
-func getTraceFileNameFromGameDir(gameDir string) (string, error) {
-	gameInfo, err := fetchGameInfoFromDir(gameDir)
-	if err != nil {
-		return "", err
-	}
-
-	filename := html.UnescapeString(gameInfo.GameName)
-	filename = filenameSanitizer.Replace(filename) + "-" + gameInfo.GameID
-
-	return filename, nil
-}
-
-// Extract a trace, as a file, from the archive with the given file path.
-// Return the file path to the trace as a string.
-func extractTraceFromArchive(archivePath string) (string, error) {
-	// Dir where traces and game archives are stored.
-	cacheDir, _ := path.Split(archivePath)
-
-	// Extract data from the archive.
-	printIfVerbose("Extracting archive %s\n", archivePath)
-	gameDirPath, err := extractArchive(archivePath)
-	if err != nil {
-		return "", err
-	}
-
-	err = regularizeTraceDir(gameDirPath)
-	if err != nil {
-		return "", err
-	}
-
-	// Get a suitable name for the trace file.
-	traceFilename, err := getTraceFileNameFromGameDir(gameDirPath)
-	if err != nil {
-		return "", err
-	}
-
-	// Some traces are compressed as zst inside the archive folder. If such is the
-	// case, this function will extract the zst archive and leave the file in
-	// game.trace.
-	traceName, err := extractGameTraceFromZst(gameDirPath)
-	if err != nil {
-		return "", err
-	}
-	if traceName == "" {
-		traceName = "game.trace"
-	}
-
-	err = verifyTraceMD5(gameDirPath, traceName)
-	if err != nil {
-		return "", err
-	}
-
-	// Finally, copy trace file to it's final path and name.
-	dstTrace := path.Join(cacheDir, traceFilename) + ".trace"
-	srcTrace := path.Join(gameDirPath, traceName)
-	err = os.Rename(srcTrace, dstTrace)
-	printIfVerbose("Trace ready as %s\n", dstTrace)
-
-	if argDeleteArchiveCrumbs {
-		os.RemoveAll(gameDirPath)
-	}
-
-	return dstTrace, err
-}
-
-// Retrieve and return, as a path, the trace file from a game archive.
-func getTraceFileFromArchive(compressedFilepath string) (string, error) {
-	fileExt := filepath.Ext(compressedFilepath)
-	switch fileExt {
-	case ".bz2", ".tar":
-		return extractTraceFromArchive(compressedFilepath)
-	default:
-		return "", fmt.Errorf("Error: unknown compressed file: %s", fileExt)
-	}
-}
-
 // Customize the profiler config with the trace file and trace-cache dir and
 // write it out as json to a temporary file. Return the path to the temp file.
-func createCustomProfilerConfig(
+func customizeProfilerConfig(
 	traceFile string, config *profile.ProfilerConfigRecord) (string, error) {
 
 	dir, filename := path.Split(traceFile)
@@ -429,8 +114,8 @@ func runProfile(profilerBinPath, traceFile string,
 	profilerConfig *profile.ProfilerConfigRecord) (string, error) {
 
 	// The bundle is actually a template that we must customize with the proper
-	// trace file name.
-	config, err := createCustomProfilerConfig(traceFile, profilerConfig)
+	// trace file name and trace dir.
+	config, err := customizeProfilerConfig(traceFile, profilerConfig)
 	if err != nil {
 		return "", err
 	}
@@ -562,7 +247,8 @@ func profileTracesOnTarget(
 		printIfVerbose("Tracing on %s with %s\n", targetName, trace)
 		profFile, err := runProfile(profileAppBinPath, trace, profilerConfig)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error profiling on %s: %s\n", targetName, err.Error())
+			fmt.Fprintf(os.Stderr, "Error profiling on %s: prof=%s, err=%s\n",
+				targetName, profFile, err.Error())
 			resultQueue <- ""
 		} else {
 			resultQueue <- profFile
@@ -612,28 +298,24 @@ func runPerfComparison() error {
 
 	// Grab trace files as they become available and feed them to the profile
 	// goroutines above.
+	var traceData = utils.CreateTraceRecord(argVerbose)
 	for trace := range traceQueue {
-		ext := filepath.Ext(trace)
-		if ext == ".bz2" || ext == ".tar" {
-			traceFile, err := getTraceFileFromArchive(trace)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error extracting trace from archive %s, err=%s\n",
-					trace, err.Error())
-				continue
-			}
-
-			trace = traceFile
+		if err := traceData.LoadFromFile(trace); err != nil {
+			fmt.Fprintf(os.Stderr, "Error extracting trace from archive %s, err=%s\n",
+				trace, err.Error())
+			continue
 		}
 
 		if !argSuppressCrostini {
-			crostFeedQueue <- trace
+			crostFeedQueue <- traceData.GetTraceFilePath()
 		}
 		if !argSuppressCrouton {
-			croutFeedQueue <- trace
+			croutFeedQueue <- traceData.GetTraceFilePath()
 		}
 
-		// Short (hacky) pause to give the profile goroutines a chance to grab the
-		// traces and print their verbose output.
+		// A short pause gives the profile goroutines a chance to grab the traces
+		// traces and print their verbose output before we print "Waiting...".It
+		// just looks better.
 		time.Sleep(5 * time.Millisecond)
 		printIfVerbose("Waiting for profiling to complete... \n")
 
@@ -648,7 +330,7 @@ func runPerfComparison() error {
 		}
 
 		if argEnableCompareFps {
-			_, traceName := path.Split(trace)
+			_, traceName := path.Split(traceData.GetTraceFilePath())
 			gatherProfileResult(traceName, crostProfile, croutProfile)
 		} else {
 			if crostProfile != "" {
@@ -697,8 +379,8 @@ func main() {
 	flag.StringVar(&argOutputFile, "out", "compare_out.prof", "Output file")
 	flag.BoolVar(&argVerbose, "verbose", false, "Enable verbose mode")
 	flag.BoolVar(&argEnableCompareFps, "compare-fps", false, "Extract FPS from profile data and compare")
-	flag.BoolVar(&argSuppressCrostini, "no-crostini", false, "Supress profiling on crostini")
-	flag.BoolVar(&argSuppressCrouton, "no-crouton", false, "Supress profiling on crouton")
+	flag.BoolVar(&argSuppressCrostini, "no-crostini", false, "Suppress profiling on crostini")
+	flag.BoolVar(&argSuppressCrouton, "no-crouton", false, "Suppress profiling on crouton")
 	flag.BoolVar(&argDeleteArchiveCrumbs, "del-archive-crumbs", false, "Delete files and folders left after unarchiving game data")
 	flag.Parse()
 
