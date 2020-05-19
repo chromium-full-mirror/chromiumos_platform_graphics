@@ -225,7 +225,7 @@ def main():
         config.kernel_release = results_database.get_cmd_output(['uname', '-r'])
         config.kernel_version = results_database.get_cmd_output(['uname', '-v'])
         parse_lsb_release(config, read_release_keyval_file('/etc/lsb-release'))
-        parse_os_release(config, read_release_keyval_file('/etc/os-release2'))
+        parse_os_release(config, read_release_keyval_file('/etc/os-release'))
         parse_bios_info(config, results_database.read_bios_keyval_file(
             '/var/log/bios_info.txt'))
         parse_ec_info(config, results_database.read_bios_keyval_file(
