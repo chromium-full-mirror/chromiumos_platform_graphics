@@ -20,6 +20,17 @@ PATH=$PATH:$PWD/src/platform/graphics/src/results_database
 emerge-$BOARD cros-config-api graphics-utils-python
 cros deploy $dut --root /usr/local cros-config-api graphics-utils-python
 
+### Crostini/Crouton
+
+```sh
+sudo apt install python3-pip
+git clone https://chromium.googlesource.com/chromiumos/config
+pip3 install config/python
+git clone https://chromium.googlesource.com/chromiumos/platform/graphics
+pip3 install graphics/src/results_database
+PATH=$PATH:$PWD/graphics/src/results_database
+```
+
 ## Common actions
 
 ### Capture machine information
@@ -93,7 +104,7 @@ use a different version of Mesa.
 ### Create results protobuf
 
 ```sh
-summarize_apitrace_log.txt --machine machine.json --software crostini.json \
+summarize_apitrace_log.py --machine machine.json --software crostini.json \
   --package mesa.json --execution_environment crostini --output results.json \
   "$trace_id-$log_id.txt"
 ```
