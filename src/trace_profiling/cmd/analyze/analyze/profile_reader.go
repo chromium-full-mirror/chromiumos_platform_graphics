@@ -121,6 +121,7 @@ func (reader *ProfileReader) parseProfileData(scanner *bufio.Scanner) (err error
 	}()
 
 	var frameOpen = false
+LineLoop:
 	for line := range lines {
 		switch {
 		case strings.HasPrefix(line, "Rendered"):
@@ -139,6 +140,10 @@ func (reader *ProfileReader) parseProfileData(scanner *bufio.Scanner) (err error
 				return
 			}
 			frameOpen = true
+		case strings.HasPrefix(line, ">>>>>> Extra"):
+			// This is the header line for extra tracing info added by the Profiler.
+			// We can ignore the rest of the file.
+			break LineLoop
 		default:
 			err = fmt.Errorf("Error: unrecognized line in profile: %s", line)
 			return

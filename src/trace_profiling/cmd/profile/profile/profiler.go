@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 
 	"trace_profiling/cmd/profile/remote"
@@ -153,6 +154,39 @@ func (p *Profiler) installTools() error {
 	return err
 }
 
+// Extract and return the env var definitions found at the begining of cmd.
+// E.g. For cmd = "DISPLAY=:1 glxinfo -B", the function returns "DISPLAY=:1".
+// Multiple env vars are all returned as a single string.
+func extractEnvParams(cmd string) string {
+	re := regexp.MustCompile("^(?P<env>(?i:[^ =]+=[^ =]+[ ]*)*)")
+	envParams := re.Find([]byte(cmd))
+	if envParams == nil {
+		return ""
+	} else {
+		return string(envParams)
+	}
+}
+
+// Append extra trace command information at the end of output file tmpFile.
+// The extra information consists of the command that was run to gather the
+// trace profile in the form "CMD: <cmd line>" and the output of "glxinfo -B"
+// ran with the same env var as the trace cmd.
+func (p *Profiler) appendTraceCmdInfo(traceCmd string, tmpFile string) {
+	// Extract the env var definitions from the trace cmd, so we can use them
+	// with glxinfo.
+	env := extractEnvParams(traceCmd)
+
+	// Print a section header so that other tools can easily skip this section.
+	cmd := fmt.Sprintf("echo \">>>>>> Extra Tracing Info <<<<<<\" >> %s", tmpFile)
+	p.target.RunCmd(cmd)
+
+	cmd = fmt.Sprintf("echo \"CMD: %s\" >> %s", traceCmd, tmpFile)
+	p.target.RunCmd(cmd)
+
+	cmd = fmt.Sprintf("%s glxinfo -B >> %s", env, tmpFile)
+	p.target.RunCmd(cmd)
+}
+
 // Profile a single trace on the target device and produce the profile data
 // in the local file <localProfPath>.
 func (p *Profiler) profileTrace(binCmd, tracePath, localProfPath string) error {
@@ -186,6 +220,8 @@ func (p *Profiler) profileTrace(binCmd, tracePath, localProfPath string) error {
 		p.printIfVerbose(" error, stdout=\"%s\"\n", output)
 		return err
 	}
+
+	p.appendTraceCmdInfo(cmd, tmpFilename)
 
 	p.printIfVerbose("\nCopy profile to local file %s: ", localProfPath)
 

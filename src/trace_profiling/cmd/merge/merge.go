@@ -183,6 +183,9 @@ func mergeProfiles(prof1, prof2 string) (err error) {
 			l1 := <-lines1
 			l2 := <-lines2
 
+			// Note that we return as soon as we find the "Rendered" line or an error
+			// occurs. Any extra tracing info inserted by the Profiler will show up
+			// after the "Rendered" line and will thus be safely ignored.
 			switch {
 			case strings.HasPrefix(l1, "Rendered"):
 				if !strings.HasPrefix(l2, "Rendered") {
