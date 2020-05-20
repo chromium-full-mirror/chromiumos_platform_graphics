@@ -12,6 +12,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"time"
 
 	"trace_profiling/cmd/profile/remote"
 )
@@ -103,7 +104,8 @@ func (p *Profiler) GatherProfiles() error {
 			return err
 		}
 
-		profName := trace + p.params.ProfileNameSuffix
+		timestamp := time.Now().Format(".20060102-150405")
+		profName := trace + timestamp + p.params.ProfileNameSuffix
 		localProf := path.Join(p.params.LocalProfileDir, profName)
 		err = p.profileTrace(p.params.ProfCommand, dstTrace, localProf)
 		if err != nil {
