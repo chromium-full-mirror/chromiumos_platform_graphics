@@ -212,10 +212,11 @@ Here's more info about each option:
 * **profileNameSuffix**: append this to the trace file name to generate profile file name.
   For example, with ".prof", `traces_linux_10127_borderlands2.trace` becomes
   `traces_linux_10127_borderlands2.trace.prof`.
-* **localProfAppPath**: Path to binaries, compiled for the target device, for the
-  profiling tool. If this path points to a binary file, that single file is copied
-  to the target device. If the path is for a directory, the entire directory
-  content is copied to the device, albeit non-recursively.
+* **localProfAppPath**: Optional path to binaries, compiled for the target device,
+  for the profiling tool. If this path points to a binary file, that single file
+  is copied to the target device. If the path is for a directory, the entire
+  directory content is copied to the device, albeit non-recursively. If not set,
+  the profiling tools must be pre-installed on the target device.
 * **targetProfAppPath**: Path to directory where to copy the tool's binaries on
   the target device.
 * **profCommand**: This parameter is used to construct the command line to invoke

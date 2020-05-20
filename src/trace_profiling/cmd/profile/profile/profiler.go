@@ -144,16 +144,20 @@ func (p *Profiler) installTrace(srcTracePath, destDirPath string) (err error) {
 	return
 }
 
-// Install the profiling tools on the target device. By default, if the tools
-// already exists on the target device they are not installed. Set force to true
-// to override that behavior.
+// If a local path to profiling tools is provided, install these tools on the
+// target device. If the tools already exists on the target device they are not
+// installed. Call SetForceInstallTools(true) to override that behavior.
 func (p *Profiler) installTools() error {
-	p.printIfVerbose("Install tool(s) %s on target: ", p.params.LocalProfAppPath)
+	if p.params.LocalProfAppPath != "" {
+		p.printIfVerbose("Install tool(s) %s on target: ", p.params.LocalProfAppPath)
 
-	err := p.copyFilesFromLocal(
-		p.params.LocalProfAppPath, p.params.TargetProfAppPath, p.forceInstallTools)
-	p.printIfVerbose("%s\n", doneOrError(err == nil))
-	return err
+		err := p.copyFilesFromLocal(
+			p.params.LocalProfAppPath, p.params.TargetProfAppPath, p.forceInstallTools)
+		p.printIfVerbose("%s\n", doneOrError(err == nil))
+		return err
+	}
+
+	return nil
 }
 
 // Extract and return the env var definitions found at the begining of cmd.
