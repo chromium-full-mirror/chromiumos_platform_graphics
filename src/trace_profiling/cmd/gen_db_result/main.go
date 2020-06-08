@@ -17,9 +17,9 @@ import (
 
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 	gfx "go.chromium.org/chromiumos/config/go/api/test/results/graphics/v1"
 	db "go.chromium.org/chromiumos/config/go/api/test/results/v1"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Relevant labels for GLX info.
