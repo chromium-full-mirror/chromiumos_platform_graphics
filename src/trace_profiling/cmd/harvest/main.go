@@ -262,9 +262,9 @@ func runPerfComparison() error {
 	fpsData = make([]fpsRecord, 0, len(harvestConfig.GetTraces()))
 
 	// Launch goroutine to download traces for G-Storage. Once a trace file is
-	// ready it is queued into traceQueue. Trace files available locally are
-	// simply queued as-is.
-	var traceQueue = make(chan string)
+	// ready it is wrapped in a TraceRecord and queued into traceQueue. Trace files
+	// available locally are simply wrapped and queued as-is.
+	var traceQueue = make(chan *utils.TraceRecord)
 	go func() {
 		for _, trace := range harvestConfig.GetTraces() {
 			if remote.IsGoogleStorageURI(trace) {
@@ -273,10 +273,12 @@ func runPerfComparison() error {
 					// Print an error and keep going with the next trace.
 					fmt.Fprintf(os.Stderr, "Error downloading trace <%s>:\n  err=%s\n", trace, err.Error())
 				} else {
-					traceQueue <- localTrace
+					traceID := utils.GenTraceIDFromGoogleStoragePath(trace)
+					printIfVerbose("Trace ID: %s\n", traceID)
+					traceQueue <- utils.CreateTraceRecord(traceID, localTrace, argVerbose)
 				}
 			} else {
-				traceQueue <- trace
+				traceQueue <- utils.CreateTraceRecord("", trace, argVerbose)
 			}
 		}
 		close(traceQueue)
@@ -296,26 +298,27 @@ func runPerfComparison() error {
 	go profileTracesOnTarget(croutFeedQueue, "Crouton", harvestConfig.GetProfilerBinPath(),
 		harvestConfig.GetCroutonProfilerConfig(), croutResultQueue)
 
-	// Grab trace files as they become available and feed them to the profile
-	// goroutines above.
-	var traceData = utils.CreateTraceRecord(argVerbose)
-	for trace := range traceQueue {
-		if err := traceData.LoadFromFile(trace); err != nil {
+	// Grab trace records as they become available, extract the trace data from
+	// the archive as needed and feed the local trace file to the profile goroutines
+	// launched above.
+	for traceRecord := range traceQueue {
+		if err := traceRecord.LoadFromTraceData(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error extracting trace from archive %s, err=%s\n",
-				trace, err.Error())
+				traceRecord.GetLocalTraceDataPath(), err.Error())
 			continue
 		}
 
 		if !argSuppressCrostini {
-			crostFeedQueue <- traceData.GetTraceFilePath()
+			fmt.Printf("** Local trace: %s\n", traceRecord.GetTraceFilePath())
+			crostFeedQueue <- traceRecord.GetTraceFilePath()
 		}
 		if !argSuppressCrouton {
-			croutFeedQueue <- traceData.GetTraceFilePath()
+			croutFeedQueue <- traceRecord.GetTraceFilePath()
 		}
 
 		// A short pause gives the profile goroutines a chance to grab the traces
-		// traces and print their verbose output before we print "Waiting...".It
-		// just looks better.
+		// and print their verbose output before we print "Waiting...". It just
+		// looks better.
 		time.Sleep(5 * time.Millisecond)
 		printIfVerbose("Waiting for profiling to complete... \n")
 
@@ -330,7 +333,7 @@ func runPerfComparison() error {
 		}
 
 		if argEnableCompareFps {
-			_, traceName := path.Split(traceData.GetTraceFilePath())
+			_, traceName := path.Split(traceRecord.GetTraceFilePath())
 			gatherProfileResult(traceName, crostProfile, croutProfile)
 		} else {
 			if crostProfile != "" {

@@ -44,12 +44,15 @@ type TraceRecord struct {
 	traceInfo *TraceInfo
 	gameInfo  *GameInfo
 
-	verbose bool
+	traceID           string // ID unique to each trace or game report.
+	traceDataFilePath string // File path to trace file or game-report archive.
 
 	workingDir      string // Dir where traces and original archives are stored.
 	traceDir        string // Dir where data extracted from archive is stored.
 	traceFilename   string // Name of trace file after extraction from archive.
 	archiveFilename string // Name of original trace archive.
+
+	verbose bool
 }
 
 // Trace file names are derived from game names found in the GameInfo file.
@@ -67,34 +70,45 @@ var filenameSanitizer = strings.NewReplacer(
 	"<", "Lt",
 	">", "Gt")
 
-// CreateTraceRecord creates and returns a TraceRecord object.
-func CreateTraceRecord(verbose bool) *TraceRecord {
+// CreateTraceRecord creates and returns a TraceRecord object. File path
+// traceDataFilePath points to either to an archive of type ".tar", ".bz2" or
+// ".tar.bz2" or a trace file of type ".trace". Archives may contain related
+// trace and game info in JSON files.
+func CreateTraceRecord(
+	traceID string, traceDataFilePath string, verbose bool) *TraceRecord {
+
 	return &TraceRecord{
-		verbose: verbose,
+		traceID:           traceID,
+		traceDataFilePath: traceDataFilePath,
+		verbose:           verbose,
 	}
 }
 
-// LoadFromFile load a trace and related info from a file. The file can be an
-// archive of type ".tar", ".bz2" or ".tar.bz2" or a trace file of type ".trace".
-// Only archives may contain related trace and game info in JSON files.
-func (tb *TraceRecord) LoadFromFile(filename string) error {
-	tb.clear()
-
-	ext := filepath.Ext(filename)
+// LoadFromTraceData load a trace and related info from the trace-data file
+// given to CreateTraceRecord.
+func (tb *TraceRecord) LoadFromTraceData() error {
+	ext := filepath.Ext(tb.traceDataFilePath)
 	if ext == ".bz2" || ext == ".tar" {
-		if err := tb.extractTraceDataFromArchive(filename); err != nil {
+		if err := tb.extractTraceDataFromArchive(tb.traceDataFilePath); err != nil {
 			return err
 		}
 	} else if ext == ".trace" {
-		tb.workingDir, tb.archiveFilename = path.Split(filename)
+		tb.workingDir, tb.traceFilename = path.Split(tb.traceDataFilePath)
+		tb.archiveFilename = tb.traceFilename
 	} else {
-		return fmt.Errorf("trace file does not exist: %s", filename)
+		return fmt.Errorf("trace file does not exist: %s", tb.traceDataFilePath)
 	}
 
 	return nil
 }
 
-// GetTraceFilePath returns the full path the trace file.
+// GetLocalTraceDataPath returns the path to the local file with the original
+// trace data.
+func (tb *TraceRecord) GetLocalTraceDataPath() string {
+	return tb.traceDataFilePath
+}
+
+// GetTraceFilePath returns the full path of the trace file.
 func (tb *TraceRecord) GetTraceFilePath() string {
 	return path.Join(tb.workingDir, tb.traceFilename)
 }
@@ -356,11 +370,16 @@ func (tb *TraceRecord) extractTraceFile() (string, error) {
 	return "", fmt.Errorf("no trace file found in %s", tb.traceDir)
 }
 
-// Given a directory path to a folder containing data extracted from a game
-// archive, construct and return a trace filename. The filename is derived from
-// the game name, itself extracted from game_info.josn, sanitized to remove
-// characters that are not suitable for file names.
+// Compose and return a filename for the local trace file.
 func (tb *TraceRecord) inferTraceFileName() string {
+	// If a trace ID is available, use it for filename since it is conveniently unique.
+	if tb.traceID != "" {
+		return tb.traceID
+	}
+
+	// Make up a filename from the game name and game ID, both extracted from
+	// game_info.json. The game name is sanitized to remove characters that are
+	// not suitable for file names.
 	filename := html.UnescapeString(tb.gameInfo.GameName)
 	filename = filenameSanitizer.Replace(filename) + "-" + tb.gameInfo.GameID
 	return filename + ".trace"
