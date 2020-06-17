@@ -6,23 +6,15 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
-	"os/exec"
-	"path"
 	"sort"
-	"strconv"
-	"strings"
-	"time"
 
 	"trace_profiling/cmd/harvest/config"
 	"trace_profiling/cmd/harvest/utils"
 	"trace_profiling/cmd/profile/profile"
-	"trace_profiling/cmd/profile/remote"
 )
 
 const (
@@ -43,15 +35,6 @@ type PerfConfig struct {
 	CroutonBundle     string   `json:"croutonBundleTemplate"`
 }
 
-// FPS output for performance comparison.
-type fpsRecord struct {
-	fpsError        error
-	traceName       string
-	crostiniFps     float64
-	croutonFps      float64
-	crostiniPercent float64
-}
-
 // Cmd-line arguments.
 var argVerbose bool
 var argOutputFile string
@@ -61,147 +44,11 @@ var argSuppressCrostini bool
 var argSuppressCrouton bool
 var argDeleteArchiveCrumbs bool
 
-var fpsData []fpsRecord
-
 var harvestConfig *config.HarvestConfigParser
-
-// Fetch a trace archive from Google storage.
-func fetchTraceFromStorage(cacheDir, trace string) (string, error) {
-	_, filename := path.Split(trace)
-	filepath := path.Join(cacheDir, filename)
-	if !utils.FileExists(filepath) {
-		_, err := remote.FetchFromGS(filepath, trace)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	return filepath, nil
-}
-
-// Customize the profiler config with the trace file and trace-cache dir and
-// write it out as json to a temporary file. Return the path to the temp file.
-func customizeProfilerConfig(
-	traceFile string, config *profile.ProfilerConfigRecord) (string, error) {
-
-	dir, filename := path.Split(traceFile)
-
-	// Create a temporary file to received the customized config.
-	configFile, err := ioutil.TempFile("", "profiler_config_*.json")
-	if err != nil {
-		return "", err
-	}
-	defer configFile.Close()
-
-	// Customize the profiler config with our own trace file and cache dir.
-	config.ProfileParams.Traces = []string{filename}
-	config.ProfileParams.LocalTraceDir = dir
-
-	// Write config to temp file as json. The format must match the unified-config
-	// format so that the Profiler can load it.
-	configFile.WriteString("{\"Profile\":")
-	encoder := json.NewEncoder(configFile)
-	encoder.SetEscapeHTML(false)
-	err = encoder.Encode(config)
-	configFile.WriteString("}")
-
-	return configFile.Name(), err
-}
-
-// Profile a trace file on a given target specified through the profiler config,
-// using the companion profiling app specified in profilerBinPath.
-func runProfile(profilerBinPath, traceFile string,
-	profilerConfig *profile.ProfilerConfigRecord) (string, error) {
-
-	// The bundle is actually a template that we must customize with the proper
-	// trace file name and trace dir.
-	config, err := customizeProfilerConfig(traceFile, profilerConfig)
-	if err != nil {
-		return "", err
-	}
-	defer os.Remove(config)
-
-	arg := fmt.Sprintf("-config=%s", config)
-	cmd := exec.Command(profilerBinPath, arg)
-
-	result, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("'profile' failed: err = %s", err)
-	}
-
-	// Extract profile file path from profiler output.
-	var prof string
-	lines := strings.Split(string(result), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "OutProfile=") {
-			prof = strings.TrimPrefix(line, "OutProfile=")
-			break
-		}
-	}
-
-	if prof == "" {
-		return "", fmt.Errorf("profiling failed; err = %s", result)
-	}
-
-	return prof, nil
-}
-
-// Scan the given profile for the FPS info line (starts with Rendered), extract
-// the FPS value and return it.
-func getFpsFromProfile(profile string) (float64, error) {
-	file, err := os.Open(profile)
-	if err != nil {
-		return 0.0, err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, "Rendered") {
-			tokens := strings.Split(strings.TrimRight(line, "\r\n"), " ")
-			for i, token := range tokens {
-				if token == "fps" && i >= 1 {
-					fps, _ := strconv.ParseFloat(tokens[i-1], 64)
-					return fps, nil
-				}
-			}
-		}
-	}
-
-	return 0.0, fmt.Errorf("no FPS info found in profile %s", profile)
-}
-
-// Print FPS comparative info for Crostini v.s. Crouton into the output file.
-func gatherProfileResult(traceName, crostiniFile, croutonFile string) {
-	if crostiniFile != "" && croutonFile != "" {
-		var err error
-		fpsCrostini, e := getFpsFromProfile(crostiniFile)
-		if e != nil {
-			err = e
-		}
-		fpsCrouton, e := getFpsFromProfile(croutonFile)
-		if e != nil {
-			err = e
-		}
-
-		percent := math.Inf(1) // Positive infinity
-		if fpsCrouton > 0.001 {
-			percent = 100.0 * fpsCrostini / fpsCrouton
-		}
-		fpsData = append(fpsData, fpsRecord{
-			fpsError:        err,
-			traceName:       traceName,
-			crostiniFps:     fpsCrostini,
-			croutonFps:      fpsCrouton,
-			crostiniPercent: percent,
-		})
-	}
-}
 
 // Generate the FPS comparative output to the target output file. Note that
 // data is always added to the file.
-func generateOutput(data []fpsRecord) {
+func generateFpsOutput(data []utils.FPSRecord) {
 	outFile, err := os.OpenFile(argOutputFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err == nil {
 		defer outFile.Close()
@@ -209,155 +56,73 @@ func generateOutput(data []fpsRecord) {
 		fileInfo, _ := outFile.Stat()
 		dataWriter := bufio.NewWriter(outFile)
 
-		sort.SliceStable(fpsData, func(i, j int) bool {
-			return fpsData[i].crostiniPercent < fpsData[j].crostiniPercent
+		sort.SliceStable(data, func(i, j int) bool {
+			return data[i].CrostiniPercent < data[j].CrostiniPercent
 		})
 
 		// Add header, but only to new files.
 		if fileInfo.Size() == 0 {
 			dataWriter.WriteString(fmt.Sprintf(
-				"%32s  %8s  %8s      %%\n", "Trace name", "Crostini", "Crouton"))
+				"%8s   %8s           %%  %s\n", "Crostini", "Crouton", "Trace name"))
 		}
 
-		for _, fps := range fpsData {
-			if fps.fpsError != nil {
-				dataWriter.WriteString(fmt.Sprintf("%32s error getting FPS: %s", fps.traceName, fps.fpsError))
+		for _, fps := range data {
+			if fps.FpsError != nil {
+				dataWriter.WriteString(fmt.Sprintf("%s error getting FPS: %s", fps.TraceName, fps.FpsError))
 			} else {
-				dataWriter.WriteString(fmt.Sprintf("%32s,  %8.2f,  %8.2f,", fps.traceName, fps.crostiniFps, fps.croutonFps))
-				if fps.crostiniPercent != math.Inf(1) {
-					dataWriter.WriteString(fmt.Sprintf("  %8.2f%%\n", fps.crostiniPercent))
+				dataWriter.WriteString(fmt.Sprintf("%8.2f,  %8.2f,  ", fps.CrostiniFps, fps.CroutonFps))
+				if fps.CrostiniPercent != math.Inf(1) {
+					dataWriter.WriteString(fmt.Sprintf("  %6.2f%%  ", fps.CrostiniPercent))
 				} else {
 					dataWriter.WriteString("     INF!\n")
 				}
+				dataWriter.WriteString(fps.TraceName)
+				dataWriter.WriteString("\n")
 			}
 		}
 		dataWriter.Flush()
 	}
 }
 
-// Profile traces coming in queue feedQueue onto the target specified in
-// targetBundle and feed the resulting profile file paths to resultQueue.
-func profileTracesOnTarget(
-	feedQueue chan string,
-	targetName string,
-	profileAppBinPath string,
-	profilerConfig *profile.ProfilerConfigRecord,
-	resultQueue chan string) {
-	for trace := range feedQueue {
-		printIfVerbose("Tracing on %s with %s\n", targetName, trace)
-		profFile, err := runProfile(profileAppBinPath, trace, profilerConfig)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error profiling on %s: prof=%s, err=%s\n",
-				targetName, profFile, err.Error())
-			resultQueue <- ""
-		} else {
-			resultQueue <- profFile
-		}
+// Run the traces on Crostini and/or Crouton to gather profile data. If requested,
+// also compare the FPS data from both platforms.
+func doHarvestProfiles() {
+
+	// Setup profiler config for crostini and crouton. Nil indicates we don't care
+	// about that particular platform.
+	var crostiniProfilerConfig *profile.ProfilerConfigRecord = nil
+	if !argSuppressCrostini {
+		crostiniProfilerConfig = harvestConfig.GetCrostiniProfilerConfig()
 	}
-}
 
-// Run the performance comparison with the given configuration.
-func runPerfComparison() error {
-	// Create array that will receive FPS data.
-	fpsData = make([]fpsRecord, 0, len(harvestConfig.GetTraces()))
+	var croutonProfilerConfig *profile.ProfilerConfigRecord = nil
+	if !argSuppressCrouton {
+		croutonProfilerConfig = harvestConfig.GetCroutonProfilerConfig()
+	}
 
-	// Launch goroutine to download traces for G-Storage. Once a trace file is
-	// ready it is wrapped in a TraceRecord and queued into traceQueue. Trace files
-	// available locally are simply wrapped and queued as-is.
-	var traceQueue = make(chan *utils.TraceRecord)
+	// TraceProfile downloads and prepares the traces and then runs them on each
+	// target platform.
+	errorFeed := make(chan error)
+	traceProfile := utils.NewTraceProfile(crostiniProfilerConfig, croutonProfilerConfig,
+		errorFeed, harvestConfig.GetProfilerBinPath(), argVerbose)
+
 	go func() {
-		for _, trace := range harvestConfig.GetTraces() {
-			if remote.IsGoogleStorageURI(trace) {
-				localTrace, err := fetchTraceFromStorage(harvestConfig.GetTraceCacheDir(), trace)
-				if err != nil {
-					// Print an error and keep going with the next trace.
-					fmt.Fprintf(os.Stderr, "Error downloading trace <%s>:\n  err=%s\n", trace, err.Error())
-				} else {
-					traceID := utils.GenTraceIDFromGoogleStoragePath(trace)
-					printIfVerbose("Trace ID: %s\n", traceID)
-					traceQueue <- utils.CreateTraceRecord(traceID, localTrace, argVerbose)
-				}
-			} else {
-				traceQueue <- utils.CreateTraceRecord("", trace, argVerbose)
-			}
-		}
-		close(traceQueue)
+		traceProfile.RunTraces(harvestConfig.GetTraces(), harvestConfig.GetTraceCacheDir())
+		close(errorFeed)
 	}()
 
-	// Feed queues are used to feed trace-file data to profilers for crostini
-	// and crouton, which run in parallel. Conversely, result queues are used
-	// to receive data from these profilers.
-	var crostFeedQueue = make(chan string)
-	var croutFeedQueue = make(chan string)
-	var crostResultQueue = make(chan string)
-	var croutResultQueue = make(chan string)
-
-	// Run goroutines to profile on Crostini and Crouton in parallel.
-	go profileTracesOnTarget(crostFeedQueue, "Crostini", harvestConfig.GetProfilerBinPath(),
-		harvestConfig.GetCrostiniProfilerConfig(), crostResultQueue)
-	go profileTracesOnTarget(croutFeedQueue, "Crouton", harvestConfig.GetProfilerBinPath(),
-		harvestConfig.GetCroutonProfilerConfig(), croutResultQueue)
-
-	// Grab trace records as they become available, extract the trace data from
-	// the archive as needed and feed the local trace file to the profile goroutines
-	// launched above.
-	for traceRecord := range traceQueue {
-		if err := traceRecord.LoadFromTraceData(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error extracting trace from archive %s, err=%s\n",
-				traceRecord.GetLocalTraceDataPath(), err.Error())
-			continue
-		}
-
-		if !argSuppressCrostini {
-			fmt.Printf("** Local trace: %s\n", traceRecord.GetTraceFilePath())
-			crostFeedQueue <- traceRecord.GetTraceFilePath()
-		}
-		if !argSuppressCrouton {
-			croutFeedQueue <- traceRecord.GetTraceFilePath()
-		}
-
-		// A short pause gives the profile goroutines a chance to grab the traces
-		// and print their verbose output before we print "Waiting...". It just
-		// looks better.
-		time.Sleep(5 * time.Millisecond)
-		printIfVerbose("Waiting for profiling to complete... \n")
-
-		// Wait for result from profilers.
-		var crostProfile = ""
-		var croutProfile = ""
-		if !argSuppressCrostini {
-			crostProfile = <-crostResultQueue
-		}
-		if !argSuppressCrouton {
-			croutProfile = <-croutResultQueue
-		}
-
-		if argEnableCompareFps {
-			_, traceName := path.Split(traceRecord.GetTraceFilePath())
-			gatherProfileResult(traceName, crostProfile, croutProfile)
-		} else {
-			if crostProfile != "" {
-				printIfVerbose("Crostini profile ready in: %s\n", crostProfile)
-			}
-			if croutProfile != "" {
-				printIfVerbose("Crouton profile ready in: %s\n", croutProfile)
-			}
-		}
+	for err := range errorFeed {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
 	}
-
-	close(crostFeedQueue)
-	close(croutFeedQueue)
 
 	if argEnableCompareFps {
-		generateOutput(fpsData)
+		generateFpsOutput(traceProfile.GetFPSData())
 	}
-
-	return nil
 }
 
 // Read and parse the Harvest config json file and leave the result in global
 // var harvestConfig.
-func readConfigFromFile(jsonFilepath string) error {
+func readHarvestConfigFromFile(jsonFilepath string) error {
 	configParser := config.CreateHarvestConfigParser()
 	if err := configParser.OpenJSONFile(jsonFilepath); err != nil {
 		return err
@@ -387,7 +152,7 @@ func main() {
 	flag.BoolVar(&argDeleteArchiveCrumbs, "del-archive-crumbs", false, "Delete files and folders left after unarchiving game data")
 	flag.Parse()
 
-	err := readConfigFromFile(argConfigFilepath)
+	err := readHarvestConfigFromFile(argConfigFilepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		return
@@ -408,8 +173,5 @@ func main() {
 	// We can only compare fps if we have both crostini and crouton data.
 	argEnableCompareFps = argEnableCompareFps && !(argSuppressCrostini || argSuppressCrouton)
 
-	err = runPerfComparison()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
-	}
+	doHarvestProfiles()
 }
