@@ -102,6 +102,11 @@ func (tb *TraceRecord) LoadFromTraceData() error {
 	return nil
 }
 
+// GetTraceID returns the trace ID.
+func (tb *TraceRecord) GetTraceID() string {
+	return tb.traceID
+}
+
 // GetLocalTraceDataPath returns the path to the local file with the original
 // trace data.
 func (tb *TraceRecord) GetLocalTraceDataPath() string {
@@ -370,14 +375,14 @@ func (tb *TraceRecord) extractTraceFile() (string, error) {
 	return "", fmt.Errorf("no trace file found in %s", tb.traceDir)
 }
 
-// Compose and return a filename for the local trace file.
+// Compose and return a file name for the local trace file.
 func (tb *TraceRecord) inferTraceFileName() string {
-	// If a trace ID is available, use it for filename since it is conveniently unique.
+	// If a trace ID is available, use it for file name since it is conveniently unique.
 	if tb.traceID != "" {
-		return tb.traceID
+		return tb.traceID + ".trace"
 	}
 
-	// Make up a filename from the game name and game ID, both extracted from
+	// Make up a file name from the game name and game ID, both extracted from
 	// game_info.json. The game name is sanitized to remove characters that are
 	// not suitable for file names.
 	filename := html.UnescapeString(tb.gameInfo.GameName)

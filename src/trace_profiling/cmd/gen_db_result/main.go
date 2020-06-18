@@ -46,22 +46,25 @@ var (
 	reGlxInfo = regexp.MustCompile(glxInfo)
 	// A regexp for extracting the cmd line from profile data.
 	reCmdLine = regexp.MustCompile("(?P<name>CMD): +(?P<value>.*)")
+	// A regexp for extracting the trace-id line from profile data.
+	reTraceIDLine = regexp.MustCompile("(?P<name>TRACE_ID): +(?P<value>.*)")
 	// A regexp for extracting relevant trace info (name and date) from the profile file name.
 	reTraceInfo = regexp.MustCompile("(?P<name>.*)\\.(?P<date_time>[0-9]{8}-[0-9]{6}).*")
-	// Aregex to extract perf info from Apitrace's "Rendered" line.
+	// A regexp to extract perf info from Apitrace's "Rendered" line.
 	reRenderedLine = regexp.MustCompile("Rendered (?P<frames>[0-9]+) frames in " +
 		"(?P<seconds>[0-9.]+) secs, average of (?P<fps>[0-9.]+) fps")
 )
 
 // Struct profileParser provides methods to parse Apitrace profile data and
 // generate protobuf for uploading to the Graphics Result DB. The relevant
-// protobuf devinition is found in chromiumos.config.api.test.results.v1.
+// protobuf definition is found in chromiumos.config.api.test.results.v1.
 type profileParser struct {
 	filename string         // Full file path to file with profile data
 	file     *os.File       // Same file opened for reading
 	scanner  *bufio.Scanner // Line-by-line scanner on that file.
 
 	labels       []*db.Result_Label // List of result labels parsed from profile.
+	traceID      string             // Trace ID parsed from profile.
 	renderedLine string             // Apitrace's "Rendered" line read from profile.
 }
 
@@ -110,7 +113,7 @@ func createTimestamp(t *time.Time) *timestamppb.Timestamp {
 	return &timestamp
 }
 
-// Make and return an invocation-source string, usign the username garnered from the env.
+// Make and return an invocation-source string, using the username garnered from the env.
 func makeInvocationSource() string {
 	return "user/" + os.Getenv("USER")
 }
@@ -123,7 +126,7 @@ func newProfileParser() *profileParser {
 	return &reader
 }
 
-// Open a profile file given its filename.
+// Open a profile file given its file name.
 func (reader *profileParser) openProfile(filename string) error {
 	var err error
 	if reader.file, err = os.Open(filename); err != nil {
@@ -193,7 +196,7 @@ func (reader *profileParser) getTestStartTime() *time.Time {
 	fileName := path.Base(reader.filename)
 	result := reTraceInfo.FindStringSubmatch(fileName)
 	if result != nil && len(result) >= 3 {
-		// Interpret the date parsed from the filename in the local time zone.
+		// Interpret the date parsed from the file name in the local time zone.
 		zone, _ := time.Now().Zone()
 		dateTime, err := time.Parse("20060102-150405MST", result[2]+zone)
 		if err == nil {
@@ -232,7 +235,7 @@ func (reader *profileParser) createResult() (*db.Result, error) {
 	// Extract perf info from "Rendered" line.
 	match := reRenderedLine.FindStringSubmatch(reader.renderedLine)
 	if match == nil {
-		return nil, fmt.Errorf("failed to parse 'Renderered' line: %s", reader.renderedLine)
+		return nil, fmt.Errorf("failed to parse 'Rendered' line: %s", reader.renderedLine)
 	}
 
 	dbResult := db.Result{
@@ -242,7 +245,7 @@ func (reader *profileParser) createResult() (*db.Result, error) {
 		InvocationSource:  makeInvocationSource(),
 		CommandLine:       reader.findLabelValue(benchmarkApitrace, "CMD"),
 		Benchmark:         benchmarkApitrace,
-		Trace:             &gfx.TraceId{Value: reader.getTraceName()},
+		Trace:             &gfx.TraceId{Value: reader.traceID},
 		PrimaryMetricName: "frame_rate",
 		Labels:            reader.labels,
 		Overrides:         nil, // TODO (gwink)
@@ -292,6 +295,8 @@ func parseProfile(prof string) (*db.Result, error) {
 			if isParsingExtra {
 				if result := reCmdLine.FindStringSubmatch(scanLine); result != nil {
 					reader.recordLabel(benchmarkApitrace, result[1], result[2])
+				} else if result := reTraceIDLine.FindStringSubmatch(scanLine); result != nil {
+					reader.traceID = result[2]
 				} else if result := reGlxInfo.FindStringSubmatch(scanLine); result != nil {
 					reader.recordLabel(groupingGlxInfo, result[1], result[2])
 				}
@@ -336,6 +341,11 @@ func outputToProtobuf(results *db.ResultList, outputFile string) error {
 		if err == nil {
 			_, err = file.Write(data)
 		}
+	}
+
+	// Finish output with a newline.
+	if err == nil {
+		file.Write([]byte("\n"))
 	}
 
 	return err

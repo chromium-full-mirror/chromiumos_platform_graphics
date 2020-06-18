@@ -108,9 +108,15 @@ func (tp *TraceProfile) RunTraces(traces []string, cacheDir string) {
 		var croutProfile = ""
 		if tp.crostiniConfig != nil {
 			crostProfile = <-crostResultQueue
+			if crostProfile != "" {
+				appendTraceIDToProfile(traceRecord.GetTraceID(), crostProfile)
+			}
 		}
 		if tp.croutonConfig != nil {
 			croutProfile = <-croutResultQueue
+			if croutProfile != "" {
+				appendTraceIDToProfile(traceRecord.GetTraceID(), croutProfile)
+			}
 		}
 
 		if tp.crostiniConfig != nil && tp.croutonConfig != nil {
@@ -271,6 +277,21 @@ func getFpsFromProfile(profile string) (float64, error) {
 	}
 
 	return 0.0, fmt.Errorf("no FPS info found in profile %s", profile)
+}
+
+// Append a line with the trace ID at the end of the profile. Companion tool
+// gen_db_result parses this line to extract the trace ID.
+func appendTraceIDToProfile(traceID string, profFilepath string) error {
+	f, err := os.OpenFile(profFilepath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	traceIDLine := fmt.Sprintf("TRACE_ID: %s\n", traceID)
+	_, err = f.WriteString(traceIDLine)
+
+	return err
 }
 
 // If verbose mode is enabled, print the formatted string.
