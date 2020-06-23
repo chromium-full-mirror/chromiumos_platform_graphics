@@ -10,7 +10,7 @@ GOFORMAT=$(GOCMD) fmt
 GOENV=$(GOCMD) env
 
 SRCS=main.go
-BIN=../../bin/gen_db_result
+BIN=../../bin/gen
 
 REMOTE_PACKS= \
 	github.com/golang/protobuf/jsonpb \
