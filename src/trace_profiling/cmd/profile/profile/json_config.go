@@ -5,11 +5,28 @@
 package profile
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"regexp"
+	"strings"
+)
+
+// Together these regex are used to filter out c-style comments from json, with
+// some limitations. E.g. block comments are no expected on the same lines as json
+// code.
+var (
+	// Regex to match whole-line c-style comment just like this line.
+	regexWholeLineComment = regexp.MustCompile(`^\s*//.*`)
+	// Regex to match double-backslash comment at end of line. Watch for strings!
+	regexCommentAtEndOfLine = regexp.MustCompile(`^([^"]*(?:".*")*[^"/]*)//+.*$`)
+	// Regex to match start of block comment. Limitation: no code expected on same line.
+	regexStartOfBlockComment = regexp.MustCompile(`^\s*/\*.*`)
+	// Regex to match end of block comment. Limitation: no code expected on same line.
+	regexEndOfBlockComment = regexp.MustCompile(`.*\*/\s*$`)
 )
 
 // ConfigPropertyHandler is an interfaces for handlers associated with top-level
@@ -60,7 +77,8 @@ func (jc *JSONConfigParser) OpenJSONConfigFile(jsonFile string) error {
 	}
 	defer file.Close()
 
-	return jc.OpenJSONFromReader(file)
+	jsonReader := filterCommentsFromStream(file)
+	return jc.OpenJSONFromReader(jsonReader)
 }
 
 // OpenJSONFromReader opens the parser with JSON data from the given reader and
@@ -86,7 +104,7 @@ func (jc *JSONConfigParser) Process() error {
 }
 
 // Returns whether a json data map (a map of property names to values) is one
-// that can be processed by JSNConfig. That is so when the json data has either
+// that can be processed by JSONConfig. That is so when the json data has either
 // an "include" property or at least one property that can be processed by one
 // of the available handlers.
 func (jc *JSONConfigParser) canProcessData(jsonData map[string]interface{}) bool {
@@ -188,4 +206,48 @@ func (jc *JSONConfigParser) invokeHandler(handler ConfigPropertyHandler, data in
 	}
 
 	return handler.ParseJSONData(buffer.String())
+}
+
+// Filter out a limited form of c-style comments from inStream. Returns a new
+// stream that delivers the new json with comments removed.
+func filterCommentsFromStream(inStream io.Reader) io.Reader {
+	outJSON := strings.Builder{}
+	lines := bufio.NewScanner(inStream)
+	inBlockComment := false
+	for lines.Scan() {
+		line := []byte(lines.Text())
+		if inBlockComment {
+			// Within a multi-line block comment: we only look for end-of-block comments
+			// and all lines are ignored.
+			if regexEndOfBlockComment.Match(line) {
+				inBlockComment = false
+			}
+		} else {
+			// Whole-line comments like this line are simply dropped.
+			if regexWholeLineComment.Match(line) {
+				continue
+			}
+
+			// Kept together and in this order, the next two if statements take care
+			// of block comments that start and end on the same line.
+			if regexStartOfBlockComment.Match(line) {
+				inBlockComment = true
+			}
+			if regexEndOfBlockComment.Match(line) {
+				inBlockComment = false
+				continue
+			}
+
+			// Look for double-backslash end-of-line comments and remove them.
+			if match := regexCommentAtEndOfLine.FindSubmatch(line); match != nil {
+				line = match[1]
+			}
+
+			if !inBlockComment {
+				outJSON.Write(line)
+			}
+		}
+	}
+
+	return strings.NewReader(outJSON.String())
 }
