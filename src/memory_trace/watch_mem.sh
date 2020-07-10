@@ -31,8 +31,14 @@ columns="Time, HostMemTotal, HostMemFree, HostMemAvailable, HostActive, \
 CrosvmGpuRss, CrosvmParentRss, GuestProcRss, GpuTotal, GpuPurgeable"
 echo "${columns}"
 
-ssh "${host}" cat /sys/kernel/debug/dri/0/i915_gem_objects > /tmp/gpumem
-if [[ ! -s /tmp/gpumem ]]; then
+# Setup temporary file path.
+tmp_dir=$(mktemp -d)
+trap "rm -rf ${tmp_dir}" EXIT
+mem_info="${tmp_dir}/mem_info"
+gpu_info="${tmp_dir}/gpu_info"
+
+ssh "${host}" cat /sys/kernel/debug/dri/0/i915_gem_objects > "${gpu_info}"
+if [[ ! -s "${gpu_info}" ]]; then
   echo "Error: unexpected GPU, please file bug and cc:jbates to add "
   echo "       support for this device."
   exit 1
@@ -41,18 +47,17 @@ fi
 while true
 do
   Time=$(date +%s)
-  ssh "${host}" cat /proc/meminfo > /tmp/hostmem
-  ssh "${host}" cat /sys/kernel/debug/dri/0/i915_gem_objects > /tmp/gpumem
-  HostMemTotal=$(grep MemTotal: /tmp/hostmem | sed 's/[^0-9]*//g')
-  HostMemFree=$(grep MemFree: /tmp/hostmem | sed 's/[^0-9]*//g')
-  HostMemAvailable=$(grep MemAvailable: /tmp/hostmem | sed 's/[^0-9]*//g')
-  HostActive=$(grep Active: /tmp/hostmem | sed 's/[^0-9]*//g')
+  ssh "${host}" cat /proc/meminfo > "${mem_info}"
+  ssh "${host}" cat /sys/kernel/debug/dri/0/i915_gem_objects > "${gpu_info}"
+  HostMemTotal=$(grep "MemTotal:" "${mem_info}" | sed 's/[^0-9]*//g')
+  HostMemFree=$(grep "MemFree:" "${mem_info}" | sed 's/[^0-9]*//g')
+  HostMemAvailable=$(grep "MemAvailable:" "${mem_info}" | sed 's/[^0-9]*//g')
+  HostActive=$(grep "Active:" "${mem_info}" | sed 's/[^0-9]*//g')
   CrosvmGpuRss=$(ssh "${host}" ps -o rss= "${virtio_gpu_pid}")
   CrosvmParentRss=$(ssh "${host}" ps -o rss= "${crosvm_parent_pid}")
-  GpuTotal=$(cat /tmp/gpumem | \
-      sed -n 's/^[0-9]* objects, \([0-9]*\) bytes/\1/p')
-  GpuPurgeable=$(cat /tmp/gpumem | \
-      sed -n 's/^[0-9]* purgeable objects, \([0-9]*\) bytes/\1/p')
+  GpuTotal=$(sed -n 's/^[0-9]* objects, \([0-9]*\) bytes/\1/p' "${gpu_info}")
+  GpuPurgeable=$(sed -n 's/^[0-9]* purgeable objects, \([0-9]*\) bytes/\1/p' \
+      "${gpu_info}")
   GpuTotal=$(("${GpuTotal}" / 1024))
   GpuPurgeable=$(("${GpuPurgeable}" / 1024))
 
