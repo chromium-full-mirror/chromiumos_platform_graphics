@@ -6,9 +6,12 @@ package common
 
 import (
 	"bufio"
+	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,29 +20,23 @@ import (
 	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 )
 
-// Parse bios-info key-value lines, such as:
-// hwid                    = SONA F5V-A9G-F52-O6G-O2Q-Q86   # [RO/str] Hardware ID
-var reBiosKeyValLine = regexp.MustCompile(`^(\S+)\s+(?:[|=])\s+([^#]+)`)
+// Package-global vars.
+var (
+	// Whether to print warnings to Stderr; true by default.
+	FlagEnablePrintWarnings = true
+)
 
-// Read a Chrome-OS bios-info file and returns a key-value map.
-func readBiosKeyValFile(filename string) (map[string]string, error) {
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
+// Convert a string to a 32-bit unsigned integer.
+func strToUint32(str string) uint32 {
+	u64, _ := strconv.ParseUint(str, 10, 32)
+	return uint32(u64)
+}
+
+// Print a formatted warning string to stderr if enabled.
+func printWarningToStderr(format string, a ...interface{}) {
+	if FlagEnablePrintWarnings {
+		fmt.Fprintf(os.Stderr, format, a...)
 	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	dict := make(map[string]string)
-	for scanner.Scan() {
-		line := scanner.Text()
-		result := reBiosKeyValLine.FindStringSubmatch(line)
-		if result != nil && len(result) >= 3 {
-			dict[result[1]] = strings.TrimSpace(result[2])
-		}
-	}
-
-	return dict, nil
 }
 
 // WriteProtobuf writes the protobuf data to the output file. If the output file
@@ -80,10 +77,93 @@ func writeProtobuf(protobuf proto.Message, outputFile string) error {
 	return err
 }
 
+// Read a protobuf object from a file, either binary or JSON.
+func readProtoFromFile(filename string, p proto.Message) error {
+	if strings.HasSuffix(filename, ".json") {
+		return readProtoFromJSON(filename, p)
+	} else {
+		return readProtoFromBin(filename, p)
+	}
+}
+
+// Read a protobuf object from a raw (binary) file.
+func readProtoFromBin(filename string, p proto.Message) error {
+	pbData, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	return proto.Unmarshal(pbData, p)
+}
+
+// Read a protobuf object from a JSON file.
+func readProtoFromJSON(filename string, p proto.Message) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	return jsonpb.Unmarshal(file, p)
+}
+
 // Create a return a Timestamp protobuf object with the given time.
 func createTimestamp(t *time.Time) *timestamppb.Timestamp {
 	timestamp := timestamppb.Timestamp{
 		Seconds: t.Unix(),
 	}
 	return &timestamp
+}
+
+// Read a Chrome-OS bios-info file and returns a key-value map.
+func readBiosKeyValFile(filename string) (map[string]string, error) {
+	// Parse bios-info key-value lines, such as:
+	// hwid                    = SONA F5V-A9G-F52-O6G-O2Q-Q86   # [RO/str] Hardware ID
+	re := regexp.MustCompile(`^(\S+)\s+(?:[|=])\s+([^#]+)`)
+	return parseKeyValFileWithRegex(filename, re)
+}
+
+// Read and parse a key-value file with the given regexp. The regexp must be structured
+// to produce two subgroup for each line of interest in the file. The first subgroup
+// is the key and the second is the corresponding value. Return all the key-value pairs
+// as a dictionary.
+func parseKeyValFileWithRegex(filename string, re *regexp.Regexp) (map[string]string, error) {
+	var dict = map[string]string{}
+	var feed = make(chan string, 5)
+	var err error
+
+	go func() {
+		err = readLines(filename, feed)
+	}()
+
+	for line := range feed {
+		line = strings.TrimSpace(line)
+		match := re.FindStringSubmatch(line)
+		if match != nil && len(match) > 2 {
+			key := match[1]
+			value := strings.Trim(match[2], "\"' ")
+			if value != "" {
+				dict[key] = value
+			}
+		}
+	}
+
+	return dict, err
+}
+
+// Read lines if text from a file and feed them one by one to channel feed.
+func readLines(filename string, feed chan string) error {
+	defer close(feed)
+
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		feed <- scanner.Text()
+	}
+
+	return nil
 }

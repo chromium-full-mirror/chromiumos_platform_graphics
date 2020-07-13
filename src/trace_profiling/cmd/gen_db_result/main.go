@@ -5,6 +5,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -21,7 +22,7 @@ type command interface {
 
 func printUsage(subCommands []command) {
 	appName := filepath.Base(os.Args[0])
-	fmt.Printf("Usage: %s <action> [options]\n", appName)
+	fmt.Printf("Usage: %s [options] <action> [options for action]\n", appName)
 	fmt.Printf("       where <action> is one of: ")
 	for i, c := range subCommands {
 		if i > 0 {
@@ -29,16 +30,26 @@ func printUsage(subCommands []command) {
 		}
 		fmt.Printf(c.CmdName())
 	}
-	fmt.Printf("\nUse:   %s <action> -help  for additional help\n", appName)
+	fmt.Printf("\nAvailable options are:\n")
+	flag.PrintDefaults()
+	fmt.Printf("Use:   %s <action> -help  for additional help on action\n", appName)
 }
 
 func main() {
 	subCommands := []command{
 		common.NewCmdMachineInfo(),
+		common.NewCmdSoftwareInfo(),
 		common.NewCmdTraceResult(),
 	}
 
-	if len(os.Args) < 2 {
+	flag.Usage = func() {
+		printUsage(subCommands)
+	}
+	suppressWarnings := flag.Bool("no-warnings", false, "Don't print warnings to Stderr")
+	flag.Parse()
+	common.FlagEnablePrintWarnings = !*suppressWarnings
+
+	if len(flag.Args()) < 1 {
 		printUsage(subCommands)
 		os.Exit(1)
 	}
@@ -46,8 +57,8 @@ func main() {
 	var err error
 	var cmdDidRun = false
 	for _, c := range subCommands {
-		if c.CmdName() == os.Args[1] {
-			err = c.Setup(os.Args[2:])
+		if c.CmdName() == flag.Args()[0] {
+			err = c.Setup(flag.Args()[1:])
 			if err == nil {
 				err = c.Execute()
 			}

@@ -10,14 +10,15 @@ GOFORMAT=$(GOCMD) fmt
 GOENV=$(GOCMD) env
 
 SRCS=main.go
-BIN=../../bin/gen
+BIN=../../bin/get_device_info
 
 REMOTE_PACKS= \
 	github.com/golang/protobuf/jsonpb \
 	github.com/golang/protobuf/proto \
 	github.com/golang/protobuf/ptypes \
 	go.chromium.org/chromiumos/config/go/api/test/results/v1 \
-	go.chromium.org/chromiumos/config/go/api/test/results/graphics/v1
+	go.chromium.org/chromiumos/config/go/api/test/results/graphics/v1 \
+	golang.org/x/crypto/ssh
 
 all: build
 build: import
