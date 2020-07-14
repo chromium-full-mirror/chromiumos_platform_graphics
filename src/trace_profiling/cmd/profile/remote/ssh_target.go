@@ -379,18 +379,21 @@ func (s *SSHTarget) RunCmdWithWriter(command string, outWriter io.Writer) error 
 
 	// If there's an ongoing shell session use it. Otherwise, create a one-time
 	// session to run the command.
-	var session cmdSession = s.shell
-	if session == nil {
-		session, err := s.connection.NewSession()
+	var session cmdSession
+	if s.shell != nil {
+		s.shell.setStdout(outWriter)
+		session = s.shell
+	} else {
+		sshSession, err := s.connection.NewSession()
 		if err != nil {
 			return fmt.Errorf("SSHTarget run-cmd error: %w", err)
 		}
 		errBuffer := bytes.Buffer{}
-		session.Stdout = outWriter
-		session.Stderr = &errBuffer
-		defer session.Close()
-	} else {
-		s.shell.setStdout(outWriter)
+		sshSession.Stdout = outWriter
+		sshSession.Stderr = &errBuffer
+		defer sshSession.Close()
+
+		session = sshSession
 	}
 
 	err := session.Run(command)
