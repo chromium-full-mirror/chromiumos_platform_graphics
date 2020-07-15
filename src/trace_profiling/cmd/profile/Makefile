@@ -12,13 +12,20 @@ GOENV = $(GOCMD) env
 SRCS=main.go
 BIN=../../bin/profile
 
+REMOTE_PACKS= \
+	golang.org/x/crypto/ssh
+
 all: build
-build: env
+build: import
+import: env
 format: env
 clean: env
 
 build:
 	$(GOBUILD) -o $(BIN) $(SRCS)
+
+import:
+	$(GOGET) $(REMOTE_PACKS)
 
 clean:
 	$(GOCLEAN)

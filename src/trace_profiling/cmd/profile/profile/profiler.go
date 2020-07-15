@@ -139,7 +139,7 @@ func (p *Profiler) installTrace(srcTracePath, destDirPath string) (err error) {
 		err = p.target.SendFile(srcTracePath, dstTracePath, permissions)
 		p.printIfVerbose("%s\n", doneOrError(err == nil))
 	} else {
-		p.printIfVerbose("skipped (already exist)\n")
+		p.printIfVerbose("skipped (already exists)\n")
 	}
 	return
 }

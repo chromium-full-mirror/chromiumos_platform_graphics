@@ -91,7 +91,7 @@ func (jc *JSONConfigParser) OpenJSONFromReader(jsonReader io.Reader) error {
 	}
 
 	if !jc.canProcessData(jc.jsonData) {
-		return fmt.Errorf("unable to process JSON data from reader")
+		return fmt.Errorf("JSON has no usable configuration data")
 	}
 
 	return nil
