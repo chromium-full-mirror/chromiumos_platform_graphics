@@ -60,10 +60,10 @@ func (gf *GSFetcher) FetchTraceData(fileUris []string) {
 				} else {
 					traceID := GenTraceIDFromGoogleStoragePath(trace)
 					gf.printIfVerbose("Trace ID: %s\n", traceID)
-					traceQueue <- CreateTraceRecord(traceID, localTrace, gf.verbose)
+					traceQueue <- CreateTraceRecord(traceID, localTrace, false /* not from local file */, gf.verbose)
 				}
 			} else {
-				traceQueue <- CreateTraceRecord("", trace, gf.verbose)
+				traceQueue <- CreateTraceRecord("", trace, true /* from local file */, gf.verbose)
 			}
 		}
 		close(traceQueue)

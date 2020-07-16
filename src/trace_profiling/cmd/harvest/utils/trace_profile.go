@@ -31,12 +31,13 @@ type FPSRecord struct {
 // TraceProfile takes profiler configuration for crostini and crouton devices and
 // is able to run traces on these platform.
 type TraceProfile struct {
-	crostiniConfig  *profile.ProfilerConfigRecord // Profiler configuration for Crostini device. May be nil.
-	croutonConfig   *profile.ProfilerConfigRecord // Profiler configuration for Crouton device. May be nil.
-	profilerBinPath string                        // Local path to Profiler tool.
-	fpsData         []FPSRecord                   // FPS comparison between Crostini and Crouton.
-	errorOut        chan error                    // This channel receives errors during profiling.
-	verbose         bool                          //  Whether to be verbose during profiling.
+	crostiniConfig    *profile.ProfilerConfigRecord // Profiler configuration for Crostini device. May be nil.
+	croutonConfig     *profile.ProfilerConfigRecord // Profiler configuration for Crouton device. May be nil.
+	profilerBinPath   string                        // Local path to Profiler tool.
+	fpsData           []FPSRecord                   // FPS comparison between Crostini and Crouton.
+	errorOut          chan error                    // This channel receives errors during profiling.
+	keepTracesInCache bool                          // Whether to keep trace files in the cache.
+	verbose           bool                          //  Whether to be verbose during profiling.
 }
 
 // NewTraceProfile creates and returns a new TraceProfile object. Either crostiniConfig
@@ -46,14 +47,16 @@ func NewTraceProfile(
 	croutonConfig *profile.ProfilerConfigRecord,
 	errorOut chan error,
 	profilerBinPath string,
+	keepTracesInCache bool,
 	verbose bool) *TraceProfile {
 
 	tp := TraceProfile{
-		crostiniConfig:  crostiniConfig,
-		croutonConfig:   croutonConfig,
-		errorOut:        errorOut,
-		profilerBinPath: profilerBinPath,
-		verbose:         verbose,
+		crostiniConfig:    crostiniConfig,
+		croutonConfig:     croutonConfig,
+		errorOut:          errorOut,
+		profilerBinPath:   profilerBinPath,
+		keepTracesInCache: keepTracesInCache,
+		verbose:           verbose,
 	}
 
 	return &tp
@@ -130,6 +133,16 @@ func (tp *TraceProfile) RunTraces(traces []string, cacheDir string) {
 				tp.printIfVerbose("Crouton profile ready in: %s\n", croutProfile)
 			}
 		}
+
+		// Delete the trace file unless the option to keep it is enabled. However,
+		// if the original file was the local trace file, keep it.
+		if !tp.keepTracesInCache && (traceRecord.isFromArchive || !traceRecord.isFromLocalFile) {
+			tp.printIfVerbose("Delete trace file %s\n", traceRecord.GetTraceFilePath())
+			traceRecord.DeleteTraceFile()
+		}
+
+		// Delete the folder and content extracted from the archive.
+		traceRecord.DeleteTraceDir()
 	}
 
 	// Closing the feed queues lets the goroutines we launched above exit gracefully.

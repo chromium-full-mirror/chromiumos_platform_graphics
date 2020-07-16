@@ -42,7 +42,6 @@ var argConfigFilepath string
 var argEnableCompareFps bool
 var argSuppressCrostini bool
 var argSuppressCrouton bool
-var argDeleteArchiveCrumbs bool
 
 var harvestConfig *config.HarvestConfigParser
 
@@ -104,7 +103,8 @@ func doHarvestProfiles() {
 	// target platform.
 	errorFeed := make(chan error)
 	traceProfile := utils.NewTraceProfile(crostiniProfilerConfig, croutonProfilerConfig,
-		errorFeed, harvestConfig.GetProfilerBinPath(), argVerbose)
+		errorFeed, harvestConfig.GetProfilerBinPath(), harvestConfig.ShouldKeepTraceAfterUse(),
+		argVerbose)
 
 	go func() {
 		traceProfile.RunTraces(harvestConfig.GetTraces(), harvestConfig.GetTraceCacheDir())
@@ -149,7 +149,6 @@ func main() {
 	flag.BoolVar(&argEnableCompareFps, "compare-fps", false, "Extract FPS from profile data and compare")
 	flag.BoolVar(&argSuppressCrostini, "no-crostini", false, "Suppress profiling on crostini")
 	flag.BoolVar(&argSuppressCrouton, "no-crouton", false, "Suppress profiling on crouton")
-	flag.BoolVar(&argDeleteArchiveCrumbs, "del-archive-crumbs", false, "Delete files and folders left after unarchiving game data")
 	flag.Parse()
 
 	err := readHarvestConfigFromFile(argConfigFilepath)

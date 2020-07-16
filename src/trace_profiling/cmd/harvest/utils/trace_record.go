@@ -51,6 +51,8 @@ type TraceRecord struct {
 	traceDir        string // Dir where data extracted from archive is stored.
 	traceFilename   string // Name of trace file after extraction from archive.
 	archiveFilename string // Name of original trace archive.
+	isFromLocalFile bool   // Whether the trace data came from a local source.
+	isFromArchive   bool   // Whether the trace data was extracted from an archive.
 
 	verbose bool
 }
@@ -75,11 +77,13 @@ var filenameSanitizer = strings.NewReplacer(
 // ".tar.bz2" or a trace file of type ".trace". Archives may contain related
 // trace and game info in JSON files.
 func CreateTraceRecord(
-	traceID string, traceDataFilePath string, verbose bool) *TraceRecord {
+	traceID string, traceDataFilePath string, fromLocalFile, verbose bool) *TraceRecord {
 
 	return &TraceRecord{
 		traceID:           traceID,
 		traceDataFilePath: traceDataFilePath,
+		isFromLocalFile:   fromLocalFile,
+		isFromArchive:     true,
 		verbose:           verbose,
 	}
 }
@@ -95,12 +99,19 @@ func (tb *TraceRecord) LoadFromTraceData() error {
 	} else if ext == ".trace" {
 		tb.workingDir, tb.traceFilename = path.Split(tb.traceDataFilePath)
 		tb.archiveFilename = tb.traceFilename
+		tb.isFromArchive = false
 	} else {
 		return fmt.Errorf("trace file does not exist: %s", tb.traceDataFilePath)
 	}
 
 	return nil
 }
+
+// IsFromLocalFile returns whether the trace data was obtained from a local file.
+func (tb *TraceRecord) IsFromLocalFile() bool { return tb.isFromLocalFile }
+
+// IsFromArchive returns whether the trace data was extracted from an archive.
+func (tb *TraceRecord) IsFromArchive() bool { return tb.isFromArchive }
 
 // GetTraceID returns the trace ID.
 func (tb *TraceRecord) GetTraceID() string {
@@ -139,7 +150,7 @@ func (tb *TraceRecord) DeleteArchive() error {
 	return nil
 }
 
-// DeleteTraceDir deletes the trace directory and its content that was extracted
+// DeleteTraceDir deletes the trace directory and the content that was extracted
 // from the trace archive.
 func (tb *TraceRecord) DeleteTraceDir() error {
 	if tb.traceDir != "" {
@@ -192,7 +203,7 @@ func (tb *TraceRecord) extractTraceDataFromArchive(archive string) error {
 	}
 	tb.traceDir = extractedDir
 
-	// Special with empty dir means that archive extracted directly to a trace file.
+	// Special case with empty dir means that archive extracted directly to a trace file.
 	if extractedDir == "" {
 		return nil
 	}
@@ -293,6 +304,9 @@ func (tb *TraceRecord) regularizeExtractedDir(dirPath string) error {
 		for _, f := range nestedFiles {
 			os.Rename(path.Join(nestedDir, f.Name()), path.Join(dirPath, f.Name()))
 		}
+
+		// Delete the nested dir.
+		os.RemoveAll(nestedDir)
 	}
 
 	return nil
