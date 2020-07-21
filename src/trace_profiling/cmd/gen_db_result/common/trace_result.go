@@ -7,15 +7,21 @@ package common
 import (
 	"flag"
 	"fmt"
+	"strings"
 
 	db "go.chromium.org/chromiumos/config/go/api/test/results/v1"
 )
 
 // CmdTraceResult encapsulates the trace-result sub-command.
 type CmdTraceResult struct {
-	flagSet       *flag.FlagSet
-	argHelp       bool
-	argOutputFile string
+	flagSet           *flag.FlagSet
+	argHelp           bool
+	argOutputFile     string
+	argMachine        string
+	argSoftwareConfig string
+
+	machineId        string
+	softwareConfigId string
 }
 
 // NewCmdTraceResult allocates and returns a new CmdTraceResult object.
@@ -25,6 +31,8 @@ func NewCmdTraceResult() *CmdTraceResult {
 	}
 
 	cmd.flagSet.StringVar(&cmd.argOutputFile, "output", "", "Output file (default is stdout)")
+	cmd.flagSet.StringVar(&cmd.argMachine, "machine", "", "Machine protobuf or ID")
+	cmd.flagSet.StringVar(&cmd.argSoftwareConfig, "software", "", "SoftwareConfig protobuf or ID")
 	cmd.flagSet.BoolVar(&cmd.argHelp, "help", false, "Show help info")
 
 	return &cmd
@@ -47,6 +55,32 @@ func (c *CmdTraceResult) Execute() error {
 		return nil
 	}
 
+	if c.argMachine != "" {
+		if strings.HasSuffix(c.argMachine, ".json") || strings.HasSuffix(c.argMachine, ".pb") {
+			machine := db.Machine{}
+			if err := readProtoFromFile(c.argMachine, &machine); err != nil {
+				return fmt.Errorf("failed to parse machine pb %s, err = %s", c.argMachine, err.Error())
+			}
+			c.machineId = machine.Name.Value
+		} else {
+			// Assume that argMachine, if not empty, is an ID string.
+			c.machineId = c.argMachine
+		}
+	}
+
+	if c.argSoftwareConfig != "" {
+		if strings.HasSuffix(c.argSoftwareConfig, ".json") || strings.HasSuffix(c.argSoftwareConfig, ".pb") {
+			softwareConfig := db.SoftwareConfig{}
+			if err := readProtoFromFile(c.argSoftwareConfig, &softwareConfig); err != nil {
+				return fmt.Errorf("failed to parse software config pb %s, err = %s", c.argSoftwareConfig, err.Error())
+			}
+			c.softwareConfigId = softwareConfig.Id.Value
+		} else {
+			// Assume that argSoftwareConfig, if not empty, is an ID string.
+			c.softwareConfigId = c.argSoftwareConfig
+		}
+	}
+
 	// Process each file listed after the cmd-line options. Each successfully parsed
 	// file yields a Result protobuf object that is added to ResultList.
 	results := db.ResultList{}
@@ -55,6 +89,8 @@ func (c *CmdTraceResult) Execute() error {
 		if err != nil {
 			return fmt.Errorf("failed to parse profile %s, err = %s", f, err.Error())
 		}
+		result.Machine = &db.MachineId{Value: c.machineId}
+		result.SoftwareConfig = &db.SoftwareConfigId{Value: c.softwareConfigId}
 
 		results.Value = append(results.Value, result)
 	}
