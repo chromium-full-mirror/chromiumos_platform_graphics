@@ -18,10 +18,10 @@ type harvestConfigRecord struct {
 	ProfileBinPath    string   `json:"profileBinPath"`
 }
 
-// HarvestConfigParser provides support for read and parsing Harvest configuration
-// json files. That includes the parameters specific to Harvest as well as the
-// profiler configurations that Harvest uses when launching the companion tool
-// Profile for running traces on Crostini and Crouton devices.
+// HarvestConfigParser provides support for reading and parsing Harvest
+// configuration json files. That includes the parameters specific to Harvest as
+// well as the profiler configurations that Harvest uses when launching the
+// companion tool Profile for running traces on Crostini and Crouton devices.
 type HarvestConfigParser struct {
 	jsonParser             *profile.JSONConfigParser
 	harvestConfig          harvestConfigRecord
@@ -74,6 +74,13 @@ func CreateHarvestConfigParser() *HarvestConfigParser {
 	}
 	hc.jsonParser.AddHandler("CroutonProfilerConfig", &croutonParser)
 	return &hc
+}
+
+// AddHandler adds handler for the top-level config property with name fieldName.
+func (hc *HarvestConfigParser) AddHandler(
+	fieldName string, handler profile.ConfigPropertyHandler) error {
+
+	return hc.jsonParser.AddHandler(fieldName, handler)
 }
 
 // OpenJSONFile opens a json file and get ready for processing it. If the file

@@ -95,7 +95,7 @@ func (c *CmdTraceResult) Execute() error {
 		results.Value = append(results.Value, result)
 	}
 
-	err := writeProtobuf(&results, c.argOutputFile)
+	err := WriteProtobuf(&results, c.argOutputFile)
 	if err != nil {
 		return fmt.Errorf("unable to write output, err = %s", err.Error())
 	}

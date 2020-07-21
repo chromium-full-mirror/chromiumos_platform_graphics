@@ -13,16 +13,18 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
-// Return whether file with path filename exists.
+// FileExists returns whether file with path filename exists.
 func FileExists(filename string) bool {
 	fileInfo, err := os.Stat(filename)
 	return err == nil && !fileInfo.IsDir()
 }
 
-// Split a filename from all its extensions and returns as pair (name, extensions).
-// E.g. filename "blahblah.txt.tar" produces "blahblah" and ".txt.tar".
+// SplitFileExt splits a filename from all its extensions and returns as pair
+// (name, extensions). E.g. filename "blahblah.txt.tar" produces "blahblah" and
+// ".txt.tar".
 func SplitFileExt(filename string) (string, string) {
 	ext := ""
 	for {
@@ -37,7 +39,7 @@ func SplitFileExt(filename string) (string, string) {
 	return filename, ext
 }
 
-// Read JSON data from a file and return as a byte array.
+// ReadJSONData reads JSON data from a file and return it as a byte array.
 func ReadJSONData(jsonFilepath string) ([]byte, error) {
 	file, err := os.Open(jsonFilepath)
 	if err != nil {
@@ -53,7 +55,7 @@ func ReadJSONData(jsonFilepath string) ([]byte, error) {
 	return jsonData, nil
 }
 
-// Return the MD5 hash from file <filename>.
+// GetFileMD5Hash returns the MD5 hash from file <filename>.
 func GetFileMD5Hash(fileName string) (string, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -68,4 +70,16 @@ func GetFileMD5Hash(fileName string) (string, error) {
 	hashInBytes := hash.Sum(nil)[:16]
 
 	return hex.EncodeToString(hashInBytes), nil
+}
+
+// GetUTCDateString return the UTC date as a string with format "YYYMMDD-HHMMSS".
+func GetUTCDateString() string {
+	utc := time.Now().UTC()
+	return utc.Format("20060102-150405")
+}
+
+// GetUTCTimeString return the UTC time as a string with format "HHMMSS".
+func GetUTCTimeString() string {
+	utc := time.Now().UTC()
+	return utc.Format("150405")
 }

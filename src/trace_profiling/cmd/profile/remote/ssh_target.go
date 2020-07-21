@@ -313,7 +313,7 @@ func (s *SSHTarget) CheckFileExists(filePath string) (bool, error) {
 	cmd := fmt.Sprintf(
 		"if [ -f \"%s\" ]; then (echo present) fi", filePath)
 	output, err := s.RunCmd(cmd)
-	return err == nil && strings.HasPrefix(output, "present"), err
+	return strings.HasPrefix(output, "present"), err
 }
 
 // Mkdir make the directories in the given path on the target. Parent directories
@@ -340,6 +340,17 @@ func (s *SSHTarget) MkTempDir(base string) (string, error) {
 		cmd = fmt.Sprintf("mktemp -d")
 	}
 	out, err := s.RunCmd(cmd)
+	if err != nil {
+		return "", err
+	}
+
+	// Ensure we always return an absolute path.
+	cmd = fmt.Sprintf("realpath %s", out)
+	out, err = s.RunCmd(cmd)
+	if err != nil {
+		return "", err
+	}
+
 	out = strings.TrimSuffix(out, "\n")
 	return out, err
 }

@@ -42,24 +42,27 @@ type TraceProfile struct {
 
 // NewTraceProfile creates and returns a new TraceProfile object. Either crostiniConfig
 // or croutonConfig may be set to nil to ignore that platform.
-func NewTraceProfile(
+func NewTraceProfile(verbose bool) *TraceProfile {
+
+	tp := TraceProfile{verbose: verbose}
+
+	return &tp
+}
+
+// Setup must be invoked before calling RunTraces to configure the TraceProfile
+// instance.
+func (tp *TraceProfile) Setup(
 	crostiniConfig *profile.ProfilerConfigRecord,
 	croutonConfig *profile.ProfilerConfigRecord,
 	errorOut chan error,
 	profilerBinPath string,
-	keepTracesInCache bool,
-	verbose bool) *TraceProfile {
+	keepTracesInCache bool) {
 
-	tp := TraceProfile{
-		crostiniConfig:    crostiniConfig,
-		croutonConfig:     croutonConfig,
-		errorOut:          errorOut,
-		profilerBinPath:   profilerBinPath,
-		keepTracesInCache: keepTracesInCache,
-		verbose:           verbose,
-	}
-
-	return &tp
+	tp.crostiniConfig = crostiniConfig
+	tp.croutonConfig = croutonConfig
+	tp.errorOut = errorOut
+	tp.profilerBinPath = profilerBinPath
+	tp.keepTracesInCache = keepTracesInCache
 }
 
 // GetFPSData returns the FPS data gathered during profiling. Call this function

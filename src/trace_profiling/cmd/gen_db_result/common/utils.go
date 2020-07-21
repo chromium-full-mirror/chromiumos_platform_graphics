@@ -43,7 +43,7 @@ func printWarningToStderr(format string, a ...interface{}) {
 // is the empty string, the output goes to stdout. The generated output is JSON
 // if the file name ends with ".json" or is stdout. Otherwise it is protobuf
 // streaming binary format.
-func writeProtobuf(protobuf proto.Message, outputFile string) error {
+func WriteProtobuf(protobuf proto.Message, outputFile string) error {
 	var file *os.File = os.Stdout
 	var err error
 

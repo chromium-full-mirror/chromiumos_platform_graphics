@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"path/filepath"
 	"sort"
 
 	"trace_profiling/cmd/harvest/config"
@@ -42,8 +43,49 @@ var argConfigFilepath string
 var argEnableCompareFps bool
 var argSuppressCrostini bool
 var argSuppressCrouton bool
+var argToolToRun string
 
+// Config data read from JSON.
 var harvestConfig *config.HarvestConfigParser
+var crostiniProfilerConfig *profile.ProfilerConfigRecord
+var croutonProfilerConfig *profile.ProfilerConfigRecord
+var deviceInfoConfig *config.DeviceInfoConfigParser
+
+// Tools.
+var profileTool *utils.TraceProfile
+var deviceInfoTool *utils.DeviceInfoTool
+
+// Setup profiler config for crostini and crouton. Nil indicates we don't care
+// about that particular platform.
+func setupProfilerConfigs() {
+	// Check what configurations are available.
+	crostiniProfilerConfig = harvestConfig.GetCrostiniProfilerConfig()
+	if crostiniProfilerConfig == nil || crostiniProfilerConfig.ProfileParams == nil {
+		argSuppressCrostini = true
+		fmt.Fprintf(os.Stderr, "Warning: Crostini profiling is off; no profiler configuration found.\n")
+	}
+	croutonProfilerConfig = harvestConfig.GetCroutonProfilerConfig()
+	if croutonProfilerConfig == nil || croutonProfilerConfig.ProfileParams == nil {
+		argSuppressCrouton = true
+		fmt.Fprintf(os.Stderr, "Warning: Crouton profiling is off; no profiler configuration found.\n")
+	}
+
+	// Take cmd-line options into account.
+	if argSuppressCrostini {
+		crostiniProfilerConfig = nil
+	}
+	if argSuppressCrouton {
+		croutonProfilerConfig = nil
+	}
+
+	// We can only compare fps if we have both crostini and crouton data.
+	argEnableCompareFps = argEnableCompareFps && !(argSuppressCrostini || argSuppressCrouton)
+}
+
+func setupTools() {
+	profileTool = utils.NewTraceProfile(argVerbose)
+	deviceInfoTool = utils.NewDeviceInfoTool(argVerbose)
+}
 
 // Generate the FPS comparative output to the target output file. Note that
 // data is always added to the file.
@@ -86,28 +128,15 @@ func generateFpsOutput(data []utils.FPSRecord) {
 // Run the traces on Crostini and/or Crouton to gather profile data. If requested,
 // also compare the FPS data from both platforms.
 func doHarvestProfiles() {
+	printIfVerbose("\nHarvesting profile data with traces:\n")
+	printIfVerbose("===================================\n")
 
-	// Setup profiler config for crostini and crouton. Nil indicates we don't care
-	// about that particular platform.
-	var crostiniProfilerConfig *profile.ProfilerConfigRecord = nil
-	if !argSuppressCrostini {
-		crostiniProfilerConfig = harvestConfig.GetCrostiniProfilerConfig()
-	}
-
-	var croutonProfilerConfig *profile.ProfilerConfigRecord = nil
-	if !argSuppressCrouton {
-		croutonProfilerConfig = harvestConfig.GetCroutonProfilerConfig()
-	}
-
-	// TraceProfile downloads and prepares the traces and then runs them on each
-	// target platform.
 	errorFeed := make(chan error)
-	traceProfile := utils.NewTraceProfile(crostiniProfilerConfig, croutonProfilerConfig,
-		errorFeed, harvestConfig.GetProfilerBinPath(), harvestConfig.ShouldKeepTraceAfterUse(),
-		argVerbose)
+	profileTool.Setup(crostiniProfilerConfig, croutonProfilerConfig,
+		errorFeed, harvestConfig.GetProfilerBinPath(), harvestConfig.ShouldKeepTraceAfterUse())
 
 	go func() {
-		traceProfile.RunTraces(harvestConfig.GetTraces(), harvestConfig.GetTraceCacheDir())
+		profileTool.RunTraces(harvestConfig.GetTraces(), harvestConfig.GetTraceCacheDir())
 		close(errorFeed)
 	}()
 
@@ -116,22 +145,72 @@ func doHarvestProfiles() {
 	}
 
 	if argEnableCompareFps {
-		generateFpsOutput(traceProfile.GetFPSData())
+		generateFpsOutput(profileTool.GetFPSData())
+	}
+}
+
+// Run the device-info tool on crostini/crouton, per config.
+func doHarvestDeviceInfo() {
+	printIfVerbose("\nHarvesting device info:\n======================\n")
+
+	if !argSuppressCrostini {
+		doHarvestDeviceInfoOnTarget(deviceInfoConfig.GetCrosvmMachineInfoConfig(),
+			crostiniProfilerConfig, "Crosvm")
+	}
+
+	if !argSuppressCrouton {
+		doHarvestDeviceInfoOnTarget(deviceInfoConfig.GetCroutonMachineInfoConfig(),
+			croutonProfilerConfig, "Crouton")
+	}
+}
+
+// Run the device-info tool on a specific target.
+func doHarvestDeviceInfoOnTarget(
+	machineConfig *config.MachineInfoConfig,
+	profilerConfig *profile.ProfilerConfigRecord,
+	machineLabel string) {
+
+	if machineConfig == nil {
+		printIfVerbose("Skipping %s device: no applicable property in config file.\n", machineLabel)
+	} else if !machineConfig.Enabled {
+		printIfVerbose("Skipping %s device: disabled in config.\n", machineLabel)
+	} else {
+		printIfVerbose("Getting device info from %s device.\n", machineLabel)
+		deviceInfoTool.Setup(deviceInfoConfig.GetDeviceInfoBinPath(),
+			machineConfig.Name, deviceInfoConfig.GetOwner(),
+			profilerConfig.SSHConfig, profilerConfig.TunnelConfig)
+		if err := deviceInfoTool.Run(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error getting machine-info for %s: %s\n", machineLabel, err.Error())
+			return
+		}
+
+		// TODO (gwink): upload protobuf to DB if requested.
+
+		err := deviceInfoTool.WriteProtoBufToFile(deviceInfoConfig.GetProtoBufsOutputDir(),
+			machineConfig.OutputFileTemplate)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing machine-info to protobuf for %s: %s\n",
+				machineLabel, err.Error())
+		}
 	}
 }
 
 // Read and parse the Harvest config json file and leave the result in global
 // var harvestConfig.
 func readHarvestConfigFromFile(jsonFilepath string) error {
-	configParser := config.CreateHarvestConfigParser()
-	if err := configParser.OpenJSONFile(jsonFilepath); err != nil {
+	harvestConfigParser := config.CreateHarvestConfigParser()
+	deviceInfoConfigParser := config.NewDeviceInfoConfigParser()
+	harvestConfigParser.AddHandler("DeviceInfo", deviceInfoConfigParser)
+
+	if err := harvestConfigParser.OpenJSONFile(jsonFilepath); err != nil {
 		return err
 	}
-	if err := configParser.Process(); err != nil {
+	if err := harvestConfigParser.Process(); err != nil {
 		return err
 	}
 
-	harvestConfig = configParser
+	harvestConfig = harvestConfigParser
+	deviceInfoConfig = deviceInfoConfigParser
 	return nil
 }
 
@@ -142,14 +221,26 @@ func printIfVerbose(format string, a ...interface{}) {
 	}
 }
 
+func printUsage() {
+	appName := filepath.Base(os.Args[0])
+	fmt.Fprintf(os.Stderr, "\nUsage: %s -config config-file.json [other options]\n", appName)
+	fmt.Fprintf(os.Stderr, "Available options:\n")
+	flag.PrintDefaults()
+	os.Exit(2)
+}
+
 func main() {
+	flag.Usage = printUsage
 	flag.StringVar(&argConfigFilepath, "config", "", "Filename for JSON config data")
 	flag.StringVar(&argOutputFile, "out", "compare_out.prof", "Output file")
 	flag.BoolVar(&argVerbose, "verbose", false, "Enable verbose mode")
 	flag.BoolVar(&argEnableCompareFps, "compare-fps", false, "Extract FPS from profile data and compare")
 	flag.BoolVar(&argSuppressCrostini, "no-crostini", false, "Suppress profiling on crostini")
 	flag.BoolVar(&argSuppressCrouton, "no-crouton", false, "Suppress profiling on crouton")
+	flag.StringVar(&argToolToRun, "tool", "profile", "Tool to run, one of profile, device-info")
 	flag.Parse()
+
+	setupTools()
 
 	err := readHarvestConfigFromFile(argConfigFilepath)
 	if err != nil {
@@ -157,20 +248,11 @@ func main() {
 		return
 	}
 
-	// Verify that we have profiler configuration for Crostini and Crouton.
-	config := harvestConfig.GetCrostiniProfilerConfig()
-	if config == nil || config.ProfileParams == nil {
-		argSuppressCrostini = true
-		fmt.Fprintf(os.Stderr, "Warning: Crostini profiling is off; no profiler configuration found.\n")
+	setupProfilerConfigs()
+	switch argToolToRun {
+	case "profile":
+		doHarvestProfiles()
+	case "device-info":
+		doHarvestDeviceInfo()
 	}
-	config = harvestConfig.GetCroutonProfilerConfig()
-	if config == nil || config.ProfileParams == nil {
-		argSuppressCrouton = true
-		fmt.Fprintf(os.Stderr, "Warning: Crouton profiling is off; no profiler configuration found.\n")
-	}
-
-	// We can only compare fps if we have both crostini and crouton data.
-	argEnableCompareFps = argEnableCompareFps && !(argSuppressCrostini || argSuppressCrouton)
-
-	doHarvestProfiles()
 }

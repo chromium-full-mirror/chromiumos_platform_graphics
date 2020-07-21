@@ -79,7 +79,7 @@ func (c *CmdMachineInfo) Execute() error {
 	now := time.Now()
 	machine.CreateTime = createTimestamp(&now)
 
-	err := writeProtobuf(&machine, c.argOutputFile)
+	err := WriteProtobuf(&machine, c.argOutputFile)
 	if err != nil {
 		return fmt.Errorf("failed to write output, err = %s", err.Error())
 	}

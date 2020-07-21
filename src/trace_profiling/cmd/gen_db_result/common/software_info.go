@@ -120,7 +120,7 @@ func (c *CmdSoftwareInfo) Execute() error {
 		c.addECInfo()
 	}
 
-	return writeProtobuf(c.config, c.argOutputFile)
+	return WriteProtobuf(c.config, c.argOutputFile)
 }
 
 // Return a parent-software-config ID if one can be found or and empty string
