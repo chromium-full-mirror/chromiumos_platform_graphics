@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -41,15 +42,20 @@ type ConfigPropertyHandler interface {
 // processes config files listed in property with name "include". To be useful
 // handlers must be associated with top-level properties other than "include".
 type JSONConfigParser struct {
-	handlers     map[string]ConfigPropertyHandler
-	jsonData     map[string]interface{}
-	includeDepth int
+	handlers map[string]ConfigPropertyHandler
+	jsonData map[string]interface{}
+
+	// Each time a file is opened, its base path (dir) is pushed onto this stack.
+	// When a file to be opened has a relative path, it is considered to be relative
+	// to the base path at the top of the stack.
+	basePathStack []string
 }
 
 // CreateJSONConfigParser creates and returns a JSONConfigParser instance.
 func CreateJSONConfigParser() *JSONConfigParser {
 	return &JSONConfigParser{
-		handlers: make(map[string]ConfigPropertyHandler),
+		handlers:      make(map[string]ConfigPropertyHandler),
+		basePathStack: make([]string, 0, 11),
 	}
 }
 
@@ -71,11 +77,12 @@ func (jc *JSONConfigParser) AddHandler(
 // for processing. If the file doesn't look like a file that can be processed
 // with this JSONConfigParser instance, an error is returned.
 func (jc *JSONConfigParser) OpenJSONConfigFile(jsonFile string) error {
-	file, err := os.Open(jsonFile)
+	file, err := jc.openFileAndPushBasePath(jsonFile)
 	if err != nil {
-		return fmt.Errorf("cannot open config file <%s>; error=%w", jsonFile, err)
+		return err
 	}
 	defer file.Close()
+	defer jc.popBasePath()
 
 	jsonReader := filterCommentsFromStream(file)
 	return jc.OpenJSONFromReader(jsonReader)
@@ -161,24 +168,21 @@ func (jc *JSONConfigParser) includeFiles(files interface{}) error {
 		return fmt.Errorf("invalid value type for include: %v", files)
 	}
 
-	// Process the included files in the order found. We limit how deep we can
-	// recursively include files as a way of avoiding infinite include loops.
+	// Process the included files in the order found. Included files may themselves
+	// include other files. However, the capacity of the base-path stack is fixed.
+	// That ensures that circular references will not cause infinite recursion.
 	for _, oneFile := range fileList {
-		file, err := os.Open(oneFile)
+		fileHandle, err := jc.openFileAndPushBasePath(oneFile)
 		if err != nil {
-			return fmt.Errorf("cannot include file <%s>; error=%w", oneFile, err)
-		}
-		defer file.Close()
-
-		jc.includeDepth++
-		if jc.includeDepth == 10 {
-			return fmt.Errorf("too many includes: %d", jc.includeDepth)
-		}
-
-		if err := jc.parseFile(file); err != nil {
 			return err
 		}
-		jc.includeDepth--
+
+		err = jc.parseFile(fileHandle)
+		fileHandle.Close()
+		jc.popBasePath()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -206,6 +210,81 @@ func (jc *JSONConfigParser) invokeHandler(handler ConfigPropertyHandler, data in
 	}
 
 	return handler.ParseJSONData(buffer.String())
+}
+
+// Try to open the file for reading and return its os.File handle. If the  file
+// path is relative, it is taken to be relative to the current base path. If the
+// file is successfully opened, its dir becomes the most current base path.
+func (jc *JSONConfigParser) openFileAndPushBasePath(file string) (*os.File, error) {
+	if jc.isBasePathStackFull() {
+		return nil, fmt.Errorf("too many includes: %d", len(jc.basePathStack))
+	}
+
+	absPath, err := jc.getAbsolutePath(file)
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := os.Open(absPath)
+	if err != nil {
+		return nil, fmt.Errorf("cannot open file <%s>; error=%w", absPath, err)
+	}
+
+	jc.pushBasePath(filepath.Dir(absPath))
+	return f, nil
+}
+
+// Returns whether the base-path stack is empty.
+func (jc *JSONConfigParser) isBasePathStackEmpty() bool {
+	return len(jc.basePathStack) == 0
+}
+
+// Returns whether the base-path stack is full.
+func (jc *JSONConfigParser) isBasePathStackFull() bool {
+	return len(jc.basePathStack) == cap(jc.basePathStack)
+}
+
+// Push path bp onto the base-path stack.
+func (jc *JSONConfigParser) pushBasePath(bp string) {
+	if len(jc.basePathStack) < cap(jc.basePathStack) {
+		jc.basePathStack = append(jc.basePathStack, bp)
+	}
+}
+
+// Pop and discard the top-most path from the base-path stack.
+func (jc *JSONConfigParser) popBasePath() {
+	if len(jc.basePathStack) > 0 {
+		jc.basePathStack = jc.basePathStack[:len(jc.basePathStack)-1]
+	}
+}
+
+// Return the top-most path from the base-path stack.
+func (jc *JSONConfigParser) peekBasePath() string {
+	if len(jc.basePathStack) > 0 {
+		return jc.basePathStack[len(jc.basePathStack)-1]
+	}
+	return ""
+}
+
+// Returns the absolute path for given file path aPath using the following
+// algorithm:
+// - If aPath is already an absolute path, return it as-is.
+// - If the base-path stack is empty, aPath is joined to the current working
+//   directory.
+// - Otherwise, aPath is joined to the top-most path on the base-path stack.
+func (jc *JSONConfigParser) getAbsolutePath(aPath string) (string, error) {
+	if filepath.IsAbs(aPath) {
+		return aPath, nil
+	} else if jc.isBasePathStackEmpty() {
+		absPath, err := filepath.Abs(aPath)
+		if err != nil {
+			return "", err
+		}
+		return absPath, nil
+	}
+
+	absPath := filepath.Join(jc.peekBasePath(), aPath)
+	return filepath.Clean(absPath), nil
 }
 
 // Filter out a limited form of c-style comments from inStream. Returns a new
