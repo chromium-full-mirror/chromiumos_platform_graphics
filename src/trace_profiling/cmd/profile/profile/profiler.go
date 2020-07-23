@@ -5,6 +5,7 @@
 package profile
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -18,7 +19,26 @@ import (
 )
 
 // ProfileParams bundles all the parameters needed to profile traces on a
-// target device.
+// target device. Fields are as follows:
+//  LocalTraceDir: Full path to dir where traces are found on local machine.
+//  TargetTraceDir: Full path to dir where traces should be stored on target device.
+//  Traces: List of trace file names.
+//  KeepTraceOnTarget: Whether trace file should be kept on or deleted from target
+//      device.
+//  LocalProfileDir: Full path to dir where profiles should be stored on local machine.
+//  TargetProfAppPath: Full path to dir where profiling app binaries should be stored
+//      on target device.
+//  ProfCommand: Command to invoke on target device to initiate profiling. This
+//      command string should include the following two placeholders:
+//      [[trace-file]]: will be replace with path to input trace file.
+//      [[prof-file]]: will be replace with path to output profile-data file.
+//      Eg. "/home/gwink/apitrace/glretrace  -b --timeout=500 [[trace-file]] > [[prof-file]]"
+//  Timeout: Timeout in seconds. After a timeout, profiling is canceled and the kill
+//      command (below) is ran on the target device. A negative value means no
+//      timeout and a 0 value implies the default timeout of 15 minutes.
+//  KillCommand: Command to run on the target device when the timeout is reached
+//      E.g. "killall glretrace"
+//  TargetDisplay: DISPLAY number to use on target device, e.g. "0".
 type ProfileParams struct {
 	LocalTraceDir     string   `json:"localTraceDir"`
 	TargetTraceDir    string   `json:"targetTraceDir"`
@@ -29,6 +49,8 @@ type ProfileParams struct {
 	LocalProfAppPath  string   `json:"localProfAppPath"`
 	TargetProfAppPath string   `json:"targetProfAppPath"`
 	ProfCommand       string   `json:"profCommand"`
+	Timeout           int      `json:"timeout"`
+	KillCommand       string   `json:"killCommand"`
 	TargetDisplay     string   `json:"targetDisplay"`
 }
 
@@ -168,9 +190,9 @@ func extractEnvParams(cmd string) string {
 	envParams := re.Find([]byte(cmd))
 	if envParams == nil {
 		return ""
-	} else {
-		return string(envParams)
 	}
+
+	return string(envParams)
 }
 
 // Append extra trace command information at the end of output file tmpFile.
@@ -202,11 +224,21 @@ func (p *Profiler) profileTrace(binCmd, tracePath, localProfPath string) error {
 		}
 	}()
 
+	// Timeout is a newer config option that may not always be defined. Thus 0 is
+	// taken to mean the default timeout, which we set at a very generous 15 minutes.
+	var timeout int
+	if p.params.Timeout == 0 {
+		timeout = 15 * 60
+	} else {
+		timeout = p.params.Timeout
+	}
+
 	outFile, err := os.OpenFile(localProfPath, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err
 	}
 	defer outFile.Close()
+	outFile.Truncate(0)
 
 	tmpFilename, err := p.target.MkTempFileName()
 	if err != nil {
@@ -221,8 +253,19 @@ func (p *Profiler) profileTrace(binCmd, tracePath, localProfPath string) error {
 	cmd := strings.Replace(binCmd, "[[trace-file]]", tracePath, 1)
 	cmd = strings.Replace(cmd, "[[prof-file]]", tmpFilename, 1)
 	cmd = fmt.Sprintf("DISPLAY=:%s %s", p.params.TargetDisplay, cmd)
-	output, err := p.target.RunCmd(cmd)
+
+	// Negative timeout means no timeout.
+	var output string
+	if timeout > 0 {
+		output, err = p.runTraceCmdWithTimeout(cmd, time.Duration(timeout))
+	} else {
+		output, err = p.target.RunCmd(cmd)
+	}
+
 	if err != nil {
+		// Write an error line to the output file.
+		outFile.WriteString(fmt.Sprintf("Profile error: output=%s, err=%s\n",
+			output, err.Error()))
 		p.printIfVerbose(" error, stdout=\"%s\"\n", output)
 		return err
 	}
@@ -232,10 +275,37 @@ func (p *Profiler) profileTrace(binCmd, tracePath, localProfPath string) error {
 	p.printIfVerbose("\nCopy profile to local file %s: ", localProfPath)
 
 	cmd = fmt.Sprintf("cat %s", tmpFilename)
-	outFile.Truncate(0)
 	err = p.target.RunCmdWithWriter(cmd, outFile)
 	p.printIfVerbose("%s\n", doneOrError(err == nil))
 	return err
+}
+
+// Run the trace command cmd with the given timeout. Returns the command's output
+// and eventual error.  If the trace command doesn't complete in the allocated time,
+// returns an empty string for output and a timeout error.
+func (p *Profiler) runTraceCmdWithTimeout(cmd string, timeout time.Duration) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout*time.Second)
+	defer cancel()
+
+	var err error
+	var done = make(chan bool)
+	var output string = ""
+	go func() {
+		output, err = p.target.RunCmd(cmd)
+		done <- true
+	}()
+
+	select {
+	case <-done:
+		// Profiling completed normally.
+		return output, err
+	case <-ctx.Done():
+		// Profiling timed out. If a kill command is defined, use it to clear the target.
+		if p.params.KillCommand != "" {
+			p.target.RunCmd(p.params.KillCommand)
+		}
+		return "", fmt.Errorf("profiling canceled after %dS timeout", timeout)
+	}
 }
 
 // Copy a single file or directory from the local host to the target device.
