@@ -65,6 +65,9 @@ func (c *CmdSoftwareInfo) Execute() error {
 	var err error
 
 	if c.argHelp {
+		appName := filepath.Base(os.Args[0])
+		fmt.Printf("Usage: %s [app-options] %s [options]\n", appName, c.CmdName())
+		fmt.Printf("where options are:\n")
 		c.flagSet.Usage()
 		return nil
 	}

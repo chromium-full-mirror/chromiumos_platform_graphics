@@ -8,11 +8,15 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/google/uuid"
 	db "go.chromium.org/chromiumos/config/go/api/test/results/v1"
 )
+
+// Option constant that indicates owner name should be obtained from env.
+const defaultOwnerName = "get USER from env"
 
 // CmdMachineInfo encapsulates the machine-info sub-command.
 type CmdMachineInfo struct {
@@ -30,7 +34,7 @@ func NewCmdMachineInfo() *CmdMachineInfo {
 	}
 
 	// Note: default value for "owner" means not set.
-	cmd.flagSet.StringVar(&cmd.argOwner, "owner", ".", "Owner to assign")
+	cmd.flagSet.StringVar(&cmd.argOwner, "owner", defaultOwnerName, "Owner to assign")
 	cmd.flagSet.StringVar(&cmd.argMachineName, "name", "", "Machine name to assign")
 	cmd.flagSet.StringVar(&cmd.argOutputFile, "output", "", "Output file (default is stdout)")
 	cmd.flagSet.BoolVar(&cmd.argHelp, "help", false, "Show help info")
@@ -51,6 +55,9 @@ func (c *CmdMachineInfo) Setup(args []string) error {
 // Execute is called to execute the sub-command.
 func (c *CmdMachineInfo) Execute() error {
 	if c.argHelp {
+		appName := filepath.Base(os.Args[0])
+		fmt.Printf("Usage: %s [app-options] %s [options]\n", appName, c.CmdName())
+		fmt.Printf("where options are:\n")
 		c.flagSet.Usage()
 		return nil
 	}
@@ -68,7 +75,7 @@ func (c *CmdMachineInfo) Execute() error {
 		Value: c.argMachineName,
 	}
 
-	if c.argOwner == "." {
+	if c.argOwner == defaultOwnerName {
 		c.argOwner = os.Getenv("USER")
 		if c.argOwner == "root" {
 			return fmt.Errorf("machine owner may not be \"root\"")

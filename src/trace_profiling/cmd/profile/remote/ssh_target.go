@@ -479,10 +479,16 @@ func (s *SSHTarget) SendFile(srcFilename string, dstFilename string, permissions
 func (s *SSHTarget) GetRemoteFreeSpaceKb(dirPath string) (int, error) {
 	dfOut, err := s.RunCmd(fmt.Sprintf("df -Pk %s | tail -1 | awk '{print $4}'", dirPath))
 	if err != nil {
-		return -1, err
+		return -1, fmt.Errorf("failed to get free space for \"%s\" on target: %s",
+			dirPath, err.Error())
 	}
 
-	return strconv.Atoi(strings.TrimSpace(dfOut))
+	freeSpace, err := strconv.Atoi(strings.TrimSpace(dfOut))
+	if err != nil {
+		return -1, fmt.Errorf("failed to get free space for \"%s\" on target", dirPath)
+	}
+
+	return freeSpace, nil
 }
 
 // Wait on the given waitGroup, but no longer than timeout.

@@ -7,6 +7,8 @@ package common
 import (
 	"flag"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	db "go.chromium.org/chromiumos/config/go/api/test/results/v1"
@@ -51,6 +53,10 @@ func (c *CmdTraceResult) Setup(args []string) error {
 // Execute is called to execute the sub-command.
 func (c *CmdTraceResult) Execute() error {
 	if c.argHelp {
+		appName := filepath.Base(os.Args[0])
+		fmt.Printf("Usage: %s [app-options] %s [options] profile [profile...]\n",
+			appName, c.CmdName())
+		fmt.Printf("where options are:\n")
 		c.flagSet.Usage()
 		return nil
 	}
