@@ -391,6 +391,7 @@ func (s *SSHTarget) RunCmdWithWriter(command string, outWriter io.Writer) error 
 	// If there's an ongoing shell session use it. Otherwise, create a one-time
 	// session to run the command.
 	var session cmdSession
+	var errBuffer = bytes.Buffer{}
 	if s.shell != nil {
 		s.shell.setStdout(outWriter)
 		session = s.shell
@@ -399,7 +400,6 @@ func (s *SSHTarget) RunCmdWithWriter(command string, outWriter io.Writer) error 
 		if err != nil {
 			return fmt.Errorf("SSHTarget run-cmd error: %w", err)
 		}
-		errBuffer := bytes.Buffer{}
 		sshSession.Stdout = outWriter
 		sshSession.Stderr = &errBuffer
 		defer sshSession.Close()
@@ -409,7 +409,10 @@ func (s *SSHTarget) RunCmdWithWriter(command string, outWriter io.Writer) error 
 
 	err := session.Run(command)
 	if err != nil {
-		return fmt.Errorf("RunCmd error: %w", err)
+		if errBuffer.Len() > 0 {
+			return fmt.Errorf("Remote cmd error: %s", errBuffer.String())
+		}
+		return fmt.Errorf("Remote cmd error: %w", err)
 	}
 
 	return nil
