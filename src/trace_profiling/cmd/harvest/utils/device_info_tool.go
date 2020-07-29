@@ -25,9 +25,10 @@ const (
 // DeviceInfoTool represents the tool used to get information from a device
 // reachable through SSH.
 type DeviceInfoTool struct {
-	getDeviceInfoBinPath string
-	machineOwner         string
-	machineName          string
+	getDeviceInfoBinPath string // Path to get_device_info tool on device.
+	machineOwner         string // Machine owner, e.g. "user/gwink".
+	machineName          string // Unique machine name for the device.
+	execEnv              string // The exec env, e.g. as "crostini".
 
 	// SSH and tunneling parameters from the profile configuration.
 	targetSSHParams *remote.SSHParams
@@ -56,6 +57,7 @@ func (dit *DeviceInfoTool) Setup(
 	getDeviceInfoBinPath string,
 	machineName string,
 	machineOwner string,
+	execEnv string,
 	sshParams *remote.SSHParams,
 	tunnelParams *remote.TunnelParams) {
 
@@ -63,6 +65,7 @@ func (dit *DeviceInfoTool) Setup(
 	dit.getDeviceInfoBinPath = getDeviceInfoBinPath
 	dit.machineName = machineName
 	dit.machineOwner = machineOwner
+	dit.execEnv = execEnv
 	dit.targetSSHParams = sshParams
 	dit.tunnelParams = tunnelParams
 	dit.machinePb = nil
@@ -87,7 +90,9 @@ func (dit DeviceInfoTool) WriteProtoBufToFile(dir, fileTemplate string) error {
 	}
 
 	// Build the file name from the template.
-	filename := strings.ReplaceAll(fileTemplate, "[[utc-date]]", GetUTCDateString())
+	filename := strings.ReplaceAll(fileTemplate, "[[name]]", dit.machineName)
+	filename = strings.ReplaceAll(filename, "[[exec-env]]", dit.execEnv)
+	filename = strings.ReplaceAll(filename, "[[utc-date]]", GetUTCDateString())
 	filename = strings.ReplaceAll(filename, "[[utc-time]]", GetUTCTimeString())
 	filename = strings.ReplaceAll(filename, "[[hwid]]", dit.machinePb.Hwid)
 

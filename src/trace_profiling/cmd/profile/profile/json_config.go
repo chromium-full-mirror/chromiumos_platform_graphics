@@ -34,7 +34,7 @@ var (
 // properties in the config file. Handlers are associated with top-level
 // properties by calling function AddHandler on JSONConfigParser.
 type ConfigPropertyHandler interface {
-	ParseJSONData(jsonData string) error
+	ParseJSONData(propName, jsonData string) error
 }
 
 // JSONConfigParser is a helper class for parsing JSON configuration files. By
@@ -142,7 +142,7 @@ func (jc *JSONConfigParser) processJSONData(data map[string]interface{}) error {
 	// Process property values that have an associated handler.
 	for propertyName := range data {
 		if handler, ok := jc.handlers[propertyName]; ok {
-			if err := jc.invokeHandler(handler, data[propertyName]); err != nil {
+			if err := jc.invokeHandler(handler, propertyName, data[propertyName]); err != nil {
 				return err
 			}
 		}
@@ -200,7 +200,7 @@ func (jc *JSONConfigParser) parseFile(file *os.File) error {
 }
 
 // Look for a handler associated with a top-level property and invoke it if found.
-func (jc *JSONConfigParser) invokeHandler(handler ConfigPropertyHandler, data interface{}) error {
+func (jc *JSONConfigParser) invokeHandler(handler ConfigPropertyHandler, propName string, data interface{}) error {
 	// The handler expect the json data as a string. So we must map the interface{} value
 	// back to a string. We can do that with the json encoder.
 	var buffer = new(bytes.Buffer)
@@ -209,7 +209,7 @@ func (jc *JSONConfigParser) invokeHandler(handler ConfigPropertyHandler, data in
 		return err
 	}
 
-	return handler.ParseJSONData(buffer.String())
+	return handler.ParseJSONData(propName, buffer.String())
 }
 
 // Try to open the file for reading and return its os.File handle. If the  file

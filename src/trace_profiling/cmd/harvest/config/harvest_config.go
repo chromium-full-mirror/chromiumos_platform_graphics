@@ -6,9 +6,17 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"trace_profiling/cmd/profile/profile"
 )
+
+// TargetDevice encloses all the information needed for identifying a device
+// and reaching it through SSH running remote commands on it.
+type TargetDevice struct {
+	ProfilerConfig *profile.ProfilerConfigRecord
+	DeviceConfig   *profile.DeviceConfigRecord
+}
 
 // Type harvestConfigRecord encapsulates the configuration parameters for Harvest.
 type harvestConfigRecord struct {
@@ -21,23 +29,23 @@ type harvestConfigRecord struct {
 // HarvestConfigParser provides support for reading and parsing Harvest
 // configuration json files. That includes the parameters specific to Harvest as
 // well as the profiler configurations that Harvest uses when launching the
-// companion tool Profile for running traces on Crostini and Crouton devices.
+// companion tool Profile for running traces on target devices.
 type HarvestConfigParser struct {
-	jsonParser             *profile.JSONConfigParser
-	harvestConfig          harvestConfigRecord
-	crostiniProfilerConfig *profile.ProfilerConfigRecord
-	croutonProfilerConfig  *profile.ProfilerConfigRecord
+	jsonParser    *profile.JSONConfigParser
+	harvestConfig harvestConfigRecord
+	targetDevice1 TargetDevice
+	targetDevice2 TargetDevice
 }
 
-// Type parser, and the function ParseJSONData below, provides a concrete
+// Struct parser, and the function ParseJSONData below, provides a concrete
 // implementation of the json-config ConfigPropertyHandler interface.
 type parser struct {
-	handler func(jsonData string) error
+	handler func(propName, jsonData string) error
 }
 
 // ParseJSONData is parser's handler function for interface ConfigPropertyHandler.
-func (p *parser) ParseJSONData(jsonData string) error {
-	return p.handler(jsonData)
+func (p *parser) ParseJSONData(propName, jsonData string) error {
+	return p.handler(propName, jsonData)
 }
 
 // CreateHarvestConfigParser creates and returns a HarvestConfigParser instance.
@@ -48,39 +56,52 @@ func CreateHarvestConfigParser() *HarvestConfigParser {
 
 	// Define and add a handler for property "Harvest".
 	var harvestParser = parser{
-		handler: func(jsonData string) error {
+		handler: func(propName, jsonData string) error {
 			return hc.parseHarvestParams(jsonData)
 		},
 	}
 	hc.jsonParser.AddHandler("Harvest", &harvestParser)
 
 	// Define and add a handler for property "CrostiniProfilerConfig".
-	var crostiniParser = parser{
-		handler: func(jsonData string) error {
-			var err error
-			hc.crostiniProfilerConfig, err = hc.parseProfilerConfig(jsonData)
-			return err
+	var legacyCrostiniParser = parser{
+		handler: func(propName, jsonData string) error {
+			targetDevice, err := hc.parseLegacyProfilerConfig(jsonData, "crostini")
+			if err != nil {
+				return err
+			}
+
+			hc.targetDevice1 = *targetDevice
+			return nil
 		},
 	}
-	hc.jsonParser.AddHandler("CrostiniProfilerConfig", &crostiniParser)
+	hc.jsonParser.AddHandler("CrostiniProfilerConfig", &legacyCrostiniParser)
 
 	// Define and add a handler for property "CroutonProfilerConfig".
-	var croutonParser = parser{
-		handler: func(jsonData string) error {
-			var err error
-			hc.croutonProfilerConfig, err = hc.parseProfilerConfig(jsonData)
-			return err
+	var legacyCroutonParser = parser{
+		handler: func(propName, jsonData string) error {
+			targetDevice, err := hc.parseLegacyProfilerConfig(jsonData, "crouton")
+			if err != nil {
+				return err
+			}
+
+			hc.targetDevice2 = *targetDevice
+			return nil
 		},
 	}
-	hc.jsonParser.AddHandler("CroutonProfilerConfig", &croutonParser)
+	hc.jsonParser.AddHandler("CroutonProfilerConfig", &legacyCroutonParser)
+
+	// Add a handlers for target devices.
+	hc.jsonParser.AddHandler("TargetDevice1", &hc.targetDevice1)
+	hc.jsonParser.AddHandler("TargetDevice2", &hc.targetDevice2)
+
 	return &hc
 }
 
-// AddHandler adds handler for the top-level config property with name fieldName.
+// AddHandler adds handler for the top-level config property with name propName.
 func (hc *HarvestConfigParser) AddHandler(
-	fieldName string, handler profile.ConfigPropertyHandler) error {
+	propName string, handler profile.ConfigPropertyHandler) error {
 
-	return hc.jsonParser.AddHandler(fieldName, handler)
+	return hc.jsonParser.AddHandler(propName, handler)
 }
 
 // OpenJSONFile opens a json file and get ready for processing it. If the file
@@ -118,16 +139,22 @@ func (hc *HarvestConfigParser) ShouldKeepTraceAfterUse() bool {
 	return hc.harvestConfig.KeepTracesInCache
 }
 
-// GetCrostiniProfilerConfig returns the profiler config for Crostini. May
-// return nil if no such configuration is found in the json data.
-func (hc *HarvestConfigParser) GetCrostiniProfilerConfig() *profile.ProfilerConfigRecord {
-	return hc.crostiniProfilerConfig
+// GetTargetDeviceConfig1 returns the target device for config TargetDevice1.
+// May be nil.
+func (hc *HarvestConfigParser) GetTargetDeviceConfig1() *TargetDevice {
+	if hc.targetDevice1.ProfilerConfig != nil && hc.targetDevice1.DeviceConfig != nil {
+		return &hc.targetDevice1
+	}
+	return nil
 }
 
-// GetCroutonProfilerConfig returns the profiler config for Crouton. May return
-// nil if no such configuration is found in the json data.
-func (hc *HarvestConfigParser) GetCroutonProfilerConfig() *profile.ProfilerConfigRecord {
-	return hc.croutonProfilerConfig
+// GetTargetDeviceConfig2 returns the target device for config TargetDevice2.
+// May be nil.
+func (hc *HarvestConfigParser) GetTargetDeviceConfig2() *TargetDevice {
+	if hc.targetDevice2.ProfilerConfig != nil && hc.targetDevice2.DeviceConfig != nil {
+		return &hc.targetDevice2
+	}
+	return nil
 }
 
 // Parse the Harvest config parameters from json data into harvestConfig.
@@ -139,11 +166,49 @@ func (hc *HarvestConfigParser) parseHarvestParams(jsonData string) error {
 	return nil
 }
 
-// Parse and return profiler configuration parameters from json data.
-func (hc *HarvestConfigParser) parseProfilerConfig(
-	jsonData string) (*profile.ProfilerConfigRecord, error) {
+// Parse the config properties for legacy configurations CrostiniProfilerConfig and
+// CroutonProfilerConfig. CrostiniProfilerConfig is automatically assigned the
+// exec-env value of "crostini" if one is not defined in the config file. Likewise,
+// CroutonProfilerConfig is assigned exec env value "crouton".
+func (hc *HarvestConfigParser) parseLegacyProfilerConfig(
+	jsonData, targetEnv string) (*TargetDevice, error) {
 
 	profileParser := profile.CreateProfilerConfigParser()
 	err := profileParser.ParseJSONFromReader(strings.NewReader(jsonData))
-	return profileParser.GetProfilerConfig(), err
+	if err != nil {
+		return nil, err
+	}
+
+	targetDevice := &TargetDevice{
+		ProfilerConfig: profileParser.GetProfilerConfig(),
+		DeviceConfig:   profileParser.GetDeviceConfig(),
+	}
+
+	if targetDevice.DeviceConfig == nil {
+		targetDevice.DeviceConfig = &profile.DeviceConfigRecord{
+			Name:    "",
+			ExecEnv: targetEnv,
+		}
+	} else if targetDevice.DeviceConfig.ExecEnv == "" {
+		targetDevice.DeviceConfig.ExecEnv = targetEnv
+	}
+
+	return targetDevice, nil
+}
+
+// ParseJSONData implements interface ConfigPropertyHandler on struct TargetDevice.
+func (td *TargetDevice) ParseJSONData(propName, jsonData string) error {
+	profileParser := profile.CreateProfilerConfigParser()
+	err := profileParser.ParseJSONFromReader(strings.NewReader(jsonData))
+	if err != nil {
+		return fmt.Errorf("could not parse %s: err = %s", propName, err.Error())
+	}
+
+	td.ProfilerConfig = profileParser.GetProfilerConfig()
+	td.DeviceConfig = profileParser.GetDeviceConfig()
+
+	if td.DeviceConfig == nil {
+		return fmt.Errorf("target-device config %s has no device info", propName)
+	}
+	return nil
 }

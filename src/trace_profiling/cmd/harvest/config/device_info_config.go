@@ -6,25 +6,26 @@ package config
 
 import "encoding/json"
 
-// MachineInfoConfig encapsulates the machine-configuration parameters read from
-// the JSON config file. Fields are as follows:
+// MachineInfoConfig encapsulates the config parameters that affect how
+// machine-info is collected from the devices. Fields are as follows:
 //  Enabled: whether machine info should be collected.
-//  Name: Optional name to ID this machine by. A UUID is assigned if left blank.
 //  UploadToDb: TODO (gwink): options to upload protobuf to DB.
 //  OutputFileTemplate: File name to which the protobuf should be written to.
+//      [[exec-env]] replaced with the execution environment, taken from
+//           target-device config, e.g. "host"
+//      [[name]] replaced with machine name, taken from target-device config.
 //      [[hwid]] is replaced with the machine hwid.
 //      [[utc-date]] is replaced with the UTC date, e.g. "20060102-150405"
 //      [[utc-time]] is replaced with the UTC time, e.g. "150405"
-//      Example: ""machine-info-crosvm-[[hwid]].json"
+//      Example: ""machine-info-[[exec-env]]-[[hwid]].json"
 type MachineInfoConfig struct {
 	Enabled            bool   `json:"enabled"`
-	Name               string `json:"name"`
 	UploadToDb         string `json:"uploadToDb"`
 	OutputFileTemplate string `json:"outputFileTemplate"`
 }
 
-// DeviceInfoConfig encapsulates the device-info configuration parameters read from
-// the JSON config file. Fields are as follows:
+// DeviceInfoToolConfig encapsulates the parameters that the device-info tool
+// uses to collect information from the devices. Fields are as follows:
 //    GetDeviceInfoBinPath: full path to tool get_device_info. If left empty,
 //        Harvest expects get_device_info to be available in PATH on the target
 //        device.
@@ -33,18 +34,17 @@ type MachineInfoConfig struct {
 //        is read from USER env on target device. May not be "root".
 //    CroutonMachine & CrosvmMachine: MachineInfoConfig specific to each target
 //        device. (See above.)
-type deviceInfoConfig struct {
+type deviceInfoToolConfig struct {
 	GetDeviceInfoBinPath string             `json:"getDeviceInfoBinPath"`
 	ProtoBufsOutputDir   string             `json:"protoBufsOutputDir"`
 	Owner                string             `json:"owner"`
-	CroutonMachine       *MachineInfoConfig `json:"croutonMachine"`
-	CrosvmMachine        *MachineInfoConfig `json:"crosvmMachine"`
+	Machine              *MachineInfoConfig `json:"machine"`
 }
 
 // DeviceInfoConfigParser provides support for reading and parsing device-info
 // configuration from a Harvest config json file.
 type DeviceInfoConfigParser struct {
-	config deviceInfoConfig
+	toolConfig deviceInfoToolConfig
 }
 
 // NewDeviceInfoConfigParser creates and returns a new DeviceInfoConfigParser
@@ -53,10 +53,9 @@ func NewDeviceInfoConfigParser() *DeviceInfoConfigParser {
 	return &DeviceInfoConfigParser{}
 }
 
-// ParseJSONData is a handler function that implements interface
-// profile.ConfigPropertyHandler.
-func (dp *DeviceInfoConfigParser) ParseJSONData(jsonData string) error {
-	if err := json.Unmarshal([]byte(jsonData), &dp.config); err != nil {
+// ParseJSONData implements interface profile.ConfigPropertyHandler.
+func (dp *DeviceInfoConfigParser) ParseJSONData(propName, jsonData string) error {
+	if err := json.Unmarshal([]byte(jsonData), &dp.toolConfig); err != nil {
 		return err
 	}
 	return nil
@@ -65,28 +64,21 @@ func (dp *DeviceInfoConfigParser) ParseJSONData(jsonData string) error {
 // GetDeviceInfoBinPath returns the get_device_info bin path read from the
 // config file.
 func (dp *DeviceInfoConfigParser) GetDeviceInfoBinPath() string {
-	return dp.config.GetDeviceInfoBinPath
+	return dp.toolConfig.GetDeviceInfoBinPath
 }
 
 // GetProtoBufsOutputDir returns the full path to the protobuf output dir read
 // from the config file.
 func (dp *DeviceInfoConfigParser) GetProtoBufsOutputDir() string {
-	return dp.config.ProtoBufsOutputDir
+	return dp.toolConfig.ProtoBufsOutputDir
 }
 
 // GetOwner returns the owner string read from the config file.
 func (dp *DeviceInfoConfigParser) GetOwner() string {
-	return dp.config.Owner
+	return dp.toolConfig.Owner
 }
 
-// GetCrosvmMachineInfoConfig returns the Crosvm machine-info config options read
-// from the config file. May be nil.
-func (dp *DeviceInfoConfigParser) GetCrosvmMachineInfoConfig() *MachineInfoConfig {
-	return dp.config.CrosvmMachine
-}
-
-// GetCroutonMachineInfoConfig returns the Crouton machine-info config options read
-// from the config file. May be nil.
-func (dp *DeviceInfoConfigParser) GetCroutonMachineInfoConfig() *MachineInfoConfig {
-	return dp.config.CroutonMachine
+// GetMachineConfig returns the machine parameters read from the config file. May be nil.
+func (dp *DeviceInfoConfigParser) GetMachineConfig() *MachineInfoConfig {
+	return dp.toolConfig.Machine
 }

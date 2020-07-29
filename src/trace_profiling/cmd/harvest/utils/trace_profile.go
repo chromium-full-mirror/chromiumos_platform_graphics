@@ -16,32 +16,37 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"trace_profiling/cmd/harvest/config"
 	"trace_profiling/cmd/profile/profile"
 )
 
-// FPSRecord records frame-per-second performance data for crostini/crouton comparisons.
+// FPSRecord records frame-per-second performance data for comparisons between
+// a reference device, usually a crouton device, and a test device.
 type FPSRecord struct {
-	FpsError        error
-	TraceName       string
-	CrostiniFps     float64
-	CroutonFps      float64
-	CrostiniPercent float64
+	FpsError       error   // Non-nil indicates an error occurred for this trace.
+	TraceName      string  // Name of trace that yielded this fps data.
+	RefDeviceName  string  // The name of the reference device.
+	RefDeviceEnv   string  // The exec env of the reference device, one of crostini, crouton, etc.
+	TestDeviceName string  // The name of the test device.
+	TestDeviceEnv  string  // The exec env for the test device.
+	TestFps        float64 // Measured frame-per-second for test device.
+	ReferenceFps   float64 // Measured frame-per-second for reference device.
+	TestFpsPercent float64 // Percent fps for test device v.s. reference device.
 }
 
-// TraceProfile takes profiler configuration for crostini and crouton devices and
-// is able to run traces on these platform.
+// TraceProfile takes profiler configuration for up to two target devices and
+// is run traces on these devices to collect profile data.
 type TraceProfile struct {
-	crostiniConfig    *profile.ProfilerConfigRecord // Profiler configuration for Crostini device. May be nil.
-	croutonConfig     *profile.ProfilerConfigRecord // Profiler configuration for Crouton device. May be nil.
-	profilerBinPath   string                        // Local path to Profiler tool.
-	fpsData           []FPSRecord                   // FPS comparison between Crostini and Crouton.
-	errorOut          chan error                    // This channel receives errors during profiling.
-	keepTracesInCache bool                          // Whether to keep trace files in the cache.
-	verbose           bool                          //  Whether to be verbose during profiling.
+	targetDevice1     *config.TargetDevice // First target device. May be nil.
+	targetDevice2     *config.TargetDevice // Second target device. May be nil.
+	profilerBinPath   string               // Local path to Profiler tool.
+	fpsData           []FPSRecord          // FPS comparison between the two devices, one per trace.
+	errorOut          chan error           // This channel receives errors during profiling.
+	keepTracesInCache bool                 // Whether to keep trace files in the cache.
+	verbose           bool                 //  Whether to be verbose during profiling.
 }
 
-// NewTraceProfile creates and returns a new TraceProfile object. Either crostiniConfig
-// or croutonConfig may be set to nil to ignore that platform.
+// NewTraceProfile creates and returns a new TraceProfile object.
 func NewTraceProfile(verbose bool) *TraceProfile {
 
 	tp := TraceProfile{verbose: verbose}
@@ -50,16 +55,17 @@ func NewTraceProfile(verbose bool) *TraceProfile {
 }
 
 // Setup must be invoked before calling RunTraces to configure the TraceProfile
-// instance.
+// instance.  Either device may be set to nil to run traces on only one device.
+// If both target devices are nil, this will be boring but will run very fast.
 func (tp *TraceProfile) Setup(
-	crostiniConfig *profile.ProfilerConfigRecord,
-	croutonConfig *profile.ProfilerConfigRecord,
+	targetDevice1 *config.TargetDevice,
+	targetDevice2 *config.TargetDevice,
 	errorOut chan error,
 	profilerBinPath string,
 	keepTracesInCache bool) {
 
-	tp.crostiniConfig = crostiniConfig
-	tp.croutonConfig = croutonConfig
+	tp.targetDevice1 = targetDevice1
+	tp.targetDevice2 = targetDevice2
 	tp.errorOut = errorOut
 	tp.profilerBinPath = profilerBinPath
 	tp.keepTracesInCache = keepTracesInCache
@@ -79,28 +85,28 @@ func (tp *TraceProfile) RunTraces(traces []string, cacheDir string) {
 	fetcher := NewGSFetcher(cacheDir, traceQueue, tp.errorOut, tp.verbose)
 	go fetcher.FetchTraceData(traces)
 
-	// Feed queues are used to feed trace-file data to profilers for crostini
-	// and crouton, which run in parallel. Conversely, result queues are used
-	// to receive data from these profilers.
-	var crostFeedQueue = make(chan string)
-	var croutFeedQueue = make(chan string)
-	var crostResultQueue = make(chan string)
-	var croutResultQueue = make(chan string)
+	// Feed queues are used to feed trace-file data to profilers for both devices,
+	// which run in parallel. Conversely, result queues are used to receive data
+	// data from these profilers.
+	var feedQueue1 = make(chan string)
+	var feedQueue2 = make(chan string)
+	var resultQueue1 = make(chan string)
+	var resultQueue2 = make(chan string)
 
-	// Run goroutines to profile on Crostini and Crouton in parallel.
-	go tp.profileTracesOnTarget(crostFeedQueue, "Crostini", tp.crostiniConfig, crostResultQueue)
-	go tp.profileTracesOnTarget(croutFeedQueue, "Crouton", tp.croutonConfig, croutResultQueue)
+	// Run goroutines to profile on both devices in parallel.
+	go tp.profileTracesOnTarget(feedQueue1, tp.targetDevice1, resultQueue1)
+	go tp.profileTracesOnTarget(feedQueue2, tp.targetDevice2, resultQueue2)
 
 	for traceRecord := range traceQueue {
 		if traceRecord == nil {
 			break
 		}
 
-		if tp.crostiniConfig != nil {
-			crostFeedQueue <- traceRecord.GetTraceFilePath()
+		if tp.targetDevice1 != nil {
+			feedQueue1 <- traceRecord.GetTraceFilePath()
 		}
-		if tp.croutonConfig != nil {
-			croutFeedQueue <- traceRecord.GetTraceFilePath()
+		if tp.targetDevice2 != nil {
+			feedQueue2 <- traceRecord.GetTraceFilePath()
 		}
 
 		// A short pause gives the profile goroutines a chance to grab the traces
@@ -110,30 +116,35 @@ func (tp *TraceProfile) RunTraces(traces []string, cacheDir string) {
 		tp.printIfVerbose("Waiting for profiling to complete... \n")
 
 		// Wait for result from profilers.
-		var crostProfile = ""
-		var croutProfile = ""
-		if tp.crostiniConfig != nil {
-			crostProfile = <-crostResultQueue
-			if crostProfile != "" {
-				appendTraceIDToProfile(traceRecord.GetTraceID(), crostProfile)
+		var profile1 = ""
+		var profile2 = ""
+		if tp.targetDevice1 != nil {
+			profile1 = <-resultQueue1
+			if profile1 != "" {
+				appendExtraInfoToProfile(traceRecord.GetTraceID(),
+					tp.targetDevice1.DeviceConfig.ExecEnv, tp.targetDevice1.DeviceConfig.Name, profile1)
 			}
 		}
-		if tp.croutonConfig != nil {
-			croutProfile = <-croutResultQueue
-			if croutProfile != "" {
-				appendTraceIDToProfile(traceRecord.GetTraceID(), croutProfile)
+		if tp.targetDevice2 != nil {
+			profile2 = <-resultQueue2
+			if profile2 != "" {
+				appendExtraInfoToProfile(traceRecord.GetTraceID(),
+					tp.targetDevice2.DeviceConfig.ExecEnv, tp.targetDevice2.DeviceConfig.Name, profile2)
 			}
 		}
 
-		if tp.crostiniConfig != nil && tp.croutonConfig != nil {
+		if tp.targetDevice1 != nil && tp.targetDevice2 != nil {
 			_, traceName := path.Split(traceRecord.GetTraceFilePath())
-			tp.gatherProfileResult(traceName, crostProfile, croutProfile)
+			tp.gatherProfileResult(traceName, tp.targetDevice1.DeviceConfig, profile1,
+				tp.targetDevice2.DeviceConfig, profile2)
 		} else {
-			if crostProfile != "" {
-				tp.printIfVerbose("Crostini profile ready in: %s\n", crostProfile)
+			if profile1 != "" {
+				tp.printIfVerbose("Profile for %s ready in: %s\n",
+					tp.targetDevice1.DeviceConfig.ExecEnv, profile1)
 			}
-			if croutProfile != "" {
-				tp.printIfVerbose("Crouton profile ready in: %s\n", croutProfile)
+			if profile2 != "" {
+				tp.printIfVerbose("Profile for %s ready in: %s\n",
+					tp.targetDevice2.DeviceConfig.ExecEnv, profile2)
 			}
 		}
 
@@ -149,21 +160,25 @@ func (tp *TraceProfile) RunTraces(traces []string, cacheDir string) {
 	}
 
 	// Closing the feed queues lets the goroutines we launched above exit gracefully.
-	close(crostFeedQueue)
-	close(croutFeedQueue)
+	close(feedQueue1)
+	close(feedQueue2)
 }
 
 // Profile traces coming in queue feedQueue onto the target specified in
 // targetBundle and feed the resulting profile file paths to resultQueue.
 func (tp *TraceProfile) profileTracesOnTarget(
 	feedQueue chan string,
-	targetName string,
-	profilerConfig *profile.ProfilerConfigRecord,
+	targetDevice *config.TargetDevice,
 	resultQueue chan string) {
+
+	targetName := "undefined"
+	if targetDevice != nil {
+		targetName = targetDevice.DeviceConfig.ExecEnv
+	}
 
 	for trace := range feedQueue {
 		tp.printIfVerbose("Tracing on %s with %s\n", targetName, trace)
-		profFile, err := tp.runProfile(trace, profilerConfig)
+		profFile, err := tp.runProfile(trace, targetDevice.ProfilerConfig)
 		if err != nil {
 			tp.errorOut <- fmt.Errorf("profiling on %s failed: prof=%s, err=%s",
 				targetName, profFile, err.Error())
@@ -241,30 +256,51 @@ func (tp *TraceProfile) customizeProfilerConfig(
 	return configFile.Name(), err
 }
 
-// Print FPS comparative info for Crostini v.s. Crouton into the output file.
-func (tp *TraceProfile) gatherProfileResult(traceName, crostiniFile, croutonFile string) {
-	if crostiniFile != "" && croutonFile != "" {
+// Print FPS comparative info for profile results from the two devices into the
+// output file. If a single device is a crouton device, then it is chosen as the
+// reference device and the other device is the test device. Otherwise, the
+// comparison order is arbitrary.
+func (tp *TraceProfile) gatherProfileResult(
+	traceName string,
+	device1 *profile.DeviceConfigRecord,
+	profileData1 string,
+	device2 *profile.DeviceConfigRecord,
+	profileData2 string) {
+
+	if profileData1 != "" && profileData2 != "" {
+		// Pick the crouton device, if one is available, as reference device.
+		referenceData, testData := profileData1, profileData2
+		referenceDevice, testDevice := device1, device2
+		if device2.ExecEnv == "crouton" {
+			referenceData, testData = profileData2, profileData1
+			referenceDevice, testDevice = device2, device1
+		}
+
 		var err error
-		fpsCrostini, e := getFpsFromProfile(crostiniFile)
+		fpsFromTestDevice, e := getFpsFromProfile(testData)
 		if e != nil {
 			err = e
 		}
-		fpsCrouton, e := getFpsFromProfile(croutonFile)
+		fpsFromReferenceDevice, e := getFpsFromProfile(referenceData)
 		if e != nil {
 			err = e
 		}
 
 		percent := math.Inf(1) // Positive infinity
-		if fpsCrouton > 0.001 {
-			percent = 100.0 * fpsCrostini / fpsCrouton
+		if fpsFromReferenceDevice > 0.001 {
+			percent = 100.0 * fpsFromTestDevice / fpsFromReferenceDevice
 		}
 
 		tp.fpsData = append(tp.fpsData, FPSRecord{
-			FpsError:        err,
-			TraceName:       traceName,
-			CrostiniFps:     fpsCrostini,
-			CroutonFps:      fpsCrouton,
-			CrostiniPercent: percent,
+			FpsError:       err,
+			TraceName:      traceName,
+			RefDeviceName:  referenceDevice.Name,
+			RefDeviceEnv:   referenceDevice.ExecEnv,
+			TestDeviceName: testDevice.Name,
+			TestDeviceEnv:  testDevice.ExecEnv,
+			TestFps:        fpsFromTestDevice,
+			ReferenceFps:   fpsFromReferenceDevice,
+			TestFpsPercent: percent,
 		})
 	}
 }
@@ -295,19 +331,27 @@ func getFpsFromProfile(profile string) (float64, error) {
 	return 0.0, fmt.Errorf("no FPS info found in profile %s", profile)
 }
 
-// Append a line with the trace ID at the end of the profile. Companion tool
-// gen_db_result parses this line to extract the trace ID.
-func appendTraceIDToProfile(traceID string, profFilepath string) error {
+// Append extra information about the device and trace at the end of the profile.
+// Companion tool gen_db_result parses these lines to extract the info.
+func appendExtraInfoToProfile(
+	traceID, machineExecEnv, machineName string, profFilepath string) error {
 	f, err := os.OpenFile(profFilepath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	traceIDLine := fmt.Sprintf("TRACE_ID: %s\n", traceID)
-	_, err = f.WriteString(traceIDLine)
+	if _, err := f.WriteString(fmt.Sprintf("TRACE_ID: %s\n", traceID)); err != nil {
+		return err
+	}
+	if _, err := f.WriteString(fmt.Sprintf("EXEC_ENV: %s\n", machineExecEnv)); err != nil {
+		return err
+	}
+	if _, err := f.WriteString(fmt.Sprintf("MACHINE_NAME: %s\n", machineName)); err != nil {
+		return err
+	}
 
-	return err
+	return nil
 }
 
 // If verbose mode is enabled, print the formatted string.
