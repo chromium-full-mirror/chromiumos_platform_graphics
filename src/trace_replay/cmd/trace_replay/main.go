@@ -285,8 +285,43 @@ func replayTrace(ctx context.Context, traceFileName string) (*comm.ReplayResult,
 	return parseReplayOutput(string(out))
 }
 
+func listFiles(path string) (map[string]uint64, error) {
+	result := make(map[string]uint64)
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, err;
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			result[file.Name()] = uint64(file.Size())
+		}
+	}
+	return result, nil
+}
+
 func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (*[]comm.ReplayResult, error) {
-	//TODO(tutankhamen): Check for free space (container file size + trace file size + some extra?)
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Preparing to run %v", *traceEntry))
+	// check is it enough space to run the test (container file size + trace file size + 16MB)
+	requiredSpace := traceEntry.StorageFile.Size + traceEntry.TraceFile.Size + uint64(16*1204*1024)
+	freeSpace, err := utils.GetFreeSpace(tempFolder)
+	if err != nil {
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Unable to get free space information: %s", err.Error()))
+	} else {
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Available space at <%s>: %s bytes, Required space: %s bytes",
+			tempFolder, utils.FormatSize(freeSpace), utils.FormatSize(requiredSpace)))
+		if freeSpace < requiredSpace {
+			// Dump the content of tempFolder
+			files, err := listFiles(tempFolder)
+			if err != nil {
+				logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Unable to read the content of %s: %s",
+					tempFolder, err.Error()))
+			} else {
+				logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("The content of %s: %v", tempFolder, files))
+			}
+			return nil, errors.New("Not enough space to run %s test.", traceEntry.Name)
+		}
+	}
 
 	// Download trace file via proxy server
 	downloadedFileName, err := downloadFile(ctx, tempFolder, config.ProxyServer.URL, traceEntry.StorageFile.Name)

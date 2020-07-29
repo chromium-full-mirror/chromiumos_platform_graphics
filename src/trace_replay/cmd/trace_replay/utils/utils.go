@@ -1,12 +1,19 @@
+// Copyright 2020 The Chromium OS Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 package utils
 
 import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"os"
+	"regexp"
+	"syscall"
 )
 
+// GetFileMD5Sum calculates MD5 checksum for the specified file
 func GetFileMD5Sum(ctx context.Context, fileName string) (string, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
@@ -19,4 +26,31 @@ func GetFileMD5Sum(ctx context.Context, fileName string) (string, error) {
 	}
 	hashInBytes := hash.Sum(nil)[:16]
 	return hex.EncodeToString(hashInBytes), nil
+}
+
+// FormatSize returns the formatted string for the specified integer value by
+// grouping decimals and separate thousands with commas
+func FormatSize(siz uint64) string {
+	str := fmt.Sprintf("%d", siz)
+	re := regexp.MustCompile(`(\d+)(\d{3})`)
+	for n := ""; n != str; {
+		n = str
+		str = re.ReplaceAllString(str, "$1,$2")
+	}
+	return str
+}
+
+// GetFreeSpace returns the available free space at given location in bytes
+func GetFreeSpace(path string) (uint64, error) {
+	var stat syscall.Statfs_t
+	wd, err := os.Getwd()
+	if err != nil {
+		return uint64(0), err
+	}
+	err = syscall.Statfs(wd, &stat)
+	if err != nil {
+		return uint64(0), err
+	}
+
+	return stat.Bavail * uint64(stat.Bsize), nil
 }
