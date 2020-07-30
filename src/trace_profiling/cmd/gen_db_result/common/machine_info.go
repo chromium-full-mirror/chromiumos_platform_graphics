@@ -9,14 +9,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	db "go.chromium.org/chromiumos/config/go/api/test/results/v1"
 )
 
-// Option constant that indicates owner name should be obtained from env.
-const defaultOwnerName = "get USER from env"
+// Special cmd-line option constant that indicates owner name should be obtained
+// from env. This value is also printed in the usage text, so it needs to be
+// descriptive. As such, it prints as: "default "USERNAME = get env USER"".
+const defaultOwnerName = "USERNAME = get env USER"
 
 // CmdMachineInfo encapsulates the machine-info sub-command.
 type CmdMachineInfo struct {
@@ -34,7 +37,8 @@ func NewCmdMachineInfo() *CmdMachineInfo {
 	}
 
 	// Note: default value for "owner" means not set.
-	cmd.flagSet.StringVar(&cmd.argOwner, "owner", defaultOwnerName, "Owner to assign")
+	cmd.flagSet.StringVar(&cmd.argOwner, "owner", defaultOwnerName,
+		"Owner to assign in format user/USERNAME")
 	cmd.flagSet.StringVar(&cmd.argMachineName, "name", "", "Machine name to assign")
 	cmd.flagSet.StringVar(&cmd.argOutputFile, "output", "", "Output file (default is stdout)")
 	cmd.flagSet.BoolVar(&cmd.argHelp, "help", false, "Show help info")
@@ -49,7 +53,20 @@ func (c *CmdMachineInfo) CmdName() string {
 
 // Setup is called to setup the sub-command.
 func (c *CmdMachineInfo) Setup(args []string) error {
-	return c.flagSet.Parse(args)
+	if err := c.flagSet.Parse(args); err != nil {
+		return err
+	}
+
+	// If an owner is specified through cmd-line option, ensure it conforms to the
+	// required format.
+	if c.argOwner != defaultOwnerName {
+		if !strings.HasPrefix(c.argOwner, "user/") ||
+			len(c.argOwner) == len("user/") {
+			return fmt.Errorf("value for -owner option must have format user/USERNAME")
+		}
+	}
+
+	return nil
 }
 
 // Execute is called to execute the sub-command.
@@ -80,6 +97,7 @@ func (c *CmdMachineInfo) Execute() error {
 		if c.argOwner == "root" {
 			return fmt.Errorf("machine owner may not be \"root\"")
 		}
+		c.argOwner = "user/" + c.argOwner
 	}
 	machine.Owner = c.argOwner
 
