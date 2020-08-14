@@ -14,6 +14,7 @@ import (
 	"net"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -53,11 +54,13 @@ type SSHTarget struct {
 // ssh.Session, shellSession makes it possible to run several commands while
 // preserving the context between these commands, much like a SSH shell.
 type shellSession struct {
-	session     *ssh.Session   // The underlying ssh Session.
-	shellStdin  io.WriteCloser // Shell's stdin, used to write command to the shell.
-	shellStdout *bufio.Reader  // Shell's stdout.
-	readBuffer  []byte         // Buffer for reading from the shell's stdout.
-	stdout      io.Writer      // Command's output is pipe to this writer.
+	session      *ssh.Session   // The underlying ssh Session.
+	shellStdin   io.WriteCloser // Shell's stdin, used to write command to the shell.
+	shellStdout  *bufio.Reader  // Shell's stdout.
+	readBuffer   []byte         // Buffer for reading from the shell's stdout.
+	stdout       io.Writer      // Command's output is pipe to this writer.
+	statusBuffer bytes.Buffer   // Buffer used to read last command status
+
 }
 
 // CreateSSHTargetWithParams creates a SSHTarget object from the given SSH
@@ -135,7 +138,22 @@ func (shell *shellSession) Run(cmd string) error {
 		return err
 	}
 
+	// Read the command output to shell.stdout.
 	shell.readCommandOutput(shell.stdout)
+
+	// Get the command status by running "echo $?".
+	_, err = fmt.Fprintf(shell.shellStdin, "echo $?\n")
+	if err != nil {
+		return err
+	}
+
+	shell.statusBuffer.Truncate(0)
+	shell.readCommandOutput(&shell.statusBuffer)
+	status := strings.TrimSpace(shell.statusBuffer.String())
+	if status != "0" {
+		return fmt.Errorf("cmd status = %s, output = %s", status, shell.stdout)
+	}
+
 	return nil
 }
 
@@ -160,28 +178,28 @@ func (shell *shellSession) readCommandOutput(out io.Writer) {
 			iMatchPrompt++
 			if iMatchPrompt == len(shellPrompt) {
 				// Shell prompt is matched. that signals the end of output.
-				shell.flushReadBuffer()
+				shell.flushReadBuffer(out)
 				break
 			}
 		} else {
 			iMatchPrompt = 0
 			if b == '\n' {
 				// Flush the read buffer at the end of each line.
-				shell.flushReadBuffer()
+				shell.flushReadBuffer(out)
 			}
 		}
 	}
 }
 
 // Flush and clear the content of the read buffer. Only the line that are part of
-// the command's output are piped to shell.stdout. The line with the shell's prompt
+// the command's output are piped to out. The line with the shell's prompt
 // is discarded.
-func (shell *shellSession) flushReadBuffer() {
-	if shell.stdout != nil && len(shell.readBuffer) > 0 {
+func (shell *shellSession) flushReadBuffer(out io.Writer) {
+	if out != nil && len(shell.readBuffer) > 0 {
 		s := string(shell.readBuffer)
 		s = strings.TrimRight(s, "\r\n")
 		if !strings.HasSuffix(s, shellPrompt) {
-			fmt.Fprintf(shell.stdout, "%s\n", s)
+			fmt.Fprintf(out, "%s\n", s)
 		}
 	}
 
@@ -306,6 +324,34 @@ func (s *SSHTarget) CloseShellSession() error {
 	}
 
 	return nil
+}
+
+// ListFiles returns a list of files found in dir that match the given glob
+// pattern. Files are returned as a slice with each entry of the form
+// "<dir>/filename".
+func (s *SSHTarget) ListFiles(dir, glob string) ([]string, error) {
+	// use ls to list all files with single-column format.
+	path := dir
+	if glob != "" {
+		path = filepath.Join(dir, glob)
+	}
+	cmd := fmt.Sprintf("ls -1 %s", path)
+	output, err := s.RunCmd(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	// Extract the files from each line of output.
+	lines := strings.Split(output, "\n")
+	files := make([]string, 0, len(lines))
+	for _, l := range lines {
+		f := strings.TrimSpace(l)
+		if f != "" {
+			files = append(files, f)
+		}
+	}
+
+	return files, nil
 }
 
 // CheckFileExists returns whether the file at the given path exists on the target.

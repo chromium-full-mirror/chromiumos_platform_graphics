@@ -43,9 +43,10 @@ var argConfigFilepath string
 var argEnableCompareFps bool
 var argToolToRun string
 
-// Config data read from JSON.
+// Parsers for reading config data from JSON config file.
 var harvestConfig *config.HarvestConfigParser
 var deviceInfoConfig *config.DeviceInfoConfigParser
+var gpuVisConfig *config.GpuVisConfigParser
 
 var targetDevice1 *config.TargetDevice
 var targetDevice2 *config.TargetDevice
@@ -53,6 +54,7 @@ var targetDevice2 *config.TargetDevice
 // Tools.
 var profileTool *utils.TraceProfile
 var deviceInfoTool *utils.DeviceInfoTool
+var gpuVisTool *utils.GpuVisTool
 
 // Setup the two target devices. It's possible for a target device to be nil, in
 // which case it is simply ignored.
@@ -65,6 +67,7 @@ func setupTargetDevices() {
 func setupTools() {
 	profileTool = utils.NewTraceProfile(argVerbose)
 	deviceInfoTool = utils.NewDeviceInfoTool(argVerbose)
+	gpuVisTool = utils.NewGpuVisTool(argVerbose)
 }
 
 // Generate the FPS comparative output to the target output file. Note that
@@ -194,12 +197,56 @@ func doHarvestDeviceInfoOnTarget(
 	}
 }
 
+// Run the GpuVisTool on one target device.
+func doHarvestGpuVisData() {
+	printIfVerbose("\nHarvesting GpuVis performance data:\n==================================\n")
+	if gpuVisConfig == nil {
+		fmt.Fprintf(os.Stderr, "Error: no GpuVis parameters in configuration.\n")
+		return
+	}
+
+	// GpuVisTool can only run on one device. Pick non-nil device as target. If both
+	// are non-nil, use targetDevice1 and print a warning.
+	targetDevice := targetDevice2
+	if targetDevice1 != nil {
+		targetDevice = targetDevice1
+		if targetDevice2 != nil {
+			fmt.Printf("Warning: GpuVis can only run on one device. Running on %s\n",
+				targetDevice.DeviceConfig.ExecEnv)
+		}
+	}
+
+	err := gpuVisTool.Setup(targetDevice, gpuVisConfig.GetGPUPerfConfig(),
+		harvestConfig.GetProfilerBinPath(), harvestConfig.GetTraceCacheDir(),
+		harvestConfig.GetTraces(), harvestConfig.ShouldKeepTraceAfterUse())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error getting GpuVis trace data from %s: %s\n",
+			targetDevice.DeviceConfig.ExecEnv, err.Error())
+		return
+	}
+
+	// Run GpuVisTool asynchronously. The for loop below will loop until channel
+	// errorFeed is closed.
+	errorFeed := make(chan error)
+	go func() {
+		gpuVisTool.Run(errorFeed)
+		close(errorFeed)
+	}()
+
+	for err := range errorFeed {
+		fmt.Fprintf(os.Stderr, "Error getting GpuVis trace data from %s: %s\n",
+			targetDevice.DeviceConfig.ExecEnv, err.Error())
+	}
+}
+
 // Read and parse the Harvest config json file and leave the result in global
 // var harvestConfig.
 func readHarvestConfigFromFile(jsonFilepath string) error {
 	harvestConfigParser := config.CreateHarvestConfigParser()
 	deviceInfoConfigParser := config.NewDeviceInfoConfigParser()
+	gpuVisConfigParser := config.NewGpuVisConfigParser()
 	harvestConfigParser.AddHandler("DeviceInfoTool", deviceInfoConfigParser)
+	harvestConfigParser.AddHandler("GpuVis", gpuVisConfigParser)
 
 	if err := harvestConfigParser.OpenJSONFile(jsonFilepath); err != nil {
 		return err
@@ -210,6 +257,7 @@ func readHarvestConfigFromFile(jsonFilepath string) error {
 
 	harvestConfig = harvestConfigParser
 	deviceInfoConfig = deviceInfoConfigParser
+	gpuVisConfig = gpuVisConfigParser
 	return nil
 }
 
@@ -251,5 +299,7 @@ func main() {
 		doHarvestProfiles()
 	case "device-info":
 		doHarvestDeviceInfo()
+	case "gpuvis":
+		doHarvestGpuVisData()
 	}
 }
