@@ -216,7 +216,7 @@ func getTraceEntries(traceList *repo.TraceList, queryLabels *[]string) ([]repo.T
 	return result, nil
 }
 
-func parseReplayOutput(output string) (*comm.ReplayResult, error) {
+func parseReplayOutput(output string) (map[string]comm.ValueEntry, error) {
 	re := regexp.MustCompile(apitraceOutputRE)
 	match := re.FindStringSubmatch(output)
 	if match == nil {
@@ -234,10 +234,20 @@ func parseReplayOutput(output string) (*comm.ReplayResult, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse fps %q", match[3])
 	}
-	return &comm.ReplayResult{
-		TotalFrames:       uint32(totalFrames),
-		AverageFPS:        float32(averageFPS),
-		DurationInSeconds: float32(durationInSeconds),
+	return map[string]comm.ValueEntry{
+		"frames": comm.ValueEntry{
+			Unit:      "frame",
+			Direction: 0,
+			Value:     float32(totalFrames),
+		}, "fps": comm.ValueEntry{
+			Unit:      "fps",
+			Direction: +1,
+			Value:     float32(averageFPS),
+		}, "time": comm.ValueEntry{
+			Unit:      "sec",
+			Direction: -1,
+			Value:     float32(durationInSeconds),
+		},
 	}, nil
 }
 
@@ -269,7 +279,7 @@ func checkPackageInstalled(name string) error {
 	return nil
 }
 
-func replayTrace(ctx context.Context, traceFileName string) (*comm.ReplayResult, error) {
+func replayTrace(ctx context.Context, traceFileName string) (map[string]comm.ValueEntry, error) {
 	cmd := exec.CommandContext(ctx, apitraceAppName, append(apitraceArgs, traceFileName)...)
 	out, err := cmd.CombinedOutput()
 
@@ -280,7 +290,7 @@ func replayTrace(ctx context.Context, traceFileName string) (*comm.ReplayResult,
 	}
 
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to replay trace file [%s]", traceFileName)
+		return nil, errors.Wrap(err, "Failed to replay trace file [%s]. Output: %s", traceFileName, out)
 	}
 	return parseReplayOutput(string(out))
 }
@@ -289,7 +299,7 @@ func listFiles(path string) (map[string]uint64, error) {
 	result := make(map[string]uint64)
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		return nil, err;
+		return nil, err
 	}
 
 	for _, file := range files {
@@ -300,7 +310,7 @@ func listFiles(path string) (map[string]uint64, error) {
 	return result, nil
 }
 
-func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (*[]comm.ReplayResult, error) {
+func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (map[string]comm.ValueEntry, error) {
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Preparing to run %v", *traceEntry))
 	// check is it enough space to run the test (container file size + trace file size + 16MB)
 	requiredSpace := traceEntry.StorageFile.Size + traceEntry.TraceFile.Size + uint64(16*1204*1024)
@@ -370,22 +380,24 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(replayTimeout)*time.Second)
 	defer cancel()
-	var replayResults []comm.ReplayResult
-	result, err := replayTrace(ctx, traceFileName)
-	if err != nil {
-		return nil, err
-	}
-	replayResults = append(replayResults, *result)
-
-	return &replayResults, nil
+	return replayTrace(ctx, traceFileName)
 }
 
 func main() {
 	startTime := time.Now()
 	// Check arguments and unmarshall config json
 	if len(os.Args) != 2 {
-		exitWithError(errors.New("invalid command line arguments count.\nUsage: cros_retrace <config_json>"))
+		exitWithError(errors.New("invalid command line arguments count.\nUsage: cros_retrace <config_json | --version>"))
 	}
+	if os.Args[1] == "--version" || os.Args[1] == "-v" {
+		versionInfo := comm.VersionInfo {
+			ProtocolVersion: comm.ProtocolVersion,
+		}
+		versionInfoJson, _ := json.Marshal(versionInfo)
+		fmt.Println(string(versionInfoJson))
+		os.Exit(0);
+	}
+	// Unmarshal the  config argument json
 	var config comm.TestGroupConfig
 	err := json.Unmarshal([]byte(os.Args[1]), &config)
 	if err != nil {
@@ -443,7 +455,7 @@ func main() {
 			entryResult.Message = err.Error()
 		} else {
 			entryResult.Result = comm.TestResultSuccess
-			entryResult.Values = *replayValues
+			entryResult.Values = replayValues
 			succeededCount++
 		}
 		result.Entries = append(result.Entries, entryResult)
