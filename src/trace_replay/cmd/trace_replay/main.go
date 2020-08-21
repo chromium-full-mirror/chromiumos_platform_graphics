@@ -29,9 +29,10 @@ import (
 )
 
 const (
-	tempFolder       = "/tmp"
-	apitraceAppName  = "glretrace"
-	apitraceOutputRE = `Rendered (\d+) frames in (\d*\.?\d*) secs, average of (\d*\.?\d*) fps`
+	tempFolder        = "/tmp"
+	glRetraceAppName  = "glretrace"
+	eglRetraceAppName = "eglretrace"
+	apitraceOutputRE  = `Rendered (\d+) frames in (\d*\.?\d*) secs, average of (\d*\.?\d*) fps`
 	// Default application timeout in seconds
 	defaultTimeout = 60 * 60
 	// Maximum allowed replay time for one trace in seonds
@@ -41,9 +42,31 @@ const (
 )
 
 var (
-	apitraceArgs     = []string{"--benchmark"}
+	retraceArgs      = []string{"--benchmark"}
 	requiredPackages = []string{"apitrace", "zstd"}
 )
+
+type replayAppConfig struct {
+	AppName string
+	Args    []string
+	EnvVars []string
+	Postfix string
+}
+
+var traceReplayConfigs = map[string]replayAppConfig{
+	comm.TestFlagDefault: replayAppConfig{
+		AppName: "glretrace",
+		Args:    retraceArgs,
+		EnvVars: nil,
+		Postfix: "",
+	},
+	comm.TestFlagSurfaceless: replayAppConfig{
+		AppName: "eglretrace",
+		Args:    retraceArgs,
+		EnvVars: []string{"WAFFLE_PLATFORM=sl", "LD_PRELOAD=libEGL.so.1"},
+		Postfix: "_surfaceless",
+	},
+}
 
 func runCommand(name string, args ...string) (exitCode int, stdout string, stderr string) {
 	var outbuf, errbuf bytes.Buffer
@@ -216,7 +239,7 @@ func getTraceEntries(traceList *repo.TraceList, queryLabels *[]string) ([]repo.T
 	return result, nil
 }
 
-func parseReplayOutput(output string) (map[string]comm.ValueEntry, error) {
+func parseReplayOutput(output string, postfix string) (map[string]comm.ValueEntry, error) {
 	re := regexp.MustCompile(apitraceOutputRE)
 	match := re.FindStringSubmatch(output)
 	if match == nil {
@@ -235,15 +258,15 @@ func parseReplayOutput(output string) (map[string]comm.ValueEntry, error) {
 		return nil, errors.Wrap(err, "failed to parse fps %q", match[3])
 	}
 	return map[string]comm.ValueEntry{
-		"frames": comm.ValueEntry{
+		"frames" + postfix: comm.ValueEntry{
 			Unit:      "frame",
 			Direction: 0,
 			Value:     float32(totalFrames),
-		}, "fps": comm.ValueEntry{
+		}, "fps" + postfix: comm.ValueEntry{
 			Unit:      "fps",
 			Direction: +1,
 			Value:     float32(averageFPS),
-		}, "time": comm.ValueEntry{
+		}, "time" + postfix: comm.ValueEntry{
 			Unit:      "sec",
 			Direction: -1,
 			Value:     float32(durationInSeconds),
@@ -279,8 +302,11 @@ func checkPackageInstalled(name string) error {
 	return nil
 }
 
-func replayTrace(ctx context.Context, traceFileName string) (map[string]comm.ValueEntry, error) {
-	cmd := exec.CommandContext(ctx, apitraceAppName, append(apitraceArgs, traceFileName)...)
+func replayTrace(ctx context.Context, config replayAppConfig, traceFileName string) (map[string]comm.ValueEntry, error) {
+	cmd := exec.CommandContext(ctx, config.AppName, append(config.Args, traceFileName)...)
+	if config.EnvVars != nil {
+		cmd.Env = append(os.Environ(), config.EnvVars...)
+	}
 	out, err := cmd.CombinedOutput()
 
 	if ctx.Err() == context.DeadlineExceeded {
@@ -292,7 +318,7 @@ func replayTrace(ctx context.Context, traceFileName string) (map[string]comm.Val
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to replay trace file [%s]. Output: %s", traceFileName, out)
 	}
-	return parseReplayOutput(string(out))
+	return parseReplayOutput(string(out), config.Postfix)
 }
 
 func listFiles(path string) (map[string]uint64, error) {
@@ -365,22 +391,47 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 		return nil, errors.New("Actual file MD5 checksum for %s is different from the value in metadata. Actual: %s, expected: %s", downloadedFileName, traceFileMD5Sum, traceEntry.TraceFile.MD5Sum)
 	}
 
-	// Cooling down
+	// Cool down and flush all pending filesistem pending i/o ops
 	time.Sleep(time.Duration(replayCoolDownTime) * time.Second)
-
-	// Execute all pending file system reads and writes
 	exec.Command("sync").Run()
 
 	// TODO(tutankhamen): save the trace file with meta information to the local cache
 
-	// We can't exceed replay timeout
+	// We can't exceed the test timeout
 	var replayTimeout uint32 = replayMaxTime
 	if traceEntry.ReplayTimeout != 0 {
 		replayTimeout = traceEntry.ReplayTimeout
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(replayTimeout)*time.Second)
 	defer cancel()
-	return replayTrace(ctx, traceFileName)
+
+	logMsg(ctx, config.ProxyServer.URL, "Replaying the trace with with the default settings.")
+	res, err := replayTrace(ctx, traceReplayConfigs[comm.TestFlagDefault], traceFileName)
+	if err != nil {
+		return res, err
+	}
+
+	// Replay the trace file with custom settings corresponding to an each flag list entry
+	for _, flag := range config.Flags {
+		if _, ok := traceReplayConfigs[flag]; !ok {
+			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Warning: Unable to find a trace replay config for <%s> flag! Skipping the test.", flag))
+			continue
+		}
+		// Cool down and flush all pending filesistem pending i/o ops
+		time.Sleep(time.Duration(replayCoolDownTime) * time.Second)
+		exec.Command("sync").Run()
+
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace with <%s> flag.", flag))
+		rr, err := replayTrace(ctx, traceReplayConfigs[flag], traceFileName)
+		if err != nil {
+			return rr, err
+		}
+		for k, v := range rr {
+			res[k] = v
+		}
+	}
+
+	return res, err
 }
 
 func main() {
@@ -390,12 +441,12 @@ func main() {
 		exitWithError(errors.New("invalid command line arguments count.\nUsage: cros_retrace <config_json | --version>"))
 	}
 	if os.Args[1] == "--version" || os.Args[1] == "-v" {
-		versionInfo := comm.VersionInfo {
+		versionInfo := comm.VersionInfo{
 			ProtocolVersion: comm.ProtocolVersion,
 		}
 		versionInfoJson, _ := json.Marshal(versionInfo)
 		fmt.Println(string(versionInfoJson))
-		os.Exit(0);
+		os.Exit(0)
 	}
 	// Unmarshal the  config argument json
 	var config comm.TestGroupConfig
