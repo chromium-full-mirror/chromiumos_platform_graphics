@@ -58,6 +58,12 @@ func CreateProfilerConfigParser() *ProfilerConfigParser {
 	return &pc
 }
 
+// SetBasePath set the base paths for all subsequent includes. This is optional,
+// but when used it must be done before opening or including any file.
+func (pc *ProfilerConfigParser) SetBasePath(basePath string) {
+	pc.jsonParser.SetBasePath(basePath)
+}
+
 // ParseJSONFile parse json file with path <jsonFile>. When this function is
 // successful, the parsed data may be retrieved with functions GetSSHParams,
 // GetTunnelParams and GetProfilerParams.

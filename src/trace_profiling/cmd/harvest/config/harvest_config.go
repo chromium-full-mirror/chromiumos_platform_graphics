@@ -65,13 +65,7 @@ func CreateHarvestConfigParser() *HarvestConfigParser {
 	// Define and add a handler for property "CrostiniProfilerConfig".
 	var legacyCrostiniParser = parser{
 		handler: func(propName, jsonData string) error {
-			targetDevice, err := hc.parseLegacyProfilerConfig(jsonData, "crostini")
-			if err != nil {
-				return err
-			}
-
-			hc.targetDevice1 = *targetDevice
-			return nil
+			return hc.parseLegacyProfilerConfig(jsonData, "crostini", &hc.targetDevice1)
 		},
 	}
 	hc.jsonParser.AddHandler("CrostiniProfilerConfig", &legacyCrostiniParser)
@@ -79,20 +73,25 @@ func CreateHarvestConfigParser() *HarvestConfigParser {
 	// Define and add a handler for property "CroutonProfilerConfig".
 	var legacyCroutonParser = parser{
 		handler: func(propName, jsonData string) error {
-			targetDevice, err := hc.parseLegacyProfilerConfig(jsonData, "crouton")
-			if err != nil {
-				return err
-			}
-
-			hc.targetDevice2 = *targetDevice
-			return nil
+			return hc.parseLegacyProfilerConfig(jsonData, "crouton", &hc.targetDevice2)
 		},
 	}
 	hc.jsonParser.AddHandler("CroutonProfilerConfig", &legacyCroutonParser)
 
-	// Add a handlers for target devices.
-	hc.jsonParser.AddHandler("TargetDevice1", &hc.targetDevice1)
-	hc.jsonParser.AddHandler("TargetDevice2", &hc.targetDevice2)
+	// Add a handlers for properties "TargetDevice1" and "TargetDevice2".
+	var targetDevice1Parser = parser{
+		handler: func(propName, jsonData string) error {
+			return hc.parseTargetDeviceConfig(propName, jsonData, &hc.targetDevice1)
+		},
+	}
+	hc.jsonParser.AddHandler("TargetDevice1", &targetDevice1Parser)
+
+	var targetDevice2Parser = parser{
+		handler: func(propName, jsonData string) error {
+			return hc.parseTargetDeviceConfig(propName, jsonData, &hc.targetDevice2)
+		},
+	}
+	hc.jsonParser.AddHandler("TargetDevice2", &targetDevice2Parser)
 
 	return &hc
 }
@@ -171,43 +170,54 @@ func (hc *HarvestConfigParser) parseHarvestParams(jsonData string) error {
 // exec-env value of "crostini" if one is not defined in the config file. Likewise,
 // CroutonProfilerConfig is assigned exec env value "crouton".
 func (hc *HarvestConfigParser) parseLegacyProfilerConfig(
-	jsonData, targetEnv string) (*TargetDevice, error) {
+	jsonData, targetEnv string, device *TargetDevice) error {
 
+	// Create a profile parser to parse this property. Beware, for includes with
+	// relatives paths to continue working as expected, it must use the base path
+	// from the current parser.
 	profileParser := profile.CreateProfilerConfigParser()
+	profileParser.SetBasePath(hc.jsonParser.GetBasePath())
+
 	err := profileParser.ParseJSONFromReader(strings.NewReader(jsonData))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	targetDevice := &TargetDevice{
-		ProfilerConfig: profileParser.GetProfilerConfig(),
-		DeviceConfig:   profileParser.GetDeviceConfig(),
-	}
+	device.ProfilerConfig = profileParser.GetProfilerConfig()
+	device.DeviceConfig = profileParser.GetDeviceConfig()
 
-	if targetDevice.DeviceConfig == nil {
-		targetDevice.DeviceConfig = &profile.DeviceConfigRecord{
+	if device.DeviceConfig == nil {
+		device.DeviceConfig = &profile.DeviceConfigRecord{
 			Name:    "",
 			ExecEnv: targetEnv,
 		}
-	} else if targetDevice.DeviceConfig.ExecEnv == "" {
-		targetDevice.DeviceConfig.ExecEnv = targetEnv
+	} else if device.DeviceConfig.ExecEnv == "" {
+		device.DeviceConfig.ExecEnv = targetEnv
 	}
 
-	return targetDevice, nil
+	return nil
 }
 
-// ParseJSONData implements interface ConfigPropertyHandler on struct TargetDevice.
-func (td *TargetDevice) ParseJSONData(propName, jsonData string) error {
+// Parse the config properties for one of the target devices (properties
+// TargetDevice1 and TargetDevice2).
+func (hc *HarvestConfigParser) parseTargetDeviceConfig(
+	propName, jsonData string, device *TargetDevice) error {
+
+	// Create a profile parser to parse this property. Beware, for includes with
+	// relatives paths to continue working as expected, it must use the base path
+	// from the current parser.
 	profileParser := profile.CreateProfilerConfigParser()
+	profileParser.SetBasePath(hc.jsonParser.GetBasePath())
+
 	err := profileParser.ParseJSONFromReader(strings.NewReader(jsonData))
 	if err != nil {
 		return fmt.Errorf("could not parse %s: err = %s", propName, err.Error())
 	}
 
-	td.ProfilerConfig = profileParser.GetProfilerConfig()
-	td.DeviceConfig = profileParser.GetDeviceConfig()
+	device.ProfilerConfig = profileParser.GetProfilerConfig()
+	device.DeviceConfig = profileParser.GetDeviceConfig()
 
-	if td.DeviceConfig == nil {
+	if device.DeviceConfig == nil {
 		return fmt.Errorf("target-device config %s has no device info", propName)
 	}
 	return nil

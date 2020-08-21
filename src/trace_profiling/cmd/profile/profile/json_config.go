@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -47,7 +48,8 @@ type JSONConfigParser struct {
 
 	// Each time a file is opened, its base path (dir) is pushed onto this stack.
 	// When a file to be opened has a relative path, it is considered to be relative
-	// to the base path at the top of the stack.
+	// to the base path at the top of the stack. That effectively makes an included
+	// file relative to the path of the file that contains the include.
 	basePathStack []string
 }
 
@@ -57,6 +59,21 @@ func CreateJSONConfigParser() *JSONConfigParser {
 		handlers:      make(map[string]ConfigPropertyHandler),
 		basePathStack: make([]string, 0, 11),
 	}
+}
+
+// SetBasePath set the base paths for all subsequent includes. This is optional,
+// but when used it must be done before opening or including any file.
+func (jc *JSONConfigParser) SetBasePath(basePath string) {
+	if len(jc.basePathStack) == 0 {
+		jc.basePathStack = append(jc.basePathStack, basePath)
+	} else {
+		log.Fatal("Error: trying to set include base path after opening files.\n")
+	}
+}
+
+// GetBasePath returns the current base path.
+func (jc *JSONConfigParser) GetBasePath() string {
+	return jc.peekBasePath()
 }
 
 // AddHandler adds a handler for property with name <fieldName> to the
@@ -82,7 +99,10 @@ func (jc *JSONConfigParser) OpenJSONConfigFile(jsonFile string) error {
 		return err
 	}
 	defer file.Close()
-	defer jc.popBasePath()
+
+	// Note: We leave the base path pushed on the stack by openFileAndPushBasePath.
+	// It effectively becomes the root base path for all subsequent includes and
+	// file opens.
 
 	jsonReader := filterCommentsFromStream(file)
 	return jc.OpenJSONFromReader(jsonReader)
@@ -269,8 +289,7 @@ func (jc *JSONConfigParser) peekBasePath() string {
 // Returns the absolute path for given file path aPath using the following
 // algorithm:
 // - If aPath is already an absolute path, return it as-is.
-// - If the base-path stack is empty, aPath is joined to the current working
-//   directory.
+// - If the base-path stack is empty aPath is joined to the current working directory.
 // - Otherwise, aPath is joined to the top-most path on the base-path stack.
 func (jc *JSONConfigParser) getAbsolutePath(aPath string) (string, error) {
 	if filepath.IsAbs(aPath) {

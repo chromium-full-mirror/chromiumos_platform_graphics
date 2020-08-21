@@ -306,5 +306,7 @@ func main() {
 		doHarvestDeviceInfo()
 	case "gpuvis":
 		doHarvestGpuVisData()
+	default:
+		fmt.Fprintf(os.Stderr, "Error: unknown tool %s\n", argToolToRun)
 	}
 }
