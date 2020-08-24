@@ -1,0 +1,52 @@
+{
+  /*
+   * Sample Harvest configuration file with includes for the various sections.
+   * This is the same config file as sample-config-mono.json. But instead of
+   * having all the parameters in a single files, parts are included from
+   * other files.
+   *
+   * Include can be a single file or an array of files. Relative include paths
+   * are relative to the dir  of the including file.
+   *
+   * Note: Refer to file sample-config-mono.json in same folder for detailed
+   *       comments about each section.
+   */
+
+  // Device config are included from other files. Includes can be a single file,
+  // given as a string, or a list of files given as an array of strings. Both
+  // approaches are shown below.
+  "TargetDevice1": {
+    "include": "target-crostini-config.json"
+  },
+  "TargetDevice2": {
+    "include": [
+      "target-crouton-config.json"
+    ]
+  },
+  "Harvest": {
+    "traceCacheDir": "/home/gwink/Gaming/profiles/cache",
+    "keepTracesInCache": true,
+    "profileBinPath": "/home/gwink/Gaming/profiles/bin/profile",
+    "traces": [
+      "/home/gwink/Gaming/profiles/cache/Lightroominteriorday.trace.bz2"
+    ]
+  },
+  "DeviceInfoTool": {
+    "getDeviceInfoBinPath": "/home/gwink/Gaming/profiles/bin/get_device_info",
+    "protoBufsOutputDir": "/home/gwink/Gaming/profiles/protobufs",
+    "owner": "user/gwink",
+    "machine": {
+      "enabled": true
+    }
+  },
+  "GpuVis": {
+    "chromeOSWorkingDir": "gpuperf",
+    "chromeOSEnvVar": [
+      "USE_I915_PERF=1",
+      "I915_PERF_METRIC=RenderBasic"
+    ],
+    "localGpuVisDir": "/home/gwink/Gaming/gpuvis",
+    "frameLoop": "1000-1005,300",
+    "runGpuVis": "./gpuvis"
+  }
+}

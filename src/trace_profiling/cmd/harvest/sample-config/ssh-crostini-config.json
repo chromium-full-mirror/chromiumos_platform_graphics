@@ -1,0 +1,23 @@
+{
+  "Profile": {
+    "tunnelConfig": {
+      "localPort": 9933,
+      "targetHostAddr": "penguin.linux.test",
+      "targetPort": 22,
+      "server": {
+        "addr": "192.168.1.29",
+        "port": 22,
+        "username": "root",
+        "password": "test0000",
+        "publicKeyFilepath": "/home/gwink/.ssh/testing_rsa"
+      }
+    },
+    "sshConfig": {
+      "addr": "localhost",
+      "port": 9933,
+      "username": "gwink",
+      "password": "test0000",
+      "publicKeyFilepath": "/home/gwink/.ssh/testing_rsa"
+    }
+  }
+}

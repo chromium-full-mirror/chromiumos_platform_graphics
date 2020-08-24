@@ -1,0 +1,24 @@
+{
+  "include": [
+    "ssh-crouton-config.json"
+  ],
+  "Device": {
+    "execEnv": "crouton",
+    "name": "gwink-sona-i7-C135643"
+  },
+  "Profile": {
+    "profilerConfig": {
+      "localTraceDir": "/home/gwink/Gaming/profiles/cache/",
+      "targetTraceDir": "/home/gwink/traces/",
+      "keepTraceOnTarget": false,
+      "localProfileDir": "/home/gwink/Gaming/profiles/fps/prof",
+      "profileNameSuffix": ".crouton.prof",
+      "localProfAppPath": "/home/gwink/Gaming/apitrace/usr/bin/",
+      "targetProfAppPath": "/home/gwink/apitrace/",
+      "profCommand": "/home/gwink/apitrace/glretrace -b -timeout=500 [[trace-file]] > [[prof-file]]",
+      "timeout": 600,
+      "killCommand": "killall glretrace",
+      "targetDisplay": "1"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "include": [
+    "ssh-crostini-config.json"
+  ],
+  "Device": {
+    "execEnv": "crostini",
+    "name": "gwink-sona-i7-C097462"
+  },
+  "Profile": {
+    "profilerConfig": {
+      "localTraceDir": "/home/gwink/Gaming/profiles/cache/",
+      "targetTraceDir": "/home/gwink/traces/",
+      "keepTraceOnTarget": false,
+      "localProfileDir": "/home/gwink/Gaming/profiles/fps/prof",
+      "profileNameSuffix": ".crostini.prof",
+      "localProfAppPath": "/home/gwink/Gaming/apitrace/usr/bin/",
+      "targetProfAppPath": "/home/gwink/apitrace/",
+      "profCommand": "/home/gwink/apitrace/glretrace  -b --timeout=300 [[trace-file]] > [[prof-file]]",
+      "timeout": 300,
+      "killCommand": "killall glretrace",
+      "targetDisplay": "0"
+    }
+  }
+}

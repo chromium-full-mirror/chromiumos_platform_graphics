@@ -1,0 +1,23 @@
+{
+  "Profile": {
+    "tunnelConfig": {
+      "localPort": 9922,
+      "targetHostAddr": "0.0.0.0",
+      "targetPort": 9922,
+      "server": {
+        "addr": "192.168.1.45",
+        "port": 22,
+        "username": "root",
+        "password": "test0000",
+        "publicKeyFilepath": "/home/gwink/.ssh/testing_rsa"
+      }
+    },
+    "sshConfig": {
+      "addr": "localhost",
+      "port": 9922,
+      "username": "gwink",
+      "password": "test0000",
+      "publicKeyFilepath": ""
+    }
+  }
+}

@@ -1,0 +1,187 @@
+{
+  // Sample monolithic Harvest configuration file.
+  // All the info is in a single file, with comments for didactic purpose. For a
+  // more practical config file structure, check sample-config-part0.json, which
+  // uses includes to divide the config parameters into several re-usable files.
+
+   // There can be up to two target devices. Each device config consists of info
+   // about the device itself and sub-config parameters used to gather trace-based
+   // profiles from the device.
+  "TargetDevice1": {
+    // Information about the device itself.
+    // Valid execvEnv values are host, termina, crostini, steam, arc, arcvm,
+    // crouton and crosvm. The name field should uniquely and consistently
+    // identify the device. For instance, you might build a machine name using
+    // your ldap and the device asset ID (from the asset tag).
+    "Device": {
+      "execEnv": "crostini",
+      "name": "gwink-sona-i7-C097462"
+    },
+    "Profile": {
+      // The tunnel config is optional. It is used to reach virtual devices such
+      // as crostini or crouton. In this example, we use port 9933 on the local
+      // machine to tunnel to port 22 on the crostini device. The server is the
+      // host Chrome OS.
+      "tunnelConfig": {
+        "localPort": 9933,
+        "targetHostAddr": "penguin.linux.test",
+        "targetPort": 22,
+        "server": {
+          "addr": "192.168.1.29",
+          "port": 22,
+          "username": "root",
+          "password": "test0000",
+          "publicKeyFilepath": "/home/gwink/.ssh/testing_rsa"
+        }
+      },
+      // The SSH config is mandatory and is used to reach the target device. In
+      // this case, we reach the device through the tunnel setup above, using
+      // port 9933 on the local machine.
+      "sshConfig": {
+        "addr": "localhost",
+        "port": 9933,
+        "username": "gwink",
+        "password": "test0000",
+        "publicKeyFilepath": "/home/gwink/.ssh/testing_rsa"
+      },
+      // Configuration parameters used by the Profiler to run traces on the target device.
+      "profilerConfig": {
+        // Where to find traces on the local machine.
+        "localTraceDir": "/home/gwink/Gaming/profiles/cache/",
+        // Where to store traces on the target device.
+        "targetTraceDir": "/home/gwink/traces/",
+        // Whether to keep traces on the target machine.
+        "keepTraceOnTarget": false,
+        // Where to store the collected profiles on the local machine.
+        "localProfileDir": "/home/gwink/Gaming/profiles/fps/prof",
+        // Suffix added to each profile file collected from this target device.
+        "profileNameSuffix": ".crostini.prof",
+        // Where to find binaries for the apitrace applications on the local machine.
+        // Leave blank to use binaries pre-installed on the target device.
+        "localProfAppPath": "/home/gwink/Gaming/apitrace/usr/bin/",
+        // Where to copy/find apitrace app binaries on the target device.
+        "targetProfAppPath": "/home/gwink/apitrace/",
+        // Cmd to execute to run a single trace. Placeholders [[trace-file]] and
+        // [[prof-file]] are replaced by the trace file name and output file name
+        // respectively.
+        "profCommand": "/home/gwink/apitrace/glretrace  -b --timeout=300 [[trace-file]] > [[prof-file]]",
+        // Assume that the app is frozen and kill it after this many seconds, using
+        // the kill shell cmd below.
+        "timeout": 300,
+        "killCommand": "killall glretrace",
+        // DISPLAY to use on the target device.
+        "targetDisplay": "0"
+      }
+    }
+  },
+
+  // Repeat info above for second target device. Note that the SSH tunnel must use
+  // a different port number on the local machine. If you only want to run harvest
+  // on one target device, you can simply delete TargetDevice2. To temporarily
+  // disable one or the other target device, rename it to something like
+  // "disabled_TargetDevice2" and it will be ignored.
+  "TargetDevice2": {
+    "Device": {
+      "execEnv": "crouton",
+      "name": "gwink-sona-i7-C135643"
+    },
+    "Profile": {
+      "tunnelConfig": {
+        "localPort": 9922,
+        "targetHostAddr": "0.0.0.0",
+        "targetPort": 9922,
+        "server": {
+          "addr": "192.168.1.45",
+          "port": 22,
+          "username": "root",
+          "password": "test0000",
+          "publicKeyFilepath": "/home/gwink/.ssh/testing_rsa"
+        }
+      },
+      "sshConfig": {
+        "addr": "localhost",
+        "port": 9922,
+        "username": "gwink",
+        "password": "test0000",
+        "publicKeyFilepath": ""
+      },
+      "profilerConfig": {
+        "localTraceDir": "/home/gwink/Gaming/profiles/cache/",
+        "targetTraceDir": "/home/gwink/traces/",
+        "keepTraceOnTarget": false,
+        "localProfileDir": "/home/gwink/Gaming/profiles/fps/prof",
+        "profileNameSuffix": ".crouton.prof",
+        "localProfAppPath": "/home/gwink/Gaming/apitrace/usr/bin/",
+        "targetProfAppPath": "/home/gwink/apitrace/",
+        "profCommand": "/home/gwink/apitrace/glretrace -b -timeout=300 [[trace-file]] > [[prof-file]]",
+        "timeout": 300,
+        "killCommand": "killall glretrace",
+        "targetDisplay": "1"
+      }
+    }
+  },
+
+  // What follows is the configuration for tool Harvest. By default, Harvest uses
+  // the device and profile configurations above to collect profiles data by
+  // running traces on the devices.
+  "Harvest": {
+    // Where to cache trace files on the local machine. (Should match localTraceDir
+    // in both Profile configurations above.)
+    "traceCacheDir": "/home/gwink/Gaming/profiles/cache",
+    // Whether to keep or delete trace files after using them.
+    "keepTracesInCache": true,
+    // Path to companion Profile executable.
+    "profileBinPath": "/home/gwink/Gaming/profiles/bin/profile",
+    "traces": [
+      // List of traces to run.
+      // Traces can be archives or trace files stored in Google Cloud Storage or
+      // on the local machine. Harvest will handle all these files transparently.
+      // (Note: This trace for sample only; not a valid game trace.)
+      "/home/gwink/Gaming/profiles/cache/Lightroominteriorday.trace.bz2"
+      // or "gs://path-to-trace-archives/Lightroominteriorday.trace.bz2"
+      // or "/home/gwink/Gaming/profiles/cacheLightroominteriorday.trace"
+      // or "gs://path-to-trace-files/Lightroominteriorday.trace"
+      // also supports tar archives.
+    ]
+  },
+
+  // The DeviceInfoTool config parameters are used with tool device-info in Harvest
+  // (option -tool device-info). It is used to collect information about the device
+  // and software packages that can then be uploaded to the Result DB. It can be left
+  // out if device-info tool is not used.
+  "DeviceInfoTool": {
+    // Path to the companion tool get_device_info.
+    "getDeviceInfoBinPath": "/home/gwink/Gaming/profiles/bin/get_device_info",
+    // Where to store protobuf files on the local machine.
+    "protoBufsOutputDir": "/home/gwink/Gaming/profiles/protobufs",
+    // Optional owner. If left blank, the tool will try to read the user name from
+    // host env var USER. The user name may not be "root".
+    "owner": "user/gwink",
+
+    // Instruct device-info tool to collect machine data.
+    "machine": {
+      "enabled": true
+    }
+  },
+
+  // The GpuVis config parameters are used with tool GpuVis in Harvest (-tool gpuvis)
+  // to collect CPU/GPU poerformance traces on a single target device and optionally
+  // analyze the traces with GpuVis. It can be left out if gpuvis tool is not used.
+  "GpuVis": {
+    // Path to working dir on Chrome-OS device.
+    "chromeOSWorkingDir": "gpuperf",
+    // Env var to use on Chrome-OS device when gathering trace data.
+    "chromeOSEnvVar": [
+      "USE_I915_PERF=1",
+      "I915_PERF_METRIC=RenderBasic"
+    ],
+    // GpuVis dir on local machine. GpuVis binaries and scripts should be available
+    // from this dir. Trace data will also be stored here.
+    "localGpuVisDir": "/home/gwink/Gaming/gpuvis",
+    // What frame within trace to loop on and how many time.
+    "frameLoop": "1000-1005,300",
+    // How to invoke gpuvis, relative to localGpuVisDir above. Set to empty string
+    // if you do not want to run gpuvis on collected trace data.
+    "runGpuVis": "./gpuvis"
+  }
+}
