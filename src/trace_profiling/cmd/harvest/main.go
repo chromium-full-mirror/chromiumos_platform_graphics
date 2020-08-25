@@ -178,9 +178,14 @@ func doHarvestDeviceInfoOnTarget(
 	} else {
 		printIfVerbose("Getting device info from %s device.\n", targetLabel)
 
-		deviceInfoTool.Setup(deviceInfoConfig.GetDeviceInfoBinPath(),
+		if err := deviceInfoTool.Setup(deviceInfoConfig.GetDeviceInfoBinPath(),
 			targetDevice.Name, deviceInfoConfig.GetOwner(), targetDevice.ExecEnv,
-			profilerConfig.SSHConfig, profilerConfig.TunnelConfig)
+			profilerConfig.SSHConfig, profilerConfig.TunnelConfig); err != nil {
+
+			fmt.Fprintf(os.Stderr, "Error getting machine-info for %s: %s\n", targetLabel, err.Error())
+			return
+		}
+
 		if err := deviceInfoTool.Run(); err != nil {
 			fmt.Fprintf(os.Stderr, "Error getting machine-info for %s: %s\n", targetLabel, err.Error())
 			return
@@ -189,7 +194,7 @@ func doHarvestDeviceInfoOnTarget(
 		// TODO (gwink): upload protobuf to DB if requested.
 
 		err := deviceInfoTool.WriteProtoBufToFile(deviceInfoConfig.GetProtoBufsOutputDir(),
-			machineConfig.OutputFileTemplate)
+			"machine_info_[[name]].json")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error writing machine-info to protobuf for %s: %s\n",
 				targetLabel, err.Error())

@@ -10,18 +10,9 @@ import "encoding/json"
 // machine-info is collected from the devices. Fields are as follows:
 //  Enabled: whether machine info should be collected.
 //  UploadToDb: TODO (gwink): options to upload protobuf to DB.
-//  OutputFileTemplate: File name to which the protobuf should be written to.
-//      [[exec-env]] replaced with the execution environment, taken from
-//           target-device config, e.g. "host"
-//      [[name]] replaced with machine name, taken from target-device config.
-//      [[hwid]] is replaced with the machine hwid.
-//      [[utc-date]] is replaced with the UTC date, e.g. "20060102-150405"
-//      [[utc-time]] is replaced with the UTC time, e.g. "150405"
-//      Example: ""machine-info-[[exec-env]]-[[hwid]].json"
 type MachineInfoConfig struct {
-	Enabled            bool   `json:"enabled"`
-	UploadToDb         string `json:"uploadToDb"`
-	OutputFileTemplate string `json:"outputFileTemplate"`
+	Enabled    bool   `json:"enabled"`
+	UploadToDb string `json:"uploadToDb"`
 }
 
 // DeviceInfoToolConfig encapsulates the parameters that the device-info tool

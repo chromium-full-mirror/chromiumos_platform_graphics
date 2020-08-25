@@ -14,6 +14,7 @@ import (
 	remote "trace_profiling/cmd/profile/remote"
 
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/google/uuid"
 	db "go.chromium.org/chromiumos/config/go/api/test/results/v1"
 )
 
@@ -59,7 +60,7 @@ func (dit *DeviceInfoTool) Setup(
 	machineOwner string,
 	execEnv string,
 	sshParams *remote.SSHParams,
-	tunnelParams *remote.TunnelParams) {
+	tunnelParams *remote.TunnelParams) error {
 
 	dit.deviceSSH = nil
 	dit.getDeviceInfoBinPath = getDeviceInfoBinPath
@@ -69,6 +70,13 @@ func (dit *DeviceInfoTool) Setup(
 	dit.targetSSHParams = sshParams
 	dit.tunnelParams = tunnelParams
 	dit.machinePb = nil
+
+	if machineName == "" {
+		dit.printMachineNameInfoRequirement()
+		return fmt.Errorf("no machine name provided in config file")
+	}
+
+	return nil
 }
 
 // Run runs DeviceInfoTool with the current configuration to collect device
@@ -215,4 +223,17 @@ func (dit *DeviceInfoTool) printIfVerbose(format string, a ...interface{}) {
 	if dit.verbose {
 		fmt.Printf(format, a...)
 	}
+}
+
+// Print useful information about the requirement for a unique machine name
+// in the configuration file.
+func (dit *DeviceInfoTool) printMachineNameInfoRequirement() {
+	uuidMachineName := uuid.New().String()
+	fmt.Fprintf(os.Stderr,
+		"Error: A globally unique machine name must be provided in the configuration\n"+
+			"file. You may use the uuid \"%s\", or something\n"+
+			"like \"<ldap>-<asset ID>\", where the asset-ID is taken from the asset tag,\n"+
+			"or you may create your own unique machine name. Once you have chosen a\n"+
+			"machine name, enter it in the JSON config file under Device -> name \n"+
+			"for device %s.\n", uuidMachineName, dit.execEnv)
 }
