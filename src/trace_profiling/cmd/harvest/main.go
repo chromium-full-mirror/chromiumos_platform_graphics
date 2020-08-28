@@ -15,7 +15,6 @@ import (
 
 	"trace_profiling/cmd/harvest/config"
 	"trace_profiling/cmd/harvest/utils"
-	"trace_profiling/cmd/profile/profile"
 )
 
 const (
@@ -136,70 +135,52 @@ func doHarvestProfiles() {
 	}
 }
 
-// Run the device-info tool on the target devices.
+// Run the device-info tool on the target devices. Depending on the configuration,
+// the device-info tool will collect machine information and software information
+// from the target devices.
 func doHarvestDeviceInfo() {
 	printIfVerbose("\nHarvesting device info:\n======================\n")
 
-	machineConfig := deviceInfoConfig.GetMachineConfig()
-	if machineConfig != nil {
-		if targetDevice1 != nil {
-			execEnv := targetDevice1.DeviceConfig.ExecEnv
-			if execEnv == "" {
-				fmt.Fprintf(os.Stderr, "Error: Fetching machine info aborted for TargetDevice1.\n"+
-					"Device config does not define ExecEnv.\n")
-			} else {
-				doHarvestDeviceInfoOnTarget(machineConfig, targetDevice1.ProfilerConfig,
-					targetDevice1.DeviceConfig)
-			}
-		}
+	const noExecEnv = "Error: Fetching machine info aborted for %s.\n" +
+		"Device config does not define ExecEnv.\n"
 
-		if targetDevice2 != nil {
-			execEnv := targetDevice2.DeviceConfig.ExecEnv
-			if execEnv == "" {
-				fmt.Fprintf(os.Stderr, "Error: Fetching machine info aborted for TargetDevice2.\n"+
-					"Device config does not define ExecEnv.\n")
-			} else {
-				doHarvestDeviceInfoOnTarget(machineConfig, targetDevice2.ProfilerConfig,
-					targetDevice2.DeviceConfig)
-			}
+	toolConfig := deviceInfoConfig.GetDeficeInfoToolConfig()
+	if targetDevice1 != nil {
+		execEnv := targetDevice1.DeviceConfig.ExecEnv
+		if execEnv == "" {
+			fmt.Fprintf(os.Stderr, noExecEnv, "TargetDevice1.\n")
+		} else {
+			doHarvestDeviceInfoOnTarget(toolConfig, targetDevice1)
+		}
+	}
+
+	if targetDevice2 != nil {
+		execEnv := targetDevice2.DeviceConfig.ExecEnv
+		if execEnv == "" {
+			fmt.Fprintf(os.Stderr, noExecEnv, "TargetDevice2.\n")
+		} else {
+			doHarvestDeviceInfoOnTarget(toolConfig, targetDevice2)
 		}
 	}
 }
 
 // Run the device-info tool on a single specific target.
 func doHarvestDeviceInfoOnTarget(
-	machineConfig *config.MachineInfoConfig,
-	profilerConfig *profile.ProfilerConfigRecord,
-	targetDevice *profile.DeviceConfigRecord) {
+	toolConfig *config.DeviceInfoToolConfig,
+	targetDevice *config.TargetDevice) {
 
-	targetLabel := targetDevice.ExecEnv
-	if !machineConfig.Enabled {
-		printIfVerbose("Skipping %s device: disabled in config.\n", targetLabel)
-	} else {
-		printIfVerbose("Getting device info from %s device.\n", targetLabel)
+	profilerConfig := targetDevice.ProfilerConfig
+	deviceConfig := targetDevice.DeviceConfig
+	deviceLabel := deviceConfig.ExecEnv
+	printIfVerbose("Getting device info from %s device.\n", deviceLabel)
 
-		if err := deviceInfoTool.Setup(deviceInfoConfig.GetDeviceInfoBinPath(),
-			targetDevice.Name, deviceInfoConfig.GetOwner(), targetDevice.ExecEnv,
-			profilerConfig.SSHConfig, profilerConfig.TunnelConfig); err != nil {
-
-			fmt.Fprintf(os.Stderr, "Error getting machine-info for %s: %s\n", targetLabel, err.Error())
-			return
-		}
-
-		if err := deviceInfoTool.Run(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting machine-info for %s: %s\n", targetLabel, err.Error())
-			return
-		}
-
-		// TODO (gwink): upload protobuf to DB if requested.
-
-		err := deviceInfoTool.WriteProtoBufToFile(deviceInfoConfig.GetProtoBufsOutputDir(),
-			"machine_info_[[name]].json")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error writing machine-info to protobuf for %s: %s\n",
-				targetLabel, err.Error())
-		}
+	deviceInfoTool.Setup(toolConfig, deviceLabel, deviceConfig.Name,
+		profilerConfig.SSHConfig, profilerConfig.TunnelConfig)
+	if err := deviceInfoTool.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error getting machine-info for %s: %s\n", deviceLabel, err.Error())
 	}
+
+	// TODO (gwink): upload protobuf to DB if requested.
 }
 
 // Run the GpuVisTool on one target device.

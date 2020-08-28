@@ -9,10 +9,21 @@ import "encoding/json"
 // MachineInfoConfig encapsulates the config parameters that affect how
 // machine-info is collected from the devices. Fields are as follows:
 //  Enabled: whether machine info should be collected.
-//  UploadToDb: TODO (gwink): options to upload protobuf to DB.
 type MachineInfoConfig struct {
-	Enabled    bool   `json:"enabled"`
-	UploadToDb string `json:"uploadToDb"`
+	Enabled bool `json:"enabled"`
+}
+
+// SoftwareInfoConfig encapsulates the config parameters that affect how
+// software info is collected from the devices. Fields are as follows:
+//  Enabled: whether software info should be collected.
+//  SkipPackages: when true do not collect software-package info.
+//  AlsoRunOnParent: Whether software info should also be collected from the
+//      parent device. This is meaningful only when the target device is not
+//      the host OS, such as a steam-vm or crouton device.
+type SoftwareInfoConfig struct {
+	Enabled         bool `json:"enabled"`
+	SkipPackages    bool `json:"skipPackages"`
+	AlsoRunOnParent bool `json:"alsoRunOnParent"`
 }
 
 // DeviceInfoToolConfig encapsulates the parameters that the device-info tool
@@ -25,17 +36,18 @@ type MachineInfoConfig struct {
 //        is read from USER env on target device. May not be "root".
 //    CroutonMachine & CrosvmMachine: MachineInfoConfig specific to each target
 //        device. (See above.)
-type deviceInfoToolConfig struct {
-	GetDeviceInfoBinPath string             `json:"getDeviceInfoBinPath"`
-	ProtoBufsOutputDir   string             `json:"protoBufsOutputDir"`
-	Owner                string             `json:"owner"`
-	Machine              *MachineInfoConfig `json:"machine"`
+type DeviceInfoToolConfig struct {
+	GetDeviceInfoBinPath string              `json:"getDeviceInfoBinPath"`
+	ProtoBufsOutputDir   string              `json:"protoBufsOutputDir"`
+	Owner                string              `json:"owner"`
+	Machine              *MachineInfoConfig  `json:"machine"`
+	Software             *SoftwareInfoConfig `json:"software"`
 }
 
 // DeviceInfoConfigParser provides support for reading and parsing device-info
 // configuration from a Harvest config json file.
 type DeviceInfoConfigParser struct {
-	toolConfig deviceInfoToolConfig
+	toolConfig DeviceInfoToolConfig
 }
 
 // NewDeviceInfoConfigParser creates and returns a new DeviceInfoConfigParser
@@ -69,7 +81,6 @@ func (dp *DeviceInfoConfigParser) GetOwner() string {
 	return dp.toolConfig.Owner
 }
 
-// GetMachineConfig returns the machine parameters read from the config file. May be nil.
-func (dp *DeviceInfoConfigParser) GetMachineConfig() *MachineInfoConfig {
-	return dp.toolConfig.Machine
+func (dp *DeviceInfoConfigParser) GetDeficeInfoToolConfig() *DeviceInfoToolConfig {
+	return &dp.toolConfig
 }
