@@ -20,11 +20,26 @@ guest_proc_name="$4"
 ssh "${host}" true || { echo "Error: could not ssh to ${host}" ; exit 1; }
 ssh "${guest}" true || { echo "Error: could not ssh to ${guest}" ; exit 1; }
 
+# Collect crosvm process IDs from host.
 crosvm_pids=$(ssh "${host}" pgrep crosvm)
-virtio_gpu_pid=$(ssh "${host}" pstree -p -t | grep virtio_gpu | \
-    sed -e 's/.*crosvm(//' -e 's/).*//')
-crosvm_parent_pid=$(ssh "${host}" pstree -p -a | grep "^  |   |-crosvm" | \
+# Get the crosvm GPU PID -- it has a thread named virtio_gpu.
+# First get the thread TID from pstree output:
+virtio_gpu_tid=$(ssh "${host}" pstree -pt | grep virtio_gpu | \
+    sed -e 's/.*virtio_gpu}(//' -e 's/).*//')
+if ! [[ "${virtio_gpu_tid}" =~ ^[0-9]+$ ]]; then
+  echo "Error: could not find virtio_gpu_tid."; exit 1
+fi
+# Then grep ps results for the TID to get the PID:
+virtio_gpu_pid=$(ssh "${host}" ps -AT | grep "\s${virtio_gpu_tid}\s" | \
+    sed -e 's/ .*//')
+if ! [[ "${virtio_gpu_pid}" =~ ^[0-9]+$ ]]; then
+  echo "Error: could not find virtio_gpu_pid."; exit 1
+fi
+crosvm_parent_pid=$(ssh "${host}" pstree -pa | grep "^  |   |-crosvm" | \
     sed -e 's/.*crosvm\,//' -e 's/ .*//')
+if ! [[ "${crosvm_parent_pid}" =~ ^[0-9]+$ ]]; then
+  echo "Error: could not find crosvm_parent_pid."; exit 1
+fi
 guest_pid=$(ssh "${guest}" pgrep "${guest_proc_name}")
 
 columns="Time, HostMemTotal, HostMemFree, HostMemAvailable, HostActive, \
