@@ -93,6 +93,7 @@ func CreateSSHTargetWithParams(params *SSHParams) (*SSHTarget, error) {
 			// Always accept key.
 			return nil
 		},
+		Timeout: 5 * time.Minute,
 	}
 
 	return &SSHTarget{

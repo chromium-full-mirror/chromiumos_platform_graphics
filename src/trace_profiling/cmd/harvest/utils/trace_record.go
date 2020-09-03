@@ -28,12 +28,12 @@ type GameInfo struct {
 
 // TraceInfo is also another JSON file associated with some traces.
 type TraceInfo struct {
-	TraceFileMD5     string    `json:"trace_file_md5"`
-	FileSize         int64     `json:"file_size"`
-	FileTime         time.Time `json:"file_time"`
-	ReportVersion    string    `json:"report_version"`
-	TraceFileVersion string    `json:"trace_file_version"`
-	TraceFramesCount string    `json:"trace_frames_count"`
+	TraceFileMD5     string      `json:"trace_file_md5"`
+	FileSize         int64       `json:"file_size"`
+	FileTime         time.Time   `json:"file_time"`
+	ReportVersion    string      `json:"report_version"`
+	TraceFileVersion json.Number `json:"trace_file_version"`
+	TraceFramesCount json.Number `json:"trace_frames_count"`
 }
 
 // TraceRecord encapsulates various data items associated with traces, including
