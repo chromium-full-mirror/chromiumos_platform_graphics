@@ -248,6 +248,7 @@ func (p *Profiler) profileTrace(binCmd, tracePath, localProfPath string) error {
 		p.target.DelFile(tmpFilename)
 	}()
 
+	tmpFilename = strings.TrimSpace(tmpFilename)
 	p.printIfVerbose("Profiling to temp file %s ", tmpFilename)
 
 	cmd := strings.Replace(binCmd, "[[trace-file]]", tracePath, 1)

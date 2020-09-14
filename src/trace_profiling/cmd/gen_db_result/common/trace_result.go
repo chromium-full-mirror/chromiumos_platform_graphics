@@ -90,10 +90,17 @@ func (c *CmdTraceResult) Execute() error {
 	// Process each file listed after the cmd-line options. Each successfully parsed
 	// file yields a Result protobuf object that is added to ResultList.
 	results := db.ResultList{}
+	numProfiles := len(c.flagSet.Args())
 	for _, f := range c.flagSet.Args() {
 		result, err := parseProfile(f)
 		if err != nil {
-			return fmt.Errorf("failed to parse profile %s, err = %s", f, err.Error())
+			if numProfiles > 1 {
+				fmt.Fprintf(os.Stderr, "Warning: skipping %s because of parsing error: %s\n",
+					f, err.Error())
+				continue
+			} else {
+				return fmt.Errorf("failed to parse profile %s, err = %s", f, err.Error())
+			}
 		}
 		result.Machine = &db.MachineId{Value: c.machineId}
 		result.SoftwareConfig = &db.SoftwareConfigId{Value: c.softwareConfigId}

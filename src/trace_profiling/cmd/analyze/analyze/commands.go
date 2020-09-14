@@ -166,7 +166,7 @@ func pickTargetProfile(args []string, profiles *Profiles) (prof *ProfileData, ta
 func parseSortOption(sortArg string) (choice string, sortFunc displaySortFunction, err error) {
 	choice = strings.Trim(strings.ToUpper(sortArg), "S=")
 	sortFunc = sortFunctionTable[choice]
-	if sortFunctionTable == nil {
+	if sortFunc == nil {
 		err = fmt.Errorf("invalid sort option: %s", sortArg)
 	}
 	return

@@ -358,7 +358,7 @@ func (s *SSHTarget) ListFiles(dir, glob string) ([]string, error) {
 // CheckFileExists returns whether the file at the given path exists on the target.
 func (s *SSHTarget) CheckFileExists(filePath string) (bool, error) {
 	cmd := fmt.Sprintf(
-		"if [ -f \"%s\" ]; then (echo present) fi", filePath)
+		"if [ -f \"%s\" ]; then (echo present) fi", strings.TrimSpace(filePath))
 	output, err := s.RunCmd(cmd)
 	return strings.HasPrefix(output, "present"), err
 }
@@ -404,7 +404,7 @@ func (s *SSHTarget) MkTempDir(base string) (string, error) {
 
 // DelFile removes the file or dir at the given path on the target.
 func (s *SSHTarget) DelFile(filePath string) error {
-	cmd := fmt.Sprintf("rm -f -r \"%s\"", filePath)
+	cmd := fmt.Sprintf("rm -f -r \"%s\"", strings.TrimSpace(filePath))
 	_, err := s.RunCmd(cmd)
 	return err
 }
@@ -527,6 +527,7 @@ func (s *SSHTarget) SendFile(srcFilename string, dstFilename string, permissions
 // GetRemoteFreeSpaceKb returns the amount of free disk space for the given
 // dir path on the target.
 func (s *SSHTarget) GetRemoteFreeSpaceKb(dirPath string) (int, error) {
+	dirPath = strings.TrimSpace(dirPath)
 	dfOut, err := s.RunCmd(fmt.Sprintf("df -Pk %s | tail -1 | awk '{print $4}'", dirPath))
 	if err != nil {
 		return -1, fmt.Errorf("failed to get free space for \"%s\" on target: %s",
