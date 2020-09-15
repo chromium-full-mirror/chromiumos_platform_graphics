@@ -339,6 +339,75 @@ func listFiles(path string) (map[string]uint64, error) {
 	return result, nil
 }
 
+func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileName string, replayTimeout uint32) (map[string]comm.ValueEntry, error) {
+	res := make(map[string]comm.ValueEntry)
+
+	logMsg(ctx, config.ProxyServer.URL, "Replaying the trace with with the default settings.")
+	res, err := replayTrace(ctx, traceReplayConfigs[comm.TestFlagDefault], traceFileName, replayTimeout)
+	if err != nil {
+		return res, err
+	}
+
+	// Replay the trace file with custom settings corresponding to an each flag list entry
+	for _, flag := range config.Flags {
+		if _, ok := traceReplayConfigs[flag]; !ok {
+			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Warning: Unable to find a trace replay config for <%s> flag! Skipping the test.", flag))
+			continue
+		}
+		// Cool down and flush all pending filesistem pending i/o ops
+		time.Sleep(time.Duration(replayCoolDownTime) * time.Second)
+		exec.Command("sync").Run()
+
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace with <%s> flag.", flag))
+		rr, err := replayTrace(ctx, traceReplayConfigs[flag], traceFileName, replayTimeout)
+		if err != nil {
+			return rr, err
+		}
+		for k, v := range rr {
+			res[k] = v
+		}
+	}
+
+	return res, nil
+}
+
+func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, traceFileName string, replayTimeout uint32) (map[string]comm.ValueEntry, error) {
+	res := make(map[string]comm.ValueEntry)
+
+	exec.Command("sync").Run()
+
+	flag := comm.TestFlagDefault
+	if len(config.Flags) > 0 {
+		flag = config.Flags[0]
+		msg := fmt.Sprintf("Using only the first of the specified replay flags: <%s>", flag)
+		logMsg(ctx, config.ProxyServer.URL, msg)
+	}
+
+	time_start := time.Now()
+	time_now := time_start
+	time_end := time_now.Add(time.Duration(config.ExtendedDuration) * time.Second)
+	run_count := 0
+	msg := fmt.Sprintf("Extended trace replay session configured to last %0.2f minutes, with <%s> flag", float32(config.ExtendedDuration)/60.0, flag)
+	logMsg(ctx, config.ProxyServer.URL, msg)
+	for time_now.Before(time_end) {
+		msg := fmt.Sprintf("Replaying the trace with <%s> flag, #%d at +%v from test start", flag, run_count+1, time.Since(time_start))
+		logMsg(ctx, config.ProxyServer.URL, msg)
+		rr, err := replayTrace(ctx, traceReplayConfigs[flag], traceFileName, replayTimeout)
+		if err != nil {
+			return rr, err
+		}
+		// TODO(ryanneph): We need to return results of every trace replay. map is not most convenient for this
+		for k, v := range rr {
+			res[fmt.Sprintf("replay%03d_%s", run_count, k)] = v
+		}
+
+		time_now = time.Now()
+		run_count++
+	}
+
+	return res, nil
+}
+
 func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (map[string]comm.ValueEntry, error) {
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Preparing to run %v", *traceEntry))
 	// check is it enough space to run the test (container file size + trace file size + 16MB)
@@ -406,33 +475,12 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 		replayTimeout = traceEntry.ReplayTimeout
 	}
 
-	logMsg(ctx, config.ProxyServer.URL, "Replaying the trace with with the default settings.")
-	res, err := replayTrace(ctx, traceReplayConfigs[comm.TestFlagDefault], traceFileName, replayTimeout)
-	if err != nil {
-		return res, err
+	// Run the trace replay(s)
+	if config.ExtendedDuration > 0 {
+		return runReplayRepeatedly(ctx, config, traceFileName, replayTimeout)
+	} else {
+		return runReplayOnce(ctx, config, traceFileName, replayTimeout)
 	}
-
-	// Replay the trace file with custom settings corresponding to an each flag list entry
-	for _, flag := range config.Flags {
-		if _, ok := traceReplayConfigs[flag]; !ok {
-			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Warning: Unable to find a trace replay config for <%s> flag! Skipping the test.", flag))
-			continue
-		}
-		// Cool down and flush all pending filesistem pending i/o ops
-		time.Sleep(time.Duration(replayCoolDownTime) * time.Second)
-		exec.Command("sync").Run()
-
-		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace with <%s> flag.", flag))
-		rr, err := replayTrace(ctx, traceReplayConfigs[flag], traceFileName, replayTimeout)
-		if err != nil {
-			return rr, err
-		}
-		for k, v := range rr {
-			res[k] = v
-		}
-	}
-
-	return res, err
 }
 
 func main() {
@@ -468,6 +516,10 @@ func main() {
 	runTimeout := defaultTimeout
 	if config.Timeout != 0 {
 		runTimeout = int(config.Timeout)
+	}
+	// Run long enough to complete extended test, if it has been requested
+	if config.ExtendedDuration > 0 {
+		runTimeout = utils.MaxOfInt(defaultTimeout, int(config.Timeout), 60*10+int(config.ExtendedDuration))
 	}
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(runTimeout)*time.Second)
 	defer cancel()

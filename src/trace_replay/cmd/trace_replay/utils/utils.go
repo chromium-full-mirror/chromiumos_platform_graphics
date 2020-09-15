@@ -54,3 +54,28 @@ func GetFreeSpace(path string) (uint64, error) {
 
 	return stat.Bavail * uint64(stat.Bsize), nil
 }
+
+// MinInt returns the smallest of its two integer arguments
+func MinInt(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+// MaxInt returns the largest of its two integer arguments
+func MaxInt(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
+}
+
+// MaxOfInt returns the largest of its integer arguments
+func MaxOfInt(num1 int, nums ...int) int {
+	v := num1
+	for _, num := range nums {
+		v = MaxInt(v, num)
+	}
+	return v
+}
