@@ -215,10 +215,7 @@ func (gv *GpuVisTool) verifyTargetDeviceCompatibility() error {
 
 	// List the i915 trace points.
 	traceDir := "/sys/kernel/debug/tracing/events/i915/"
-	files, err := gv.targetDeviceSSH.ListFiles(traceDir, "i915_request*")
-	if err != nil {
-		return fmt.Errorf("could not check target device: err = %s", err.Error())
-	}
+	files, _ := gv.targetDeviceSSH.ListFiles(traceDir, "i915_request*")
 
 	// Verify that at least some i915 trace points are available. Also check that
 	// low-level i915 trace points are available and print a warning if not.
@@ -388,7 +385,7 @@ func (gv *GpuVisTool) downloadTraceFiles() ([]string, error) {
 	}
 
 	for _, file := range srcFiles {
-		filename := filepath.Base(file)
+		filename := gv.targetDevice.DeviceConfig.ExecEnv + "_" + filepath.Base(file)
 		dstFile := filepath.Join(gv.gpuVisConfig.LocalGpuVisDir, filename)
 
 		gv.printIfVerbose("Download target-device trace %s to %s\n", file, dstFile)
@@ -591,7 +588,7 @@ func parseProfCmd(str string) (tokens []string) {
 	// Scan the cmd line up to the first - (option) or [ (file parameters).
 	// Beware of - and [ embedded in strings.
 	for i, c = range str {
-		if !withinString && (c == '-' || c == '[') {
+		if !withinString && ((c == '-' && prevChar == ' ') || c == '[') {
 			break
 		}
 
