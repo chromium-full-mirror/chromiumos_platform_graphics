@@ -302,7 +302,10 @@ func checkPackageInstalled(name string) error {
 	return nil
 }
 
-func replayTrace(ctx context.Context, config replayAppConfig, traceFileName string) (map[string]comm.ValueEntry, error) {
+func replayTrace(ctx context.Context, config replayAppConfig, traceFileName string, timeoutInSeconds uint32) (map[string]comm.ValueEntry, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeoutInSeconds)*time.Second)
+	defer cancel()
+
 	cmd := exec.CommandContext(ctx, config.AppName, append(config.Args, traceFileName)...)
 	if config.EnvVars != nil {
 		cmd.Env = append(os.Environ(), config.EnvVars...)
@@ -355,7 +358,7 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 			} else {
 				logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("The content of %s: %v", tempFolder, files))
 			}
-			return nil, errors.New("Not enough space to run %s test.", traceEntry.Name)
+			return nil, errors.New("not enough space to run %s test", traceEntry.Name)
 		}
 	}
 
@@ -402,11 +405,9 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	if traceEntry.ReplayTimeout != 0 {
 		replayTimeout = traceEntry.ReplayTimeout
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Duration(replayTimeout)*time.Second)
-	defer cancel()
 
 	logMsg(ctx, config.ProxyServer.URL, "Replaying the trace with with the default settings.")
-	res, err := replayTrace(ctx, traceReplayConfigs[comm.TestFlagDefault], traceFileName)
+	res, err := replayTrace(ctx, traceReplayConfigs[comm.TestFlagDefault], traceFileName, replayTimeout)
 	if err != nil {
 		return res, err
 	}
@@ -422,7 +423,7 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 		exec.Command("sync").Run()
 
 		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace with <%s> flag.", flag))
-		rr, err := replayTrace(ctx, traceReplayConfigs[flag], traceFileName)
+		rr, err := replayTrace(ctx, traceReplayConfigs[flag], traceFileName, replayTimeout)
 		if err != nil {
 			return rr, err
 		}
@@ -444,8 +445,8 @@ func main() {
 		versionInfo := comm.VersionInfo{
 			ProtocolVersion: comm.ProtocolVersion,
 		}
-		versionInfoJson, _ := json.Marshal(versionInfo)
-		fmt.Println(string(versionInfoJson))
+		versionInfoJSON, _ := json.Marshal(versionInfo)
+		fmt.Println(string(versionInfoJSON))
 		os.Exit(0)
 	}
 	// Unmarshal the  config argument json

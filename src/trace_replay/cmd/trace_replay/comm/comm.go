@@ -15,7 +15,7 @@ const (
 	ProtocolVersion = 1
 
 	// TestFlagDefault is used to select the default replay mode
-	TestFlagDefault     = "default"
+	TestFlagDefault = "default"
 	// TestFlagSurfaceless is used to select the surfaceless replay mode
 	TestFlagSurfaceless = "surfaceless"
 )
