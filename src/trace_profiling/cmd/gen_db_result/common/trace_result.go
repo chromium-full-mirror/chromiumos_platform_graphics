@@ -102,8 +102,14 @@ func (c *CmdTraceResult) Execute() error {
 				return fmt.Errorf("failed to parse profile %s, err = %s", f, err.Error())
 			}
 		}
-		result.Machine = &db.MachineId{Value: c.machineId}
-		result.SoftwareConfig = &db.SoftwareConfigId{Value: c.softwareConfigId}
+
+		// Cmd-line overrides.
+		if c.machineId != "" {
+			result.Machine = &db.MachineId{Value: c.machineId}
+		}
+		if c.softwareConfigId != "" {
+			result.SoftwareConfig = &db.SoftwareConfigId{Value: c.softwareConfigId}
+		}
 
 		results.Value = append(results.Value, result)
 	}

@@ -49,6 +49,10 @@ var (
 	// A regexp to extract perf info from Apitrace's "Rendered" line.
 	reRenderedLine = regexp.MustCompile("Rendered (?P<frames>[0-9]+) frames in " +
 		"(?P<seconds>[0-9.]+) secs, average of (?P<fps>[0-9.]+) fps")
+	// A regexp for extracting the exec-env line from profile data.
+	reExecEnvLine = regexp.MustCompile("(?P<name>EXEC_ENV): +(?P<value>.*)")
+	// A regexp for extracting the machine-name line from profile data.
+	reEMachineNameLine = regexp.MustCompile("(?P<name>MACHINE_NAME): +(?P<value>.*)")
 )
 
 // Struct profileParser provides methods to parse Apitrace profile data and
@@ -61,6 +65,8 @@ type profileParser struct {
 
 	labels       []*db.Result_Label // List of result labels parsed from profile.
 	traceID      string             // Trace ID parsed from profile.
+	execEnv      string             // Execution env. parsed from profile, e.g. "crouton"
+	machineName  string             // Machine name parse from profile, e.g. gwink-sona-C135643
 	renderedLine string             // Apitrace's "Rendered" line read from profile.
 }
 
@@ -227,17 +233,17 @@ func (reader *profileParser) createResult() (*db.Result, error) {
 	}
 
 	dbResult := db.Result{
-		Id:                reader.getResultID(),
-		Machine:           nil, // TODO (gwink)
-		SoftwareConfig:    nil, // TODO (gwink)
-		InvocationSource:  makeInvocationSource(),
-		CommandLine:       reader.findLabelValue(benchmarkApitrace, "CMD"),
-		Benchmark:         benchmarkApitrace,
-		Trace:             &gfx.TraceId{Value: reader.traceID},
-		PrimaryMetricName: "frame_rate",
-		Labels:            reader.labels,
-		Overrides:         nil, // TODO (gwink)
-		// TODO (gwink): ExecutionEnvironment:
+		Id:                   reader.getResultID(),
+		Machine:              &db.MachineId{Value: reader.machineName},
+		SoftwareConfig:       nil, // TODO(gwink)
+		InvocationSource:     makeInvocationSource(),
+		CommandLine:          reader.findLabelValue(benchmarkApitrace, "CMD"),
+		Benchmark:            benchmarkApitrace,
+		Trace:                &gfx.TraceId{Value: reader.traceID},
+		PrimaryMetricName:    "frame_rate",
+		Labels:               reader.labels,
+		Overrides:            nil, // TODO(gwink)
+		ExecutionEnvironment: strToExecEnv(reader.execEnv),
 	}
 
 	dbResult.Metrics = append(dbResult.Metrics, createFrameCountMetric(match[1]))
@@ -285,6 +291,10 @@ func parseProfile(prof string) (*db.Result, error) {
 					reader.recordLabel(benchmarkApitrace, result[1], result[2])
 				} else if result := reTraceIDLine.FindStringSubmatch(scanLine); result != nil {
 					reader.traceID = result[2]
+				} else if result := reExecEnvLine.FindStringSubmatch(scanLine); result != nil {
+					reader.execEnv = result[2]
+				} else if result := reEMachineNameLine.FindStringSubmatch(scanLine); result != nil {
+					reader.machineName = result[2]
 				} else if result := reGlxInfo.FindStringSubmatch(scanLine); result != nil {
 					reader.recordLabel(groupingGlxInfo, result[1], result[2])
 				}
@@ -299,4 +309,14 @@ func parseProfile(prof string) (*db.Result, error) {
 	// Wait for parsing to terminate before creating the Result protobuf object.
 	<-done
 	return reader.createResult()
+}
+
+// Utility function to convert a string, such as "crouton", to its protobuf
+// enum value, e.g. db.Result_CROUTON.
+func strToExecEnv(str string) db.Result_ExecutionEnvironment {
+	if execEnv, ok := db.Result_ExecutionEnvironment_value[strings.ToUpper(str)]; ok {
+		return db.Result_ExecutionEnvironment(execEnv)
+	}
+
+	return db.Result_UNKNOWN
 }
