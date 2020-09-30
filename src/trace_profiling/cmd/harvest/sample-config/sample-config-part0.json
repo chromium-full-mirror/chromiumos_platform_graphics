@@ -37,6 +37,11 @@
     "owner": "user/gwink",
     "machine": {
       "enabled": true
+    },
+    "software": {
+      "enabled": true,
+      "skipPackages": false,
+      "alsoRunOnParent": true
     }
   },
   "GpuVis": {

@@ -161,6 +161,13 @@
     // Instruct device-info tool to collect machine data.
     "machine": {
       "enabled": true
+    },
+    // Instruct device-info tool to collect software data including kernel, OS info.
+    // Set skipPackages to true to skip installed packages.
+    "software": {
+      "enabled": true,
+      "skipPackages": false,
+      "alsoRunOnParent": true
     }
   },
 
