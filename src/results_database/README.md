@@ -11,6 +11,7 @@ pip3 install .
 popd /dev/null
 
 pip3 install .
+pip3 install install --upgrade google-cloud-bigquery
 
 PATH=$PATH:$PWD/src/platform/graphics/src/results_database
 ```
