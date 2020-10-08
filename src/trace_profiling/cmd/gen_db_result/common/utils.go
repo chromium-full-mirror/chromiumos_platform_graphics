@@ -77,13 +77,14 @@ func WriteProtobuf(protobuf proto.Message, outputFile string) error {
 	return err
 }
 
-// Read a protobuf object from a file, either binary or JSON.
-func readProtoFromFile(filename string, p proto.Message) error {
+// ReadProtoFromFile reads a protobuf object from a file. The filename extension
+// determines whether the file is read as json or binary.
+func ReadProtoFromFile(filename string, p proto.Message) error {
 	if strings.HasSuffix(filename, ".json") {
 		return readProtoFromJSON(filename, p)
-	} else {
-		return readProtoFromBin(filename, p)
 	}
+
+	return readProtoFromBin(filename, p)
 }
 
 // Read a protobuf object from a raw (binary) file.

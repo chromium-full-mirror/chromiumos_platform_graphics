@@ -144,7 +144,7 @@ func doHarvestDeviceInfo() {
 	const noExecEnv = "Error: Fetching machine info aborted for %s.\n" +
 		"Device config does not define ExecEnv.\n"
 
-	toolConfig := deviceInfoConfig.GetDeficeInfoToolConfig()
+	toolConfig := deviceInfoConfig.GetDeviceInfoToolConfig()
 	if targetDevice1 != nil {
 		execEnv := targetDevice1.DeviceConfig.ExecEnv
 		if execEnv == "" {
@@ -179,8 +179,6 @@ func doHarvestDeviceInfoOnTarget(
 	if err := deviceInfoTool.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error getting machine-info for %s: %s\n", deviceLabel, err.Error())
 	}
-
-	// TODO (gwink): upload protobuf to DB if requested.
 }
 
 // Run the GpuVisTool on one target device.

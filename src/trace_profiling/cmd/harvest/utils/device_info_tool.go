@@ -7,6 +7,7 @@ package utils
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -23,6 +24,12 @@ import (
 const (
 	// Tool to run on the device to get device info.
 	getInfoToolName = "get_device_info"
+
+	// Templates used to generate filename for protobufs in conjunction with
+	// function filenameFromTemplate.
+	machinePbFileTemplate            = "machine_info_[[name]].json"
+	targetSoftwareInfoPbFileTemplate = "software_info_[[exec-env]]_[[name]].json"
+	hostSoftwareInfoPbFileTemplate   = "software_info_host_[[name]].json"
 )
 
 // DeviceInfoTool represents the tool used to get information from a device
@@ -138,82 +145,241 @@ func (dit *DeviceInfoTool) Run() error {
 			if err != nil {
 				return err
 			}
-
-			// If parent software info was collected, use its protobuf ID as the target's
-			// software-info parent ID.
-			if dit.parentSoftwarePb != nil {
-				dit.targetSoftwarePb.Parent = &db.SoftwareConfigId{
-					Value: dit.parentSoftwarePb.Id.Value,
-				}
-			}
 		}
 	}
 
-	// TODO(gwink): Compare collected protobufs against existing protobuf in files.
-	// If they are different, then upload the new data to the database.
-
-	return dit.writeAllProtobufs()
+	return dit.writeAndUploadProtobufs()
 }
 
-// Write all the collected protobufs to file.
-func (dit *DeviceInfoTool) writeAllProtobufs() error {
-	err := dit.writeProtoBufToFile(dit.machinePb, dit.config.ProtoBufsOutputDir,
-		"machine_info_[[name]].json")
-	if err != nil {
-		return fmt.Errorf("could not save machine-info protobuf to file for %s: %s",
-			dit.execEnv, err.Error())
-	}
-
-	if dit.targetSoftwarePb != nil {
-		err = dit.writeProtoBufToFile(dit.targetSoftwarePb, dit.config.ProtoBufsOutputDir,
-			"software_info_[[name]].json")
-		if err != nil {
-			return fmt.Errorf("could not save software-info protobuf to file for %s: err = %s",
-				dit.execEnv, err.Error())
+// Write all the collected protobufs to files and optionally upload them to the result DB.
+func (dit *DeviceInfoTool) writeAndUploadProtobufs() error {
+	// Ensure the destination dir exists.
+	if dit.config.ProtoBufsOutputDir != "" {
+		if err := os.MkdirAll(dit.config.ProtoBufsOutputDir, os.ModePerm); err != nil {
+			return err
 		}
 	}
 
-	if dit.parentSoftwarePb != nil {
-		err = dit.writeProtoBufToFile(dit.parentSoftwarePb, dit.config.ProtoBufsOutputDir,
-			"host_software_info_[[name]].json")
-		if err != nil {
-			return fmt.Errorf("could not save parent-software-info protobuf to file for %s: err = %s",
-				dit.execEnv, err.Error())
+	if err := dit.writeAndUploadMachineProtobuf(); err != nil {
+		return err
+	}
+
+	return dit.writeAndUploadSoftwareProtobufs()
+}
+
+// Write to file and upload the machine-info protobuf.
+func (dit *DeviceInfoTool) writeAndUploadMachineProtobuf() error {
+	if dit.machinePb != nil {
+		pbFilePath := dit.getPbFilePath(dit.config.ProtoBufsOutputDir, machinePbFileTemplate)
+		uploadMode := dit.config.Machine.UploadToDb
+		needUpdate := dit.checkIfMachineInfoHasChanged(dit.machinePb, pbFilePath)
+		if needUpdate {
+			fmt.Printf("Updating machine-info pb\n")
+			err := dit.writeProtoBufToFile(dit.machinePb, pbFilePath)
+			if err != nil {
+				return fmt.Errorf("could not save machine-info protobuf to file for %s: %s",
+					dit.execEnv, err.Error())
+			}
+		}
+		if uploadMode == config.UploadModeAlways {
+			if err := dit.uploadPbToResultDb(pbFilePath, "Machine"); err != nil {
+				return fmt.Errorf("could not upload protobuf %s to DB: err=%s",
+					pbFilePath, err.Error())
+			}
 		}
 	}
 
 	return nil
 }
 
+// Write to file and upload the software-config protobufs.
+func (dit *DeviceInfoTool) writeAndUploadSoftwareProtobufs() error {
+	// Start with the parent software-config protobuf. Its ID will be stored in the
+	// target software-config protobuf and may require that it is updated.
+	parentSoftwareId, err := dit.writeAndUploadSoftwareConfigPb(
+		dit.parentSoftwarePb, hostSoftwareInfoPbFileTemplate)
+	if err != nil {
+		return err
+	}
+
+	dit.targetSoftwarePb.Parent = parentSoftwareId
+	_, err = dit.writeAndUploadSoftwareConfigPb(
+		dit.targetSoftwarePb, targetSoftwareInfoPbFileTemplate)
+
+	return err
+}
+
+// Write a single software-config protobuf to file and optionally upload it to
+// the result DB. Return its protobuf ID and any error.
+func (dit *DeviceInfoTool) writeAndUploadSoftwareConfigPb(
+	softwarePb *db.SoftwareConfig, pbFileTemplate string) (*db.SoftwareConfigId, error) {
+
+	if softwarePb == nil {
+		return nil, nil
+	}
+
+	uploadMode := dit.config.Software.UploadToDb
+	pbFilePath := dit.getPbFilePath(dit.config.ProtoBufsOutputDir, pbFileTemplate)
+	oldSoftwarePbFromFile := dit.readSoftwareConfigPbFromFile(pbFilePath)
+	needUpdate := dit.checkIfSoftwareInfoHasChanged(softwarePb, oldSoftwarePbFromFile)
+
+	// Retain the ID for this protobuf, either the old one from the file or the
+	// new one if the protobuf is updated.
+	var pbSoftwareId *db.SoftwareConfigId
+	if oldSoftwarePbFromFile != nil {
+		pbSoftwareId = oldSoftwarePbFromFile.GetId()
+	}
+
+	if needUpdate {
+		pbSoftwareId = softwarePb.GetId()
+		err := dit.writeProtoBufToFile(softwarePb, pbFilePath)
+		if err != nil {
+			return nil, fmt.Errorf("could not save software-info protobuf to file %s: %s",
+				pbFilePath, err.Error())
+		}
+	}
+
+	if uploadMode == config.UploadModeAlways {
+		if err := dit.uploadPbToResultDb(pbFilePath, "SoftwareConfig"); err != nil {
+			return nil, fmt.Errorf("could not upload protobuf %s to DB: err=%s",
+				pbFilePath, err.Error())
+		}
+	}
+
+	return pbSoftwareId, nil
+}
+
+// Upload the protobuf in file with path pbFilePath to the Result DB. Arg pbType is
+// protobuf type and is passed as option --message to the upload script. It should be one
+// of "Machine", "ResultList", "SoftwareConfig" or "TraceList".
+func (dit *DeviceInfoTool) uploadPbToResultDb(pbFilePath string, pbType string) error {
+	uploadScript := dit.config.UploadScript
+	if uploadScript == "" {
+		uploadScript = "bq_insert_pb.py"
+	}
+
+	dit.printIfVerbose("Uploading PB %s to result DB.... ", pbFilePath)
+
+	cmd := exec.Command(uploadScript, "--deduplicate", "--message", pbType, pbFilePath)
+
+	result, err := cmd.CombinedOutput()
+	if err != nil {
+		dit.printIfVerbose("failed.\n")
+		return fmt.Errorf("exec failed: %s, err = %s", result, err)
+	}
+
+	dit.printIfVerbose("done.\n")
+	return nil
+}
+
+// Return whether the machine-info in machinePb is different from the one found in the
+// file at pbFilePath. The create-time field is ignored for this comparison. Always return
+// true if the file doesn't exist.
+func (dit *DeviceInfoTool) checkIfMachineInfoHasChanged(
+	machinePb *db.Machine, pbFilePath string) bool {
+
+	// Load the reference PB from file.
+	var pbFromFile db.Machine
+	if err := gen_db.ReadProtoFromFile(pbFilePath, &pbFromFile); err != nil {
+		fmt.Printf("No machine-info PB file\n")
+		return true
+	}
+
+	// The create-time timestamp is irrelevant in the comparison. Zero it in both PBs.
+	savedTimeStamp := machinePb.GetCreateTime()
+	machinePb.CreateTime = nil
+	pbFromFile.CreateTime = nil
+
+	// PB struct have internal fields that make deep-comparisons difficult. Instead,
+	// convert both PBs to string and compare the strings.
+	str1 := proto.MarshalTextString(machinePb)
+	str2 := proto.MarshalTextString(&pbFromFile)
+	eq := (str1 == str2)
+
+	if !eq {
+		fmt.Printf("\n\n Machine info changed:\n\n%s\n\n%s\n\n", str1, str2)
+	}
+
+	// Restore the create-time timestamp in the input PB.
+	machinePb.CreateTime = savedTimeStamp
+
+	return !eq
+}
+
+// Read a software-config protobuf from file. Return nil if the file cannot be read.
+func (dit *DeviceInfoTool) readSoftwareConfigPbFromFile(pbFilePath string) *db.SoftwareConfig {
+	var pbFromFile db.SoftwareConfig
+	if err := gen_db.ReadProtoFromFile(pbFilePath, &pbFromFile); err != nil {
+		return nil
+	}
+
+	return &pbFromFile
+}
+
+// Return whether the software configs in newSoftwarePb and oldSoftwarePb are identical.
+func (dit *DeviceInfoTool) checkIfSoftwareInfoHasChanged(
+	newSoftwarePb, oldSoftwarePb *db.SoftwareConfig) bool {
+
+	// If there's no old software-config protobuf then we definitely need to update it.
+	if oldSoftwarePb == nil {
+		return true
+	}
+
+	// The create-time timestamp is irrelevant in the comparison. Zero it in both PBs.
+	newTimeStamp := newSoftwarePb.GetCreateTime()
+	oldTimeStamp := oldSoftwarePb.GetCreateTime()
+	newSoftwarePb.CreateTime = nil
+	oldSoftwarePb.CreateTime = nil
+
+	// Likewise with the protobuf ID. A new uuid is generated each time. If the rest of the
+	// buffers match, we can ignore it.
+	newPbId := newSoftwarePb.GetId()
+	oldPbId := oldSoftwarePb.GetId()
+	newSoftwarePb.Id = nil
+	oldSoftwarePb.Id = nil
+
+	// PB struct have internal fields that make deep-comparisons difficult. Instead,
+	// convert both PBs to string and compare the strings.
+	str1 := proto.MarshalTextString(newSoftwarePb)
+	str2 := proto.MarshalTextString(oldSoftwarePb)
+	eq := (str1 == str2)
+
+	// Restore the zero-out fields in the input PB.
+	newSoftwarePb.CreateTime = newTimeStamp
+	newSoftwarePb.Id = newPbId
+	oldSoftwarePb.CreateTime = oldTimeStamp
+	oldSoftwarePb.Id = oldPbId
+
+	return !eq
+}
+
+// Return the full file path to the file with the given template and parent directory dir.
+func (dit *DeviceInfoTool) getPbFilePath(dir, fileTemplate string) string {
+	filename := dit.filenameFromTemplate(fileTemplate)
+	if dir != "" {
+		filename = filepath.Join(dir, filename)
+	}
+
+	return filename
+}
+
 // Write a single protobuf to file. The file name is derived from the file template.
 // If the template is the empty string, no output takes place. The output file
 // format is determined by the filename extension and may be either JSON or raw
 // protobuf.
-func (dit DeviceInfoTool) writeProtoBufToFile(pb proto.Message, dir, fileTemplate string) error {
-	// Empty file template means no file output.
-	if fileTemplate == "" {
-		return nil
-	}
+func (dit *DeviceInfoTool) writeProtoBufToFile(pb proto.Message, pbFilePath string) error {
+	dit.printIfVerbose("Writing protobuf to %s\n", pbFilePath)
+	return gen_db.WriteProtobuf(pb, pbFilePath)
+}
 
-	// Build the file name from the template.
+// Return a filename derived from a template. Recognized template placeholders are
+// [[name]] for the machine name, [[exec-env]] for the execution environment (e.g.
+// "crostini", [[utc-date]] and [[utc-time]].)
+func (dit *DeviceInfoTool) filenameFromTemplate(fileTemplate string) string {
 	filename := strings.ReplaceAll(fileTemplate, "[[name]]", dit.machineName)
 	filename = strings.ReplaceAll(filename, "[[exec-env]]", dit.execEnv)
 	filename = strings.ReplaceAll(filename, "[[utc-date]]", GetUTCDateString())
-	filename = strings.ReplaceAll(filename, "[[utc-time]]", GetUTCTimeString())
-
-	// Create the output Dir if necessary.
-	if dir != "" {
-		err := os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			return err
-		}
-
-		filename = filepath.Join(dir, filename)
-	}
-
-	dit.printIfVerbose("Writing protobuf to %s\n", filename)
-
-	return gen_db.WriteProtobuf(pb, filename)
+	return strings.ReplaceAll(filename, "[[utc-time]]", GetUTCTimeString())
 }
 
 // Collect the machine-info from the device reachable through SSH by running

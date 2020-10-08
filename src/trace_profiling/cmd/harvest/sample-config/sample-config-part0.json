@@ -34,14 +34,17 @@
   "DeviceInfoTool": {
     "getDeviceInfoBinPath": "/home/gwink/Gaming/profiles/bin/get_device_info",
     "protoBufsOutputDir": "/home/gwink/Gaming/profiles/protobufs",
+    "uploadScript": "/home/gwink/chromiumos/src/platform/graphics/src/results_database/bq_insert_pb.py",
     "owner": "user/gwink",
     "machine": {
-      "enabled": true
+      "enabled": true,
+      "uploadToDb": "yes"
     },
     "software": {
       "enabled": true,
       "skipPackages": false,
-      "alsoRunOnParent": true
+      "alsoRunOnParent": true,
+      "uploadToDb": "yes"
     }
   },
   "GpuVis": {

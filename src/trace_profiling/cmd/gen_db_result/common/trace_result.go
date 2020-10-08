@@ -64,7 +64,7 @@ func (c *CmdTraceResult) Execute() error {
 	if c.argMachine != "" {
 		if strings.HasSuffix(c.argMachine, ".json") || strings.HasSuffix(c.argMachine, ".pb") {
 			machine := db.Machine{}
-			if err := readProtoFromFile(c.argMachine, &machine); err != nil {
+			if err := ReadProtoFromFile(c.argMachine, &machine); err != nil {
 				return fmt.Errorf("failed to parse machine pb %s, err = %s", c.argMachine, err.Error())
 			}
 			c.machineId = machine.Name.Value
@@ -77,7 +77,7 @@ func (c *CmdTraceResult) Execute() error {
 	if c.argSoftwareConfig != "" {
 		if strings.HasSuffix(c.argSoftwareConfig, ".json") || strings.HasSuffix(c.argSoftwareConfig, ".pb") {
 			softwareConfig := db.SoftwareConfig{}
-			if err := readProtoFromFile(c.argSoftwareConfig, &softwareConfig); err != nil {
+			if err := ReadProtoFromFile(c.argSoftwareConfig, &softwareConfig); err != nil {
 				return fmt.Errorf("failed to parse software config pb %s, err = %s", c.argSoftwareConfig, err.Error())
 			}
 			c.softwareConfigId = softwareConfig.Id.Value

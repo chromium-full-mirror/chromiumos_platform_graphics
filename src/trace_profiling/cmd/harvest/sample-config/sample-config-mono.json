@@ -154,25 +154,36 @@
     "getDeviceInfoBinPath": "/home/gwink/Gaming/profiles/bin/get_device_info",
     // Where to store protobuf files on the local machine.
     "protoBufsOutputDir": "/home/gwink/Gaming/profiles/protobufs",
+    // Path to Python scrip bq_insert_pb.py that is used to upload protobufs to the Result DB.
+    // If omitted or left blank, the path defaults to "bq_insert_pb.py", which will
+    // work nicely if the script is in your PATH env var.
+    "uploadScript": "/home/gwink/chromiumos/src/platform/graphics/src/results_database/bq_insert_pb.py",
     // Optional owner. If left blank, the tool will try to read the user name from
     // host env var USER. The user name may not be "root".
     "owner": "user/gwink",
 
     // Instruct device-info tool to collect machine data.
+    // Property "uploadToDb" determines whether protobufs are automatically uploaded to the
+    // Result DB. Valid values are "no" or "yes". Protobufs are uploaded to the DB with
+    // python script result_database/bq_insert_pb.py with option --deduplicate. Thus
+    // setting uploadToDb to "yes" will not result in duplicate entries in the DB
     "machine": {
-      "enabled": true
+      "enabled": true,
+      "uploadToDb": "yes"
     },
     // Instruct device-info tool to collect software data including kernel, OS info.
-    // Set skipPackages to true to skip installed packages.
+    // Set skipPackages to true to skip installed packages. See "machine" section above
+    // to read about property "uploadToDb".
     "software": {
       "enabled": true,
       "skipPackages": false,
-      "alsoRunOnParent": true
+      "alsoRunOnParent": true,
+      "uploadToDb": "yes"
     }
   },
 
   // The GpuVis config parameters are used with tool GpuVis in Harvest (-tool gpuvis)
-  // to collect CPU/GPU poerformance traces on a single target device and optionally
+  // to collect CPU/GPU performance traces on a single target device and optionally
   // analyze the traces with GpuVis. It can be left out if gpuvis tool is not used.
   "GpuVis": {
     // Path to working dir on Chrome-OS device.

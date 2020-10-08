@@ -74,7 +74,7 @@ func (c *CmdSoftwareInfo) Execute() error {
 
 	c.config = &db.SoftwareConfig{}
 	if c.argLoadPbFrom != "" {
-		if err := readProtoFromFile(c.argLoadPbFrom, c.config); err != nil {
+		if err := ReadProtoFromFile(c.argLoadPbFrom, c.config); err != nil {
 			return err
 		}
 		if c.argSoftwareConfigID != "" {
@@ -138,7 +138,7 @@ func (c *CmdSoftwareInfo) getParentSoftwareConfigID() (string, error) {
 
 	if strings.HasSuffix(c.argParent, ".json") || strings.HasSuffix(c.argParent, ".pb") {
 		parent := db.SoftwareConfig{}
-		if err := readProtoFromFile(c.argParent, &parent); err != nil {
+		if err := ReadProtoFromFile(c.argParent, &parent); err != nil {
 			return "", err
 		}
 		return parent.Id.Value, nil
