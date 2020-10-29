@@ -148,7 +148,8 @@ func httpRequestWrapper(ctx context.Context, proxyURL string, params url.Values)
 func downloadFile(ctx context.Context, localPath, proxyURL, filePath string) (string, error) {
 	// Send http GET download=filePath request to the server
 	params := url.Values{}
-	params.Add("download", filePath)
+	params.Add("type", "download")
+	params.Add("filePath", filePath)
 	httpResponse, err := httpRequestWrapper(ctx, proxyURL, params)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to download file: %v", filePath)
@@ -172,10 +173,37 @@ func downloadFile(ctx context.Context, localPath, proxyURL, filePath string) (st
 func logMsg(ctx context.Context, proxyURL, message string) error {
 	// Send http Get log=message request to the server
 	params := url.Values{}
-	params.Add("log", message)
+	params.Add("type", "log")
+	params.Add("message", message)
 	httpResponse, err := httpRequestWrapper(ctx, proxyURL, params)
 	if err != nil {
 		return errors.Wrap(err, "failed to log message: %v", message)
+	}
+	defer httpResponse.Body.Close()
+	return nil
+}
+
+// notifyInitFinished sends an event notifying of finished initialization
+func notifyInitFinished(ctx context.Context, proxyURL string) error {
+	params := url.Values{}
+	params.Add("type", "notifyInitFinished")
+	httpResponse, err := httpRequestWrapper(ctx, proxyURL, params)
+	if err != nil {
+		return errors.Wrap(err, "failed to send initFinished notification")
+	}
+	defer httpResponse.Body.Close()
+	return nil
+}
+
+// notifyInitFinished sends an event notifying of a single finished replay
+func notifyReplayFinished(ctx context.Context, proxyURL string, replayDesc string, replayStartTime float64) error {
+	params := url.Values{}
+	params.Add("type", "notifyReplayFinished")
+	params.Add("replayDescription", replayDesc)
+	params.Add("replayStartTime", strconv.FormatFloat(replayStartTime, 'e', -1, 64))
+	httpResponse, err := httpRequestWrapper(ctx, proxyURL, params)
+	if err != nil {
+		return errors.Wrap(err, "failed to send replayFinished notification")
 	}
 	defer httpResponse.Body.Close()
 	return nil
@@ -342,6 +370,10 @@ func listFiles(path string) (map[string]uint64, error) {
 func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileName string, replayTimeout uint32) (map[string]comm.ValueEntry, error) {
 	res := make(map[string]comm.ValueEntry)
 
+	if err := notifyInitFinished(ctx, config.ProxyServer.URL); err != nil {
+		return res, err
+	}
+
 	logMsg(ctx, config.ProxyServer.URL, "Replaying the trace with with the default settings.")
 	res, err := replayTrace(ctx, traceReplayConfigs[comm.TestFlagDefault], traceFileName, replayTimeout)
 	if err != nil {
@@ -363,6 +395,11 @@ func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileN
 		if err != nil {
 			return rr, err
 		}
+
+		if err := notifyReplayFinished(ctx, config.ProxyServer.URL, "Replay_"+flag, float64(time.Now().UnixNano()/1e9)); err != nil {
+			return res, err
+		}
+
 		for k, v := range rr {
 			res[k] = v
 		}
@@ -375,6 +412,9 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 	res := make(map[string]comm.ValueEntry)
 
 	exec.Command("sync").Run()
+	if err := notifyInitFinished(ctx, config.ProxyServer.URL); err != nil {
+		return res, err
+	}
 
 	flag := comm.TestFlagDefault
 	if len(config.Flags) > 0 {
@@ -382,6 +422,8 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 		msg := fmt.Sprintf("Using only the first of the specified replay flags: <%s>", flag)
 		logMsg(ctx, config.ProxyServer.URL, msg)
 	}
+	traceReplayConfig := traceReplayConfigs[flag]
+	traceReplayConfig.Args = append(traceReplayConfigs[flag].Args, "--dump-per-frame-stats=/tmp/per_frame_stats.json")
 
 	time_start := time.Now()
 	time_now := time_start
@@ -392,13 +434,19 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 	for time_now.Before(time_end) {
 		msg := fmt.Sprintf("Replaying the trace with <%s> flag, #%d at +%v from test start", flag, run_count+1, time.Since(time_start))
 		logMsg(ctx, config.ProxyServer.URL, msg)
-		rr, err := replayTrace(ctx, traceReplayConfigs[flag], traceFileName, replayTimeout)
+		rr, err := replayTrace(ctx, traceReplayConfig, traceFileName, replayTimeout)
 		if err != nil {
-			return rr, err
+			return res, err
 		}
+
+		replayDesc := fmt.Sprintf("replay%03d", run_count+1)
+		if err := notifyReplayFinished(ctx, config.ProxyServer.URL, replayDesc, float64(time_now.UnixNano()/1e9)); err != nil {
+			return res, err
+		}
+
 		// TODO(ryanneph): We need to return results of every trace replay. map is not most convenient for this
 		for k, v := range rr {
-			res[fmt.Sprintf("replay%03d_%s", run_count, k)] = v
+			res[fmt.Sprintf("%s_%s", replayDesc, k)] = v
 		}
 
 		time_now = time.Now()
