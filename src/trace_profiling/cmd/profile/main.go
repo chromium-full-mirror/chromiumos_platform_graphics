@@ -53,89 +53,33 @@ func runProfiling(prof *profile.Profiler, target *remote.SSHTarget, tunnel *remo
 	}
 }
 
-// Retrieve the configuration parameters from a single Bundle JSON file.
-func getParamsFromBundle(bundleFilePath string) (
-	*remote.SSHParams, *remote.TunnelParams, *profile.ProfileParams, error) {
-	sshParams, tunnelParams, profileParams, err := profile.ReadConfigBundle(bundleFilePath)
-	return sshParams, tunnelParams, profileParams, err
-}
-
-// Retrieve the configuration parameters from individual JSON files for
-// ssh, tunnel and profile configurations.
-func getParamsFromFiles(sshConfigFile, tunnelConfigFile, profileConfigFile string) (
-	*remote.SSHParams, *remote.TunnelParams, *profile.ProfileParams, error) {
-
-	var tunnelConfig *remote.TunnelParams
-	var err error
-	if tunnelConfigFile != "" && tunnelConfigFile != "/no-tunnel/" {
-		tunnelConfig, err = remote.ReadTunnelParamsFromJSON(tunnelConfigFile)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-	}
-
-	sshConfig, err := remote.CreateSSHParamsFromJSON(sshConfigFile)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	profConfig, err := profile.CreateProfileParamsFromJSON(profileConfigFile)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	return sshConfig, tunnelConfig, profConfig, nil
-}
-
 func main() {
-	var argUnifiedConfigFilePath string
-	var argTunnelConfigFilepath string
-	var argSSHConfigFilepath string
-	var argBundleConfigFilePath string
-	var argProfileConfigFilepath string
+	var argConfigFilePath string
 	var argForceInstallTools bool
 	var argAlwaysCopyTraces bool
 	var argEnableVerbose bool
 
-	flag.StringVar(&argUnifiedConfigFilePath, "config", "",
-		"Specify the SSH, tunneling and profiling parameters in a unified config json file.\n"+
-			"(Other config files are ignored when this is specified.)")
-	flag.StringVar(&argTunnelConfigFilepath, "tunnel-config", "/no-tunnel/",
-		"Optional tunnel (port-forwarding) configuration file")
-	flag.StringVar(&argSSHConfigFilepath, "ssh-config", "ssh_config.json",
-		"SSH configuration file")
-	flag.StringVar(&argProfileConfigFilepath, "profile-config", "profile_config.json",
-		"Profile configuration file")
-	flag.StringVar(&argBundleConfigFilePath, "config-bundle", "",
-		"Configuration-bundle file (deprecated, use -config with new json format instead)")
+	flag.StringVar(&argConfigFilePath, "config", "",
+		"Path to json config file with the SSH, tunneling and profiling parameters.")
 	flag.BoolVar(&argForceInstallTools, "reinstall-tools", false,
-		"Re-install the profiling tools on the remote device, even if they are already there")
+		"Re-install the profiling tools on the remote device, even if they are already there.")
 	flag.BoolVar(&argAlwaysCopyTraces, "always-copy-traces", false,
-		"Always copy the traces to the remote profiling device, even if they are already there")
+		"Always copy the traces to the remote profiling device, even if they are already there.")
 	flag.BoolVar(&argEnableVerbose, "verbose", false,
-		"Enable verbose mode, to see more info during profiling")
+		"Enable verbose mode, to see more info during profiling.")
 	flag.Parse()
 
-	// Unified configuration takes precedence, then a config bundle if available.
-	// Otherwise, we look for individual SSH, tunnel and profile config files.
 	var sshParams *remote.SSHParams
 	var tunnelParams *remote.TunnelParams
 	var profParams *profile.ProfileParams
 	var profilerConfig *profile.ProfilerConfigParser
 	var err error
-	if argUnifiedConfigFilePath != "" {
+	if argConfigFilePath != "" {
 		profilerConfig = profile.CreateProfilerConfigParser()
-		err = profilerConfig.ParseJSONFile(argUnifiedConfigFilePath)
-	} else if argBundleConfigFilePath != "" {
-		sshParams, tunnelParams, profParams, err = getParamsFromBundle(argBundleConfigFilePath)
-	} else {
-		sshParams, tunnelParams, profParams, err = getParamsFromFiles(
-			argSSHConfigFilepath, argTunnelConfigFilepath, argProfileConfigFilepath)
-	}
-
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		return
+		if err = profilerConfig.ParseJSONFile(argConfigFilePath); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			return
+		}
 	}
 
 	if profilerConfig != nil {
@@ -144,11 +88,11 @@ func main() {
 		profParams = profilerConfig.GetProfileParams()
 
 		if sshParams == nil {
-			fmt.Fprintf(os.Stderr, "No SSH configuration in %s\n", argUnifiedConfigFilePath)
+			fmt.Fprintf(os.Stderr, "No SSH configuration in %s\n", argConfigFilePath)
 			return
 		}
 		if profParams == nil {
-			fmt.Fprintf(os.Stderr, "No Profiler configuration in %s\n", argUnifiedConfigFilePath)
+			fmt.Fprintf(os.Stderr, "No Profiler configuration in %s\n", argConfigFilePath)
 			return
 		}
 	}
