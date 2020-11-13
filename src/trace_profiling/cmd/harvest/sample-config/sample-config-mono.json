@@ -68,7 +68,9 @@
         // Assume that the app is frozen and kill it after this many seconds, using
         // the kill shell cmd below.
         "timeout": 300,
+        // How long to wait between traces.
         "killCommand": "killall glretrace",
+        "delay": 0,
         // DISPLAY to use on the target device.
         "targetDisplay": "0"
       }
