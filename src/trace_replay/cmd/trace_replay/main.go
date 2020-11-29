@@ -57,7 +57,7 @@ var traceReplayConfigs = map[string]replayAppConfig{
 	comm.TestFlagDefault: replayAppConfig{
 		AppName: "glretrace",
 		Args:    retraceArgs,
-		EnvVars: nil,
+		EnvVars: []string{"DISPLAY=:0"},
 		Postfix: "",
 	},
 	comm.TestFlagSurfaceless: replayAppConfig{
@@ -68,16 +68,30 @@ var traceReplayConfigs = map[string]replayAppConfig{
 	},
 }
 
-func runCommand(name string, args ...string) (exitCode int, stdout string, stderr string) {
+func runCommand(ctx context.Context, env []string, appName string, args ...string) (exitCode int, stdout string, stderr string) {
+	appPathName, err := exec.LookPath(appName)
+	if err != nil {
+		exitCode = -1
+		stderr = err.Error()
+		return
+	}
+
 	var outbuf, errbuf bytes.Buffer
 	var waitStatus syscall.WaitStatus
-	cmd := exec.Command(name, args...)
+	cmd := exec.CommandContext(ctx, appPathName, args...)
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
+	cmd.Env = append(os.Environ(), env...)
 
-	err := cmd.Run()
+	err = cmd.Run()
 	stdout = outbuf.String()
 	stderr = errbuf.String()
+
+	if ctx.Err() == context.DeadlineExceeded {
+		// In case of timeout the err is always "signal: killed", so, it's better to replace it
+		// with more informative DeadlineExceeded error
+		err = ctx.Err()
+	}
 
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
@@ -97,21 +111,26 @@ func runCommand(name string, args ...string) (exitCode int, stdout string, stder
 }
 
 func decompressFile(ctx context.Context, fileName string, expectedExt string) (string, error) {
-	var decompressCmd *exec.Cmd
+	var appName string
+	var appArgs []string
 	fileExt := filepath.Ext(fileName)
 
 	switch fileExt {
 	case expectedExt:
 		return fileName, nil
 	case ".bz2":
-		decompressCmd = exec.Command("bunzip2", "-f", fileName)
+		appName = "bunzip2"
+		appArgs = []string{"-f", fileName}
 	case ".zst", ".xz":
-		decompressCmd = exec.Command("zstd", "-d", "-f", "--rm", "-T0", fileName)
+		appName = "zstd"
+		appArgs = []string{"-d", "-f", "--rm", "-T0", fileName}
 	default:
-		return "", errors.New("Unknown trace extension: %s", fileExt)
+		return "", errors.New("Unknown compressed file  extension: %s", fileExt)
 	}
-	if out, err := decompressCmd.CombinedOutput(); err != nil {
-		return "", errors.Wrap(err, "Unable to decompress <%s>. Combined output: %s", fileName, string(out))
+
+	exitCode, _, stderr := runCommand(ctx, nil, appName, appArgs...)
+	if exitCode != 0 {
+		return "", errors.New("Unable to decompress <%s>. Exit code: %d. %s", fileName, exitCode, stderr)
 	}
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName)), nil
 }
@@ -323,9 +342,9 @@ func exitWithError(err error) {
 	os.Exit(0)
 }
 
-func checkPackageInstalled(name string) error {
-	if exitCode, _, stderr := runCommand("dpkg", "-l", name); exitCode != 0 {
-		return errors.Wrap(fmt.Errorf("%s", stderr), "dpkg for %s failed with exit code %d!", name, exitCode)
+func checkPackageInstalled(ctx context.Context, name string) error {
+	if exitCode, _, stderr := runCommand(ctx, nil, "dpkg", "-l", name); exitCode != 0 {
+		return errors.New("dpkg for %s failed with exit code %d! %s", name, exitCode, stderr)
 	}
 	return nil
 }
@@ -334,22 +353,11 @@ func replayTrace(ctx context.Context, config replayAppConfig, traceFileName stri
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeoutInSeconds)*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, config.AppName, append(config.Args, traceFileName)...)
-	if config.EnvVars != nil {
-		cmd.Env = append(os.Environ(), config.EnvVars...)
+	exitCode, stdout, stderr := runCommand(ctx, config.EnvVars, config.AppName, append(config.Args, traceFileName)...)
+	if exitCode != 0 {
+		return nil, errors.New("Failed to replay trace file [%s]. Exit code: %d. %s", traceFileName, exitCode, stderr)
 	}
-	out, err := cmd.CombinedOutput()
-
-	if ctx.Err() == context.DeadlineExceeded {
-		// In case of timeout the err is always "signal: killed", so, it's better to replace it
-		// with more informative DeadlineExceeded error
-		err = ctx.Err()
-	}
-
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to replay trace file [%s]. Output: %s", traceFileName, out)
-	}
-	return parseReplayOutput(string(out), config.Postfix)
+	return parseReplayOutput(stdout, config.Postfix)
 }
 
 func listFiles(path string) (map[string]uint64, error) {
@@ -572,6 +580,12 @@ func main() {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(runTimeout)*time.Second)
 	defer cancel()
 
+	// TODO(tutankhamen): System environment in Borealis doesn't include PATH
+	// variable for some reason
+	if _, set := os.LookupEnv("PATH"); !set {
+		os.Setenv("PATH", "/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin")
+	}
+
 	// fetch the trace list from the repository
 	traceList, err := getTraceList(ctx, &config)
 	if err != nil {
@@ -580,7 +594,7 @@ func main() {
 
 	// Check prerequisites (apitrace, bz2, etc)
 	for _, pkgName := range requiredPackages {
-		if err := checkPackageInstalled(pkgName); err != nil {
+		if err := checkPackageInstalled(ctx, pkgName); err != nil {
 			exitWithError(err)
 		}
 	}
