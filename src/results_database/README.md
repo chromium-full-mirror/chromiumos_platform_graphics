@@ -2,11 +2,14 @@
 
 ## Python setup
 
+The following installs the protobuf libraries, the results database
+library and the bigquery library.
+
 ### Host
 
 ```sh
 # optional: source ~/venv/bin/activate
-pushd chromite/infra/proto/python >/dev/null
+pushd ../../../../../src/config/python >/dev/null
 pip3 install .
 popd /dev/null
 
