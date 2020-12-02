@@ -1,5 +1,19 @@
 # Graphics results database tools
 
+## Google Cloud setup
+
+Contact someone in OWNERS for access to the appropriate BigQuery database.
+
+Authenticate against Google Cloud:
+```sh
+gcloud auth login
+```
+
+Set project for BQ uploads:
+```sh
+gcloud config set project google.com:stainless-dev
+```
+
 ## Python setup
 
 The following installs the protobuf libraries, the results database
