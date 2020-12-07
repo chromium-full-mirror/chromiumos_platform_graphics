@@ -7,6 +7,7 @@ Contact someone in OWNERS for access to the appropriate BigQuery database.
 Authenticate against Google Cloud:
 ```sh
 gcloud auth login
+gcloud auth application-default login
 ```
 
 Set project for BQ uploads:
