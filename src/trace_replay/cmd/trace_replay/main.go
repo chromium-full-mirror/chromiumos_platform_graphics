@@ -488,10 +488,12 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	}
 
 	// Download trace file via proxy server
+	downloadStart := time.Now()
 	downloadedFileName, err := downloadFile(ctx, tempFolder, config.ProxyServer.URL, traceEntry.StorageFile.Name)
 	if err != nil {
 		return nil, err
 	}
+	downloadDuration := time.Since(downloadStart)
 	defer os.Remove(downloadedFileName)
 
 	// Perform integrity checks on the downloaded file
@@ -499,17 +501,21 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to get stat for %s", downloadedFileName)
 	}
+	sizeInMB := float64(fileInfo.Size()) / (1024.0 * 1024.0)
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("The %.2f MB file was downloaded to %s in %v (%.2f MB/s)", sizeInMB, downloadedFileName, downloadDuration, sizeInMB/downloadDuration.Seconds()))
 
 	if uint64(fileInfo.Size()) != traceEntry.StorageFile.Size {
 		return nil, errors.New("Actual file size of %s is different from the value in metadata. Actual: %db, expected: %db", downloadedFileName, fileInfo.Size(), traceEntry.StorageFile.Size)
 	}
 
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Decompressing %s", downloadedFileName))
 	traceFileName, err := decompressFile(ctx, downloadedFileName, ".trace")
 	if err != nil {
 		return nil, err
 	}
 	defer os.Remove(traceFileName)
 
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Validating MD5 checksum for %s", traceFileName))
 	traceFileMD5Sum, err := utils.GetFileMD5Sum(ctx, traceFileName)
 	if err != nil {
 		return nil, errors.Wrap(err, "Unable to calculate MD5 checksum for %s", traceFileName)
