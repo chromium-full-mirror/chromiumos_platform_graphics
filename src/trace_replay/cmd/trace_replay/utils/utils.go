@@ -43,11 +43,7 @@ func FormatSize(siz uint64) string {
 // GetFreeSpace returns the available free space at given location in bytes
 func GetFreeSpace(path string) (uint64, error) {
 	var stat syscall.Statfs_t
-	wd, err := os.Getwd()
-	if err != nil {
-		return uint64(0), err
-	}
-	err = syscall.Statfs(wd, &stat)
+	err := syscall.Statfs(path, &stat)
 	if err != nil {
 		return uint64(0), err
 	}
