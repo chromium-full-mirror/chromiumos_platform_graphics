@@ -472,8 +472,8 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	if err != nil {
 		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Unable to get free space information: %s", err.Error()))
 	} else {
-		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Available space at <%s>: %s bytes, Required space: %s bytes",
-			tempFolder, utils.FormatSize(freeSpace), utils.FormatSize(requiredSpace)))
+		space_info := fmt.Sprintf("Available space at <%s>: %s bytes, Required space: %s bytes", tempFolder, utils.FormatSize(freeSpace), utils.FormatSize(requiredSpace))
+		logMsg(ctx, config.ProxyServer.URL, space_info)
 		if freeSpace < requiredSpace {
 			// Dump the content of tempFolder
 			files, err := listFiles(tempFolder)
@@ -483,7 +483,7 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 			} else {
 				logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("The content of %s: %v", tempFolder, files))
 			}
-			return nil, errors.New("not enough space to run %s test", traceEntry.Name)
+			return nil, errors.New("not enough space to run %s test. %s", traceEntry.Name, space_info)
 		}
 	}
 
@@ -645,9 +645,13 @@ func main() {
 		if ctx.Err() != nil {
 			result.Message = fmt.Sprintf("Failed with timeout. %v. ", ctx.Err())
 		} else {
-			result.Message = "Failed. Not all tests succeeded. "
+			if len(result.Entries) == 1 {
+				result.Message = result.Entries[0].Message
+			} else {
+				result.Message = "Failed. Not all tests succeeded"
+			}
 		}
-		result.Message += fmt.Sprintf("Total/Finished/Succeeded %d/%d/%d tests in %v.", len(traceEntries), len(result.Entries), succeededCount, time.Since(startTime))
+		result.Message += fmt.Sprintf(". Total/Finished/Succeeded %d/%d/%d tests in %v.", len(traceEntries), len(result.Entries), succeededCount, time.Since(startTime))
 	}
 
 	outputResult(result)
