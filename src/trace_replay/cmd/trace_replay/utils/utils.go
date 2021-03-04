@@ -8,7 +8,9 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path"
 	"regexp"
 	"syscall"
 )
@@ -49,6 +51,21 @@ func GetFreeSpace(path string) (uint64, error) {
 	}
 
 	return stat.Bavail * uint64(stat.Bsize), nil
+}
+
+// ClearDirectory deletes all the files and subdirectories in the given directory,
+// but keeps the empty directory itself
+func ClearDirectory(dir string) error {
+	items, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	for _, item := range items {
+		if err = os.RemoveAll(path.Join(dir, item.Name())); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // MinInt returns the smallest of its two integer arguments

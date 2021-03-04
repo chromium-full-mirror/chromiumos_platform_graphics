@@ -29,7 +29,9 @@ import (
 )
 
 const (
-	tempFolder        = "/tmp"
+	appDataDir        = "trace_replay.tmp"
+	tmpfsDir          = "/tmp"
+	minRequiredSpace  = 1024 * 1024
 	glRetraceAppName  = "glretrace"
 	eglRetraceAppName = "eglretrace"
 	apitraceOutputRE  = `Rendered (\d+) frames in (\d*\.?\d*) secs, average of (\d*\.?\d*) fps`
@@ -135,6 +137,30 @@ func decompressFile(ctx context.Context, fileName string, expectedExt string) (s
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName)), nil
 }
 
+func getTempDataStorageDir(storageRoot string, requiredSpace uint64) (string, uint64, error) {
+	freeSpace, err := utils.GetFreeSpace(storageRoot)
+	if err != nil {
+		return "", 0, errors.Wrap(err, "Unable to get free space information for %s", storageRoot)
+	}
+
+	space_info := fmt.Sprintf("Available space at <%s>: %s bytes, Required space: %s bytes", storageRoot, utils.FormatSize(freeSpace), utils.FormatSize(requiredSpace))
+	if freeSpace < requiredSpace {
+		return "", freeSpace, errors.New("Not enough space. %s", space_info)
+	}
+
+	resultDir := path.Join(storageRoot, appDataDir)
+	if _, err := os.Stat(resultDir); os.IsNotExist(err) {
+		if err = os.MkdirAll(resultDir, 0777); err != nil {
+			return "", freeSpace, errors.Wrap(err, "Unable to create directory %s", resultDir)
+		}
+	} else {
+		if err = utils.ClearDirectory(resultDir); err != nil {
+			return "", freeSpace, errors.Wrap(err, "Unable to clear %s directory content", resultDir)
+		}
+	}
+	return resultDir, freeSpace, nil
+}
+
 // httpRequestWrapper request the server and return the http.Response. Caller must close the response once finished processing.
 func httpRequestWrapper(ctx context.Context, proxyURL string, params url.Values) (*http.Response, error) {
 	parsedURL, err := url.Parse(proxyURL)
@@ -231,8 +257,12 @@ func notifyReplayFinished(ctx context.Context, proxyURL string, replayDesc strin
 // getTraceList function retreives the list of all traces for the repository specified
 // in the TestGroupConfig
 func getTraceList(ctx context.Context, config *comm.TestGroupConfig) (*repo.TraceList, error) {
+	storageDir, _, err := getTempDataStorageDir(tmpfsDir, minRequiredSpace)
+	if err != nil {
+		return nil, err
+	}
 	traceListFileName := fmt.Sprintf("repo.%d.json", config.Repository.Version)
-	fileName, err := downloadFile(ctx, tempFolder, config.ProxyServer.URL, traceListFileName)
+	fileName, err := downloadFile(ctx, storageDir, config.ProxyServer.URL, traceListFileName)
 	if err != nil {
 		return nil, err
 	}
@@ -466,30 +496,28 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 
 func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (map[string]comm.ValueEntry, error) {
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Preparing to run %v", *traceEntry))
-	// check is it enough space to run the test (container file size + trace file size + 16MB)
-	requiredSpace := traceEntry.StorageFile.Size + traceEntry.TraceFile.Size + uint64(16*1204*1024)
-	freeSpace, err := utils.GetFreeSpace(tempFolder)
+	requiredSpace := traceEntry.StorageFile.Size + traceEntry.TraceFile.Size + uint64(128*1204*1024)
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Required space: %s bytes", utils.FormatSize(requiredSpace)))
+	// First, try to use tmpfs to store the data files
+	storageDir, availableSpace, err := getTempDataStorageDir(tmpfsDir, requiredSpace)
 	if err != nil {
-		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Unable to get free space information: %s", err.Error()))
-	} else {
-		space_info := fmt.Sprintf("Available space at <%s>: %s bytes, Required space: %s bytes", tempFolder, utils.FormatSize(freeSpace), utils.FormatSize(requiredSpace))
-		logMsg(ctx, config.ProxyServer.URL, space_info)
-		if freeSpace < requiredSpace {
-			// Dump the content of tempFolder
-			files, err := listFiles(tempFolder)
-			if err != nil {
-				logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Unable to read the content of %s: %s",
-					tempFolder, err.Error()))
-			} else {
-				logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("The content of %s: %v", tempFolder, files))
-			}
-			return nil, errors.New("not enough space to run %s test. %s", traceEntry.Name, space_info)
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Unable to use tmpfs to store the data files: %s", err.Error()))
+		// Try to use user's home directory
+		userHomeDir, err := os.UserHomeDir()
+		if err != nil {
+			return nil, errors.Wrap(err, "Unable to get User's home directory")
+		}
+		storageDir, availableSpace, err = getTempDataStorageDir(userHomeDir, requiredSpace)
+		if err != nil {
+			return nil, err
 		}
 	}
 
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Using %s to store the data files. Available space: %s bytes", storageDir, utils.FormatSize(availableSpace)))
+
 	// Download trace file via proxy server
 	downloadStart := time.Now()
-	downloadedFileName, err := downloadFile(ctx, tempFolder, config.ProxyServer.URL, traceEntry.StorageFile.Name)
+	downloadedFileName, err := downloadFile(ctx, storageDir, config.ProxyServer.URL, traceEntry.StorageFile.Name)
 	if err != nil {
 		return nil, err
 	}
