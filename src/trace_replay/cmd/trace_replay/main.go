@@ -470,7 +470,8 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 	msg := fmt.Sprintf("Extended trace replay session configured to last %0.2f minutes, with <%s> flag", float32(config.ExtendedDuration)/60.0, flag)
 	logMsg(ctx, config.ProxyServer.URL, msg)
 	for time_now.Before(time_end) {
-		msg := fmt.Sprintf("Replaying the trace with <%s> flag, #%d at +%v from test start", flag, run_count+1, time.Since(time_start))
+		time_since_str := strings.ReplaceAll(time.Since(time_start).String(), "µ", "u")
+		msg := fmt.Sprintf("Replaying the trace with <%s> flag, #%d at +%s from test start", flag, run_count+1, time_since_str)
 		logMsg(ctx, config.ProxyServer.URL, msg)
 		rr, err := replayTrace(ctx, traceReplayConfig, traceFileName, replayTimeout)
 		if err != nil {
