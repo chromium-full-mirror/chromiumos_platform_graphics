@@ -251,7 +251,7 @@ func (p *Profiler) profileTrace(binCmd, tracePath, localProfPath string) error {
 	tmpFilename = strings.TrimSpace(tmpFilename)
 	p.printIfVerbose("Profiling to temp file %s ", tmpFilename)
 
-	cmd := strings.Replace(binCmd, "[[trace-file]]", tracePath, 1)
+	cmd := strings.Replace(binCmd, "[[trace-file]]", tracePath, 2)
 	cmd = strings.Replace(cmd, "[[prof-file]]", tmpFilename, 1)
 	cmd = fmt.Sprintf("DISPLAY=:%s %s", p.params.TargetDisplay, cmd)
 
