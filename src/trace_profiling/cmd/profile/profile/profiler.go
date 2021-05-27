@@ -38,7 +38,6 @@ import (
 //      timeout and a 0 value implies the default timeout of 15 minutes.
 //  KillCommand: Command to run on the target device when the timeout is reached
 //      E.g. "killall glretrace"
-//  Delay: Delay in seconds.
 //  TargetDisplay: DISPLAY number to use on target device, e.g. "0".
 type ProfileParams struct {
 	LocalTraceDir     string   `json:"localTraceDir"`
@@ -52,7 +51,6 @@ type ProfileParams struct {
 	ProfCommand       string   `json:"profCommand"`
 	Timeout           int      `json:"timeout"`
 	KillCommand       string   `json:"killCommand"`
-	Delay             int      `json:"delay"`
 	TargetDisplay     string   `json:"targetDisplay"`
 }
 
@@ -233,12 +231,6 @@ func (p *Profiler) profileTrace(binCmd, tracePath, localProfPath string) error {
 		timeout = 15 * 60
 	} else {
 		timeout = p.params.Timeout
-	}
-
-	if p.params.Delay != 0 {
-		p.printIfVerbose("Delaying for %d seconds\n", p.params.Delay)
-		time.Sleep(time.Duration(p.params.Delay) * time.Second)
-		p.printIfVerbose("Delayed for %d seconds\n", p.params.Delay)
 	}
 
 	outFile, err := os.OpenFile(localProfPath, os.O_RDWR|os.O_CREATE, 0755)

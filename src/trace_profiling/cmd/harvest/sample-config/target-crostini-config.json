@@ -18,7 +18,6 @@
       "profCommand": "/home/gwink/apitrace/glretrace  -b --timeout=300 [[trace-file]] > [[prof-file]]",
       "timeout": 300,
       "killCommand": "killall glretrace",
-      "delay": 0,
       "targetDisplay": "0"
     }
   }
