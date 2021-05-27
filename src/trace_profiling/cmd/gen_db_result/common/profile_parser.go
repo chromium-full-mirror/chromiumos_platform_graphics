@@ -33,6 +33,7 @@ var glxInfoLabels = []string{
 const (
 	benchmarkApitrace = "apitrace"
 	groupingGlxInfo   = "glxinfo"
+	groupingHarvest   = "harvest"
 )
 
 var (
@@ -53,6 +54,8 @@ var (
 	reExecEnvLine = regexp.MustCompile("(?P<name>EXEC_ENV): +(?P<value>.*)")
 	// A regexp for extracting the machine-name line from profile data.
 	reEMachineNameLine = regexp.MustCompile("(?P<name>MACHINE_NAME): +(?P<value>.*)")
+	// A regexp for extracting the harvest delay or timeoutline from profile data.
+	reHarvestLine = regexp.MustCompile("(?P<name>(?:DELAY|TIMEOUT)): +(?P<value>.*)")
 )
 
 // Struct profileParser provides methods to parse Apitrace profile data and
@@ -297,6 +300,8 @@ func parseProfile(prof string) (*db.Result, error) {
 					reader.machineName = result[2]
 				} else if result := reGlxInfo.FindStringSubmatch(scanLine); result != nil {
 					reader.recordLabel(groupingGlxInfo, result[1], result[2])
+				} else if result := reHarvestLine.FindStringSubmatch(scanLine); result != nil {
+					reader.recordLabel(groupingHarvest, result[1], result[2])
 				}
 			} else if strings.HasPrefix(scanLine, "Rendered") {
 				reader.renderedLine = scanLine

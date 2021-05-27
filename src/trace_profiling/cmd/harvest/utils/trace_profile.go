@@ -122,14 +122,18 @@ func (tp *TraceProfile) RunTraces(traces []string, cacheDir string, delay int) {
 			profile1 = <-resultQueue1
 			if profile1 != "" {
 				appendExtraInfoToProfile(traceRecord.GetTraceID(),
-					tp.targetDevice1.DeviceConfig.ExecEnv, tp.targetDevice1.DeviceConfig.Name, profile1)
+					tp.targetDevice1.DeviceConfig.ExecEnv, tp.targetDevice1.DeviceConfig.Name,
+					delay,
+					tp.targetDevice1.ProfilerConfig.ProfileParams.Timeout, profile1)
 			}
 		}
 		if tp.targetDevice2 != nil {
 			profile2 = <-resultQueue2
 			if profile2 != "" {
 				appendExtraInfoToProfile(traceRecord.GetTraceID(),
-					tp.targetDevice2.DeviceConfig.ExecEnv, tp.targetDevice2.DeviceConfig.Name, profile2)
+					tp.targetDevice2.DeviceConfig.ExecEnv, tp.targetDevice2.DeviceConfig.Name,
+					delay,
+					tp.targetDevice2.ProfilerConfig.ProfileParams.Timeout, profile2)
 			}
 		}
 
@@ -343,7 +347,7 @@ func getFpsFromProfile(profile string) (float64, error) {
 // Append extra information about the device and trace at the end of the profile.
 // Companion tool gen_db_result parses these lines to extract the info.
 func appendExtraInfoToProfile(
-	traceID, machineExecEnv, machineName string, profFilepath string) error {
+	traceID, machineExecEnv, machineName string, delay int, timeout int, profFilepath string) error {
 	f, err := os.OpenFile(profFilepath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if err != nil {
 		return err
@@ -357,6 +361,12 @@ func appendExtraInfoToProfile(
 		return err
 	}
 	if _, err := f.WriteString(fmt.Sprintf("MACHINE_NAME: %s\n", machineName)); err != nil {
+		return err
+	}
+	if _, err := f.WriteString(fmt.Sprintf("DELAY: %d\n", delay)); err != nil {
+		return err
+	}
+	if _, err := f.WriteString(fmt.Sprintf("TIMEOUT: %d\n", timeout)); err != nil {
 		return err
 	}
 
