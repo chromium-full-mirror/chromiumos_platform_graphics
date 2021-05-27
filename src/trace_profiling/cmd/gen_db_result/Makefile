@@ -8,6 +8,7 @@ GOCLEAN=$(GOCMD) clean
 GOGET=$(GOCMD) get
 GOFORMAT=$(GOCMD) fmt
 GOENV=$(GOCMD) env
+export GO111MODULE=off
 
 SRCS=main.go
 BIN=../../bin/get_device_info

@@ -8,6 +8,7 @@ GOCLEAN=$(GOCMD) clean
 GOGET = $(GOCMD) get
 GOFORMAT = $(GOCMD) fmt
 GOENV = $(GOCMD) env
+export GO111MODULE=off
 
 SRCS=merge.go
 BIN=../../bin/merge
