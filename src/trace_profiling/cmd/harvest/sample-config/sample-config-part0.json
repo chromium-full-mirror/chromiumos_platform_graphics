@@ -27,6 +27,7 @@
     "traceCacheDir": "/home/gwink/Gaming/profiles/cache",
     "keepTracesInCache": true,
     "profileBinPath": "/home/gwink/Gaming/profiles/bin/profile",
+    "delay": 300,
     "traces": [
       "/home/gwink/Gaming/profiles/cache/Lightroominteriorday.trace.bz2"
     ]

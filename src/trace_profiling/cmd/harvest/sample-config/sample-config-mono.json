@@ -132,6 +132,8 @@
     "keepTracesInCache": true,
     // Path to companion Profile executable.
     "profileBinPath": "/home/gwink/Gaming/profiles/bin/profile",
+    // Delay between profile invocations.
+    "delay": 60,
     "traces": [
       // List of traces to run.
       // Traces can be archives or trace files stored in Google Cloud Storage or

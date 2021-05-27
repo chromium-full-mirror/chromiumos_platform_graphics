@@ -78,7 +78,7 @@ func (tp *TraceProfile) GetFPSData() []FPSRecord {
 }
 
 // RunTraces run the profiler on the given traces found in cacheDir.
-func (tp *TraceProfile) RunTraces(traces []string, cacheDir string) {
+func (tp *TraceProfile) RunTraces(traces []string, cacheDir string, delay int) {
 	tp.fpsData = make([]FPSRecord, 0, len(traces))
 
 	traceQueue := make(chan *TraceRecord)
@@ -94,8 +94,8 @@ func (tp *TraceProfile) RunTraces(traces []string, cacheDir string) {
 	var resultQueue2 = make(chan string)
 
 	// Run goroutines to profile on both devices in parallel.
-	go tp.profileTracesOnTarget(feedQueue1, tp.targetDevice1, resultQueue1)
-	go tp.profileTracesOnTarget(feedQueue2, tp.targetDevice2, resultQueue2)
+	go tp.profileTracesOnTarget(feedQueue1, tp.targetDevice1, delay, resultQueue1)
+	go tp.profileTracesOnTarget(feedQueue2, tp.targetDevice2, delay, resultQueue2)
 
 	for traceRecord := range traceQueue {
 		if traceRecord == nil {
@@ -169,6 +169,7 @@ func (tp *TraceProfile) RunTraces(traces []string, cacheDir string) {
 func (tp *TraceProfile) profileTracesOnTarget(
 	feedQueue chan string,
 	targetDevice *config.TargetDevice,
+	delay int,
 	resultQueue chan string) {
 
 	targetName := "undefined"
@@ -176,8 +177,14 @@ func (tp *TraceProfile) profileTracesOnTarget(
 		targetName = targetDevice.DeviceConfig.ExecEnv
 	}
 
+	// Only delay after the first trace.
+	var needsDelay = false
 	for trace := range feedQueue {
-		tp.printIfVerbose("Tracing on %s with %s\n", targetName, trace)
+		if needsDelay && delay != 0 {
+			tp.printIfVerbose("Delaying for %d seconds prior to tracing %s\n", delay, trace)
+			time.Sleep(time.Duration(delay) * time.Second)
+		}
+		tp.printIfVerbose("\nTracing on %s with %s\n", targetName, trace)
 		profFile, err := tp.runProfile(trace, targetDevice.ProfilerConfig)
 		if err != nil {
 			tp.errorOut <- fmt.Errorf("profiling on %s failed: prof=%s, err=%s",
@@ -186,6 +193,8 @@ func (tp *TraceProfile) profileTracesOnTarget(
 		} else {
 			resultQueue <- profFile
 		}
+
+		needsDelay = true
 	}
 }
 

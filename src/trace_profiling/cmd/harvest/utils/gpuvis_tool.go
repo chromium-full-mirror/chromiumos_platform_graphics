@@ -494,7 +494,7 @@ func (gv *GpuVisTool) startProfiling(profilerExited chan bool) error {
 
 	go func() {
 		traces := []string{gv.traceToRun}
-		profiler.RunTraces(traces, gv.traceCacheDir)
+		profiler.RunTraces(traces, gv.traceCacheDir, 0)
 		os.RemoveAll(tmpDir)
 		profilerExited <- true
 	}()

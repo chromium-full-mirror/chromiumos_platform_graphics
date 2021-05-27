@@ -122,7 +122,7 @@ func doHarvestProfiles() {
 		harvestConfig.GetProfilerBinPath(), harvestConfig.ShouldKeepTraceAfterUse())
 
 	go func() {
-		profileTool.RunTraces(harvestConfig.GetTraces(), harvestConfig.GetTraceCacheDir())
+		profileTool.RunTraces(harvestConfig.GetTraces(), harvestConfig.GetTraceCacheDir(), harvestConfig.GetDelay())
 		close(errorFeed)
 	}()
 

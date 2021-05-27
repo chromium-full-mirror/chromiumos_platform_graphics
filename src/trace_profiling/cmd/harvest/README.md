@@ -98,6 +98,7 @@ looks as follows:
     "traceCacheDir": "local dir path where trace and trace archives are cached",
     "keepTracesInCache": true,
     "profileBinPath": "path to companion tool Profile",
+    "delay": 60,
     "traces": [
       list of trace or game archives, in Google Storage or in local dir
     ]

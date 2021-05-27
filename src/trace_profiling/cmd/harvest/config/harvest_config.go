@@ -24,6 +24,7 @@ type harvestConfigRecord struct {
 	TraceCacheDir     string   `json:"traceCacheDir"`
 	KeepTracesInCache bool     `json:"keepTracesInCache"`
 	ProfileBinPath    string   `json:"profileBinPath"`
+	Delay             int      `json:"delay"`
 }
 
 // HarvestConfigParser provides support for reading and parsing Harvest
@@ -136,6 +137,11 @@ func (hc *HarvestConfigParser) GetProfilerBinPath() string {
 // cache is true.
 func (hc *HarvestConfigParser) ShouldKeepTraceAfterUse() bool {
 	return hc.harvestConfig.KeepTracesInCache
+}
+
+// GetDelay returns the delay between profile runs.
+func (hc *HarvestConfigParser) GetDelay() int {
+	return hc.harvestConfig.Delay
 }
 
 // GetTargetDeviceConfig1 returns the target device for config TargetDevice1.
