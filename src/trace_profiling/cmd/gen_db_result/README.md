@@ -8,7 +8,7 @@ connected devices and automatically upload the result to the trace-result DB.
 
 This document makes reference to trace-result DB protobufs. The definitions for
 these protobufs are found at
-https://chromium.googlesource.com/chromiumos/config/+/refs/heads/master/go/api/test/results
+https://chromium.googlesource.com/chromiumos/config/+/HEAD/go/api/test/results
 
 ## Collecting machine information
 
@@ -237,4 +237,4 @@ if it is there. Otherwise, you must also specify it on the cmd line.
 ## Uploading trace-results to the DB
 When it comes time to upload trace-result protobufs to the DB, look for python script
 `bq_insert_pb.py` in
-https://chromium.googlesource.com/chromiumos/platform/graphics/+/refs/heads/master/src/results_database/
+https://chromium.googlesource.com/chromiumos/platform/graphics/+/HEAD/src/results_database/
