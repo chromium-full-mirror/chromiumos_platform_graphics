@@ -1,0 +1,87 @@
+#!/bin/bash
+# Copyright 2021 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+print_prereqs_and_exit () {
+  echo "error: $1"
+  echo """
+WORKSTATION SETUP
+ - record_cros_trace in PATH (src/platform/graphics/src/perfetto/)
+ - vperfetto_merge in PATH (build https://github.com/batesj/vperfetto)
+ - in ~/.ssh/config, cache connections for both host and guest, like:
+    ControlM*ster auto
+    ControlPersist yes
+    ControlPath ~/.ssh/connection-%h-%p-%r
+HOST AND GUEST SETUP
+ - perCetto library installed (https://github.com/olvaffe/percetto)
+ - perfetto installed (perfetto tool must be in PATH).
+ - code instrumented with frequent* perCetto trace events.
+ - traced service running
+* There must be frequent events on both host and guest for merging to
+  work. The incremental update in perCetto will contain this time sync data.
+  That defaults to 1 second intervals. Pass -i <ms> to change that period for
+  traces that are less than 2 seconds long. Guest sommelier now has its own
+  perfetto time sync events tied to the guest app's frame submits, so if
+  the trace includes multiple guest app frames, there will be enough data to
+  synchronize."""
+  exit 1
+}
+
+if [[ "$1" = "--help" ]] || [[ -z "$1" ]] || [[ -z "$2" ]]; then
+  echo "syntax: $0 <host-ssh-ip> <guest-ssh-ip> [args for record_cros_trace]..."
+  echo "example: $0 hostip guestip -t 5000 mesa gl virgl virgls"
+  exit 1
+fi
+
+vperfetto_merge=vperfetto_merge
+record_cros_trace=record_cros_trace
+command -v "${vperfetto_merge}" > /dev/null 2>&1 || \
+  print_prereqs_and_exit "missing ${vperfetto_merge}"
+command -v "${record_cros_trace}" > /dev/null 2>&1 || \
+  print_prereqs_and_exit "missing ${record_cros_trace}"
+
+host_file=/tmp/trace-host
+guest_file=/tmp/trace-guest
+rm -f "${host_file}" "${guest_file}"
+
+host=$1
+guest=$2
+inc_update_ms=1000
+cmd1="${record_cros_trace} --ssh ${host} -i ${inc_update_ms} \
+  -o ${host_file} ${@:3}"
+cmd2="${record_cros_trace} --ssh ${guest} -i ${inc_update_ms} \
+  -o ${guest_file} ${@:3}"
+
+tmux new-session -d bash
+tmux split-window -h bash
+tmux send -t 0:0.0 "${cmd1}; sleep 3; exit" C-m
+tmux send -t 0:0.1 "${cmd2}; sleep 3; exit" C-m
+tmux -2 attach-session -d
+
+# capture tsc-offset from the host to synchronize host and guest timestamps
+path_tsc_offset=$(ssh "${host}" find /sys/kernel/debug/ -name "tsc-offset" \
+                  -print -quit)
+if [[ -z "${path_tsc_offset}" ]]; then
+  echo "error: guest tsc offset not found -- is guest running?"
+  exit 1
+fi
+tsc_offset=$(ssh "${host}" cat "${path_tsc_offset}")
+echo "guest tsc-offset is ${tsc_offset}"
+
+now=$(date +"%Y-%m-%d_%H-%M-%S")
+outfile="${host}-${guest}-perfetto-trace-${now}"
+"${vperfetto_merge}" "${guest_file}" "${host_file}" "${outfile}" \
+  --merge-guest-into-host --guest-tsc-offset "${tsc_offset}" && \
+  echo "./${outfile}"
+
+# merge debugging:
+#d=$(pwd)
+#cd path/to/perfetto
+#out/linux/trace_to_text text "${guest_file}" "${d}/trace-guest.txt"
+#out/linux/trace_to_text text "${host_file}" "${d}/trace-host.txt"
+#out/linux/trace_to_text text "${d}/${outfile}" "${d}/${outfile}.txt"
+#cd -
+
+# example result:
+# https://ui.perfetto.dev/#!/?s=56b8ecf223b79d8121cb228d5ad52468f7a544931433cabd1c77b46acddb81f
