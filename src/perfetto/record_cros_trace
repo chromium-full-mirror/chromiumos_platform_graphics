@@ -5,16 +5,17 @@
 
 if [[ "$1" = "--help" ]]; then
   echo "syntax: $0"
-  echo "  [--ssh device]           IP of device or VM to trace (default" \
+  echo "  [--ssh <device>]         IP of device or VM to trace (default" \
        "is local trace)"
-  echo "  [-t duration_ms]         Duration to trace (default is until Ctrl+C)"
-  echo "  [-o output_file]"
-  echo "  [-b buffer_size_kb]      Size of trace buffer in KB"
+  echo "                           Append -arcvm to <device> to trace ARCVM"
+  echo "  [-t <duration_ms>]       Duration to trace (default is until Ctrl+C)"
+  echo "  [-o <output_file>]"
+  echo "  [-b <buffer_size_kb>]    Size of trace buffer in KB"
   echo "  [-p /path/to/perfetto]   Path to perfetto tool if it's not in \$PATH"
-  echo "  [-i period_ms]           Incremental update period in ms"
+  echo "  [-i <period_ms>]         Incremental update period in ms"
   echo "  [--no-ftrace]            Do not include ftrace sched data"
-  echo "  [-d category] ...           Disabled categories"
-  echo "  [category] [category] ...   Enabled categories"
+  echo "  [-d <category>] ...             Disabled categories"
+  echo "  [<category>] [<category>] ...   Enabled categories"
   echo "examples:"
   echo "  $0 --ssh DUT                      trace on DUT until Ctrl C"
   echo "  $0 --ssh DUT -t 1000              trace for 1 second"
@@ -25,13 +26,15 @@ if [[ "$1" = "--help" ]]; then
 fi
 
 dut=''
+is_arcvm=false
 time_ms=''
 ftrace=true
 categories=()
 disabled_categories=()
 now=$(date +"%Y-%m-%d_%H-%M-%S")
 output_file=''
-config_file="/tmp/perfetto-${RANDOM}.config"
+config_filename="perfetto-${RANDOM}.config"
+config_filepath="/tmp/${config_filename}"
 perfetto=perfetto
 incremental_update_period_ms=1000
 buffer_size_kb=100000
@@ -80,9 +83,24 @@ if [[ -z "${output_file}" ]]; then
   fi
 fi
 
+target_name="local"
+[[ -z "${dut}" ]] || target_name="${dut}"
+
+atrace_categories=()
+if [[ "${dut}" == *-arcvm ]]; then
+  is_arcvm=true
+  dut="${dut%"-arcvm"}"
+  # Filter categories for atrace catgories.
+  atrace_allowed=$(ssh -q "${dut}" "adb shell atrace --list" \
+      | sed -r 's/ *(.*) - .*/\1/g')
+  atrace_categories=($(comm -12 \
+      <(echo "${atrace_allowed}" | tr ' ' '\n' | sort ) \
+      <(echo "${categories[@]}" | tr ' ' '\n' | sort)))
+fi
+
 # Write perfetto config file
 
-cat >"${config_file}" <<EOL
+cat >"${config_filepath}" <<EOL
 buffers: {
   size_kb: ${buffer_size_kb}
   fill_policy: ${fill_policy}
@@ -105,8 +123,8 @@ data_sources: {
 }
 EOL
 
-if [[ "${ftrace}" = true ]]; then
-  cat >>"${config_file}" <<EOL
+if [[ "${ftrace}" == true ]]; then
+  cat >>"${config_filepath}" <<EOL
 data_sources: {
     config {
         name: "linux.ftrace"
@@ -115,6 +133,7 @@ data_sources: {
             # frequently it gets moved into the userspace buffer defined above.
             buffer_size_kb: 16384
             drain_period_ms: 250
+            ftrace_events: "ftrace/print"
             ftrace_events: "power/cpu_frequency"
             ftrace_events: "power/cpu_idle"
             ftrace_events: "power/suspend_resume"
@@ -133,13 +152,22 @@ data_sources: {
             ftrace_events: "tracing_mark_write"
             ftrace_events: "thermal/thermal_temperature"
             ftrace_events: "thermal/cdev_update"
+EOL
+
+for (( i = 0; i < ${#atrace_categories[@]}; i++ ));
+do
+  echo "            atrace_categories: \"${atrace_categories[${i}]}\"" >> \
+      "${config_filepath}"
+done
+
+cat >>"${config_filepath}" <<EOL
         }
     }
 }
 EOL
 fi
 
-cat >>"${config_file}" <<EOL
+cat >>"${config_filepath}" <<EOL
 data_sources: {
     config {
         name: "linux.sys_stats"
@@ -170,38 +198,106 @@ EOL
 for (( i = 0; i < ${#categories[@]}; i++ ));
 do
   echo "            enabled_categories: \"${categories[${i}]}\"" >> \
-       "${config_file}"
+       "${config_filepath}"
 done
 
 for (( i = 0; i < ${#disabled_categories[@]}; i++ ));
 do
   echo "            disabled_categories: \"${disabled_categories[${i}]}\"" >> \
-       "${config_file}"
+       "${config_filepath}"
 done
 
-cat >>"${config_file}" <<EOL
+cat >>"${config_filepath}" <<EOL
         }
     }
 }
 EOL
 
-if [[ -n "${time_ms}" ]]; then
-  echo "duration_ms: ${time_ms}" >> "${config_file}"
-else
-  echo "Press Ctrl+C to stop tracing..."
+if [[ "${is_arcvm}" == true ]]; then
+  cat >>"${config_filepath}" <<EOL
+data_sources: {
+    config {
+        name: "android.log"
+        android_log_config {
+            min_prio: PRIO_VERBOSE
+            log_ids: LID_DEFAULT
+            log_ids: LID_SYSTEM
+            log_ids: LID_EVENTS
+            log_ids: LID_CRASH
+        }
+    }
+}
+data_sources: {
+    config {
+        name: "android.surfaceflinger.frametimeline"
+    }
+}
+EOL
 fi
+
+dut_trace="/tmp/perfetto-trace-${RANDOM}"
+arcvm_trace="/data/misc/perfetto-traces/trace"
+
+# Kick off background perfetto trace.
 
 if [[ -z "${dut}" ]]; then
-  # Kick off the perfetto command locally
-  "${perfetto}" -c "${config_file}" --txt -o "${output_file}" || exit 1
+  "${perfetto}" -c "${config_filepath}" --txt --background \
+      -o "${output_file}" > /dev/null || exit 1
 else
-  # Kick off the perfetto command on the DUT
-  scp -q "${config_file}" "${dut}:${config_file}" || exit 1
-  ssh "${dut}" '[[ -n $(pgrep traced) ]] || start traced' 2> /dev/null
-  ssh -q -t "${dut}" "${perfetto}" -c "${config_file}" --txt -o \
-      /tmp/perfetto-trace || exit 1
-  scp -q "${dut}:/tmp/perfetto-trace" "${output_file}" && \
-      ssh "${dut}" rm /tmp/perfetto-trace || exit 1
+  if [[ "${is_arcvm}" == true ]]; then
+    cat "${config_filepath}" | ssh "${dut}" \
+        "adb shell perfetto -c - --txt --background --o ${arcvm_trace}" \
+        > /dev/null || exit 1
+  else
+    # Try to start traced if it's not already running.
+    ssh "${dut}" '[[ -n $(pgrep traced) ]] || start traced' 2> /dev/null
+    cat "${config_filepath}" | ssh "${dut}" "${perfetto}" -c - --txt \
+        --background -o "${dut_trace}" > /dev/null || exit 1
+  fi
 fi
 
-echo "${output_file}"
+# Wait for timeout or interrupt.
+
+time_string=''
+[[ -n "${time_ms}" ]] && time_string=" for ${time_ms} ms"
+[[ -z "${time_ms}" ]] && time_ms=$((24*60*60*1000)) # 24 hours by default.
+cur_time_ns=$(date +%s%N)
+wait_ns="${time_ms}000000"
+end_time_ns=$((cur_time_ns + wait_ns))
+stop_waiting () { end_time_ns="${cur_time_ns}" ; }
+trap "echo ; stop_waiting" SIGINT
+trap "stop_waiting" SIGUSR1
+
+echo "Tracing ${target_name}${time_string}... press Ctrl-C to stop"
+# Note this sleep is intentionally short because parent script may
+# send us a SIGUSR1 that we only handle in between sleeps.
+while [[ ( $(date +%s%N) < "${end_time_ns}" ) ]]; do sleep 0.1; done
+
+trap - SIGINT SIGUSR1
+
+# Kill all perfetto processes and wait for them to finish.
+
+echo "Please wait: copying trace from ${target_name}..."
+
+wait_finish () {
+  while [[ -n $($1) ]]; do sleep 0.2; done
+}
+
+if [[ -z "${dut}" ]]; then
+  killall perfetto
+  wait_finish "pgrep perfetto"
+else
+  if [[ "${is_arcvm}" == true ]]; then
+    ssh -q "${dut}" "adb shell killall perfetto"
+    wait_finish "ssh -q ${dut} adb shell pgrep perfetto"
+    ssh -q "${dut}" "adb pull ${arcvm_trace} ${dut_trace}" > /dev/null \
+        || { echo "error: failed to adb pull" ; exit 1; }
+  else
+    ssh -q "${dut}" 'kill $(pgrep perfetto)'
+    wait_finish "ssh -q ${dut} pgrep perfetto"
+  fi
+  scp -q "${dut}:${dut_trace}" "${output_file}" && \
+      ssh "${dut}" rm "${dut_trace}" || exit 1
+fi
+
+ls -hs "${output_file}"

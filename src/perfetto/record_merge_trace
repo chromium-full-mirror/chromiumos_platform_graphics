@@ -17,7 +17,9 @@ HOST AND GUEST SETUP
  - perCetto library installed (https://github.com/olvaffe/percetto)
  - perfetto installed (perfetto tool must be in PATH).
  - code instrumented with frequent* perCetto trace events.
- - traced service running
+ - traced service running.
+ - [for ARCVM] developer mode and adb enabled.
+ - only up to 2 VMs can run simultaneously, one of them being ARCVM.
 * There must be frequent events on both host and guest for merging to
   work. The incremental update in perCetto will contain this time sync data.
   That defaults to 1 second intervals. Pass -i <ms> to change that period for
@@ -30,10 +32,13 @@ HOST AND GUEST SETUP
 
 if [[ "$1" = "--help" ]] || [[ -z "$1" ]] || [[ -z "$2" ]]; then
   echo "syntax: $0 <host-ssh-ip> <guest-ssh-ip> [args for record_cros_trace]..."
-  echo "example: $0 hostip guestip -t 5000 mesa gl virgl virgls"
+  echo "example: $0 hostip guestip -t 5000 virgl virgls"
+  echo "example: $0 hostip hostip-arcvm virgl virgls gfx wm view"
+  echo "         Without the -t option, you will need to Ctrl+C on both sides"
   exit 1
 fi
 
+verbose=false
 vperfetto_merge=vperfetto_merge
 record_cros_trace=record_cros_trace
 command -v "${vperfetto_merge}" > /dev/null 2>&1 || \
@@ -47,33 +52,99 @@ rm -f "${host_file}" "${guest_file}"
 
 host=$1
 guest=$2
-inc_update_ms=1000
-cmd1="${record_cros_trace} --ssh ${host} -i ${inc_update_ms} \
-  -o ${host_file} ${@:3}"
-cmd2="${record_cros_trace} --ssh ${guest} -i ${inc_update_ms} \
-  -o ${guest_file} ${@:3}"
 
-tmux new-session -d bash
-tmux split-window -h bash
-tmux send -t 0:0.0 "${cmd1}; sleep 3; exit" C-m
-tmux send -t 0:0.1 "${cmd2}; sleep 3; exit" C-m
-tmux -2 attach-session -d
-
-# capture tsc-offset from the host to synchronize host and guest timestamps
-path_tsc_offset=$(ssh "${host}" find /sys/kernel/debug/ -name "tsc-offset" \
-                  -print -quit)
-if [[ -z "${path_tsc_offset}" ]]; then
-  echo "error: guest tsc offset not found -- is guest running?"
-  exit 1
+# Determine what tsc-offset to use. Debugfs has files for each VM.
+# This script supports at most two VMs running: ARCVM + one other.
+is_arcvm=false
+if [[ "${guest}" == *-arcvm ]]; then
+  is_arcvm=true
 fi
-tsc_offset=$(ssh "${host}" cat "${path_tsc_offset}")
-echo "guest tsc-offset is ${tsc_offset}"
+
+sync_app="com.google.perfettoguesttimesync"
+
+if [[ "${is_arcvm}" == true ]]; then
+  found=$(ssh -q "${host}" "adb shell pm list packages | grep ${sync_app}")
+  if [[ -z "${found}" ]]; then
+    echo "attempting to install ${sync_app} from vperfetto..."
+    apk=$(dirname $(which "${vperfetto_merge}"))
+    apk="${apk}/../utils/arcvm-time-sync-app/app/release/app-release.apk"
+    scp "${apk}" "${host}":/tmp/app.apk \
+        || print_prereqs_and_exit "error: could not find ${apk}"
+    ssh -q "${host}" "adb install -r /tmp/app.apk" || exit 1
+  fi
+  ssh -q "${host}" "adb shell am start ${sync_app}/${sync_app}.MainActivity" \
+      > /dev/null
+fi
+
+find_tsc_offsets="find /sys/kernel/debug/ -name 'tsc-offset'"
+
+vm_pids=$(ssh -q "${host}" "${find_tsc_offsets}" \
+          | sed -r 's/.*kvm\/([0-9]*).*/\1/g' | sort | uniq)
+
+if [[ $(echo "{vm_pids}" | wc -w) -gt "2" ]]; then
+  print_prereqs_and_exit "error: more than 2 VMs are running"
+fi
+
+found_guest_pid=''
+for pid in ${vm_pids}
+do
+  cmd_arcvm=$(ssh -q "${host}" "cat /proc/${pid}/cmdline" \
+              | grep arcvm > /dev/null && echo arcvm)
+  if [[ "${is_arcvm}" == true ]]; then
+    if [[ "${cmd_arcvm}" == "arcvm" ]]; then
+      found_guest_pid="${pid}"
+    fi
+  else
+    if [[ ! "${cmd_arcvm}" == "arcvm" ]]; then
+      found_guest_pid="${pid}"
+    fi
+  fi
+done
+
+if [[ -z "${found_guest_pid}" ]] && [[ "${is_arcvm}" == true ]]; then
+  # ARC++ is detected.
+  tsc_offset=0
+  echo "warning: ARC++ perfetto may not support --txt config option"
+else
+  if [[ -z "${found_guest_pid}" ]]; then
+    echo "error: guest tsc offset not found -- is guest running?"
+    exit 1
+  fi
+
+  # Make sure the tsc offsets are all the same for each vcpu.
+  tsc_offset=$(ssh -q "${host}" "${find_tsc_offsets} \
+              | grep ${found_guest_pid}- | xargs cat" | uniq)
+
+  if [[ ! $(echo "${tsc_offset}" | wc -w) == "1" ]]; then
+    echo "error: guest tsc offsets are inconsistent; file a bug on this script"
+    exit 1
+  fi
+fi
+
+[[ "${verbose}" == true ]] && echo "guest tsc-offset is ${tsc_offset}"
+
+"${record_cros_trace}" --ssh "${host}" -o "${host_file}" "${@:3}" &
+pids="$!"
+"${record_cros_trace}" --ssh "${guest}" -o "${guest_file}" "${@:3}" &
+pids+=" $!"
+trap "echo ; kill -s SIGUSR1 ${pids}" SIGINT
+# First wait may get canceled by the SIGINT.
+wait
+# Second wait waits for background processes to finish.
+# Don't allow SIGINT while waiting to avoid accidental interrupt.
+trap "" SIGINT
+wait
+trap - SIGINT
 
 now=$(date +"%Y-%m-%d_%H-%M-%S")
 outfile="${host}-${guest}-perfetto-trace-${now}"
 "${vperfetto_merge}" "${guest_file}" "${host_file}" "${outfile}" \
   --merge-guest-into-host --guest-tsc-offset "${tsc_offset}" && \
-  echo "./${outfile}"
+  ls -hs "./${outfile}"
+
+if [[ "${is_arcvm}" == true ]]; then
+  ssh -q "${host}" "adb shell am force-stop ${sync_app}"
+fi
 
 # merge debugging:
 #d=$(pwd)
@@ -82,6 +153,3 @@ outfile="${host}-${guest}-perfetto-trace-${now}"
 #out/linux/trace_to_text text "${host_file}" "${d}/trace-host.txt"
 #out/linux/trace_to_text text "${d}/${outfile}" "${d}/${outfile}.txt"
 #cd -
-
-# example result:
-# https://ui.perfetto.dev/#!/?s=56b8ecf223b79d8121cb228d5ad52468f7a544931433cabd1c77b46acddb81f
