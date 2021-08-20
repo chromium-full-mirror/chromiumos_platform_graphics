@@ -13,6 +13,10 @@ if [[ "$1" = "--help" ]]; then
   echo "  [-b <buffer_size_kb>]    Size of trace buffer in KB"
   echo "  [-p /path/to/perfetto]   Path to perfetto tool if it's not in \$PATH"
   echo "  [-i <period_ms>]         Incremental update period in ms"
+  echo "  [--gpu]                  Include GPU data -- requires pps-provider:"
+  echo "                           modify mesa ebuild with -Dperfetto=true and"
+  echo "                           (maybe) append-cppflags -DDCHECK_ALWAYS_ON"
+  echo "                           See b/197340286."
   echo "  [--no-ftrace]            Do not include ftrace sched data"
   echo "  [-d <category>] ...             Disabled categories"
   echo "  [<category>] [<category>] ...   Enabled categories"
@@ -27,6 +31,7 @@ fi
 
 dut=''
 is_arcvm=false
+include_gpu=false
 time_ms=''
 ftrace=true
 categories=()
@@ -67,6 +72,9 @@ for (( i = 0; i < num_args; i++ )); do
   elif [[ "${args[${i}]}" = "-d" ]]; then
     i=$((i+1))
     disabled_categories+=("${args[${i}]}")
+  elif [[ "${args[${i}]}" = "--gpu" ]]; then
+    i=$((i+1))
+    include_gpu=true
   elif [[ "${args[${i}]}" = "--no-ftrace" ]]; then
     i=$((i+1))
     ftrace=false
@@ -89,6 +97,7 @@ target_name="local"
 atrace_categories=()
 if [[ "${dut}" == *-arcvm ]]; then
   is_arcvm=true
+  include_gpu=false
   dut="${dut%"-arcvm"}"
   # Filter categories for atrace catgories.
   atrace_allowed=$(ssh -q "${dut}" "adb shell atrace --list" \
@@ -213,6 +222,40 @@ cat >>"${config_filepath}" <<EOL
 }
 EOL
 
+if [[ "${include_gpu}" == true ]]; then
+  cat >>"${config_filepath}" <<EOL
+data_sources {
+  config {
+    name: "gpu.counters.i915"
+    gpu_counter_config {
+      counter_period_ns: 100000
+    }
+  }
+}
+data_sources {
+  config {
+    name: "gpu.counters.msm"
+    gpu_counter_config {
+      counter_period_ns: 100000
+    }
+  }
+}
+data_sources {
+  config {
+    name: "gpu.renderstages.msm"
+  }
+}
+data_sources {
+  config {
+    name: "gpu.counters.panfrost"
+    gpu_counter_config {
+      counter_period_ns: 100000
+    }
+  }
+}
+EOL
+fi
+
 if [[ "${is_arcvm}" == true ]]; then
   cat >>"${config_filepath}" <<EOL
 data_sources {
@@ -249,8 +292,13 @@ else
         "adb shell perfetto -c - --txt --background --o ${arcvm_trace}" \
         > /dev/null || exit 1
   else
+    if [[ "${include_gpu}" == true ]] && \
+        [[ -z $(ssh -q "${dut}" pgrep -x pps-producer) ]]; then
+      ssh -q "${dut}" "nohup pps-producer 1>/dev/null 2>/dev/null &"
+      trap "ssh -q ${dut} pkill -x pps-producer" EXIT
+    fi
     # Try to start traced if it's not already running.
-    ssh "${dut}" '[[ -n $(pgrep traced) ]] || start traced' 2> /dev/null
+    ssh "${dut}" '[[ -n $(pgrep -x traced) ]] || start traced' 2> /dev/null
     cat "${config_filepath}" | ssh "${dut}" "${perfetto}" -c - --txt \
         --background -o "${dut_trace}" > /dev/null || exit 1
   fi
@@ -284,17 +332,17 @@ wait_finish () {
 }
 
 if [[ -z "${dut}" ]]; then
-  killall perfetto
-  wait_finish "pgrep perfetto"
+  pkill -x perfetto
+  wait_finish "pgrep -x perfetto"
 else
   if [[ "${is_arcvm}" == true ]]; then
-    ssh -q "${dut}" "adb shell killall perfetto"
-    wait_finish "ssh -q ${dut} adb shell pgrep perfetto"
+    ssh -q "${dut}" "adb shell pkill -x perfetto"
+    wait_finish "ssh -q ${dut} adb shell pgrep -x perfetto"
     ssh -q "${dut}" "adb pull ${arcvm_trace} ${dut_trace}" > /dev/null \
         || { echo "error: failed to adb pull" ; exit 1; }
   else
-    ssh -q "${dut}" 'kill $(pgrep perfetto)'
-    wait_finish "ssh -q ${dut} pgrep perfetto"
+    ssh -q "${dut}" "pkill -x perfetto"
+    wait_finish "ssh -q ${dut} pgrep -x perfetto"
   fi
   scp -q "${dut}:${dut_trace}" "${output_file}" && \
       ssh "${dut}" rm "${dut_trace}" || exit 1
