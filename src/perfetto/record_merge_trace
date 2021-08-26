@@ -64,16 +64,37 @@ sync_app="com.google.perfettoguesttimesync"
 
 if [[ "${is_arcvm}" == true ]]; then
   found=$(ssh -q "${host}" "adb shell pm list packages | grep ${sync_app}")
+  vperfetto_dir=$(dirname $(which "${vperfetto_merge}"))
+  apk_root="${vperfetto_dir}/../utils/arcvm-time-sync-app"
+  install=false
+
   if [[ -z "${found}" ]]; then
+    install=true
+  else
+    # Check if installed version is older than latest available.
+    latest_version=$(sed -n 's/.*versionCode\"\: \([0-9]*\)\,$/\1/p' < \
+        "${apk_root}/app/release/output-metadata.json")
+    install_version=$(ssh -q ${host} adb shell dumpsys package ${sync_app} | \
+        grep versionCode | sed -n 's/.*versionCode\=\([0-9]*\) .*/\1/p')
+    if [[ ( ${install_version} < ${latest_version} ) ]]; then
+      echo "upgrading ${sync_app} from ${install_version} to ${latest_version}"
+      install=true
+    fi
+  fi
+
+  if [[ "${install}" == true ]]; then
     echo "attempting to install ${sync_app} from vperfetto..."
-    apk=$(dirname $(which "${vperfetto_merge}"))
-    apk="${apk}/../utils/arcvm-time-sync-app/app/release/app-release.apk"
+    apk="${apk_root}/app/release/app-release.apk"
     scp "${apk}" "${host}":/tmp/app.apk \
         || print_prereqs_and_exit "error: could not find ${apk}"
     ssh -q "${host}" "adb install -r /tmp/app.apk" || exit 1
   fi
-  ssh -q "${host}" "adb shell am start ${sync_app}/${sync_app}.MainActivity" \
+
+  # Start the time trace service.
+  ssh -q "${host}" "adb shell \
+      am start-foreground-service ${sync_app}/${sync_app}.TimeTrace" \
       > /dev/null
+  trap "ssh -q ${host} adb shell am force-stop ${sync_app}" EXIT
 fi
 
 find_tsc_offsets="find /sys/kernel/debug/ -name 'tsc-offset'"
@@ -141,10 +162,6 @@ outfile="${host}-${guest}-perfetto-trace-${now}"
 "${vperfetto_merge}" "${guest_file}" "${host_file}" "${outfile}" \
   --merge-guest-into-host --guest-tsc-offset "${tsc_offset}" && \
   ls -hs "./${outfile}"
-
-if [[ "${is_arcvm}" == true ]]; then
-  ssh -q "${host}" "adb shell am force-stop ${sync_app}"
-fi
 
 # merge debugging:
 #d=$(pwd)
