@@ -144,7 +144,10 @@ fi
 
 [[ "${verbose}" == true ]] && echo "guest tsc-offset is ${tsc_offset}"
 
-"${record_cros_trace}" --ssh "${host}" -o "${host_file}" "${@:3}" &
+args_file="/tmp/trace-args.txt"
+
+"${record_cros_trace}" --ssh "${host}" -o "${host_file}" "${@:3}" \
+    --write-args "${args_file}" &
 pids="$!"
 "${record_cros_trace}" --ssh "${guest}" -o "${guest_file}" "${@:3}" &
 pids+=" $!"
@@ -158,7 +161,8 @@ wait
 trap - SIGINT
 
 now=$(date +"%Y-%m-%d_%H-%M-%S")
-outfile="${host}-${guest}-perfetto-trace-${now}"
+outfile="${host}-${guest}-perfetto-trace-$(cat ${args_file})-${now}"
+rm -f "${args_file}"
 "${vperfetto_merge}" "${guest_file}" "${host_file}" "${outfile}" \
   --merge-guest-into-host --guest-tsc-offset "${tsc_offset}" && \
   ls -hs "./${outfile}"

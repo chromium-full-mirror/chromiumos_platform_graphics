@@ -18,6 +18,7 @@ if [[ "$1" = "--help" ]]; then
   echo "                           (maybe) append-cppflags -DDCHECK_ALWAYS_ON"
   echo "                           See b/197340286."
   echo "  [--no-ftrace]            Do not include ftrace sched data"
+  echo "  [--write-args <file>]    Write key args to <file> for use as title"
   echo "  [-d <category>] ...             Disabled categories"
   echo "  [<category>] [<category>] ...   Enabled categories"
   echo "examples:"
@@ -40,6 +41,8 @@ now=$(date +"%Y-%m-%d_%H-%M-%S")
 output_file=''
 config_filename="perfetto-${RANDOM}.config"
 config_filepath="/tmp/${config_filename}"
+output_args_file=''
+title_args=()
 perfetto=perfetto
 incremental_update_period_ms=1000
 buffer_size_kb=100000
@@ -72,24 +75,19 @@ for (( i = 0; i < num_args; i++ )); do
   elif [[ "${args[${i}]}" = "-d" ]]; then
     i=$((i+1))
     disabled_categories+=("${args[${i}]}")
+  elif [[ "${args[${i}]}" = "--write-args" ]]; then
+    i=$((i+1))
+    output_args_file="${args[${i}]}"
   elif [[ "${args[${i}]}" = "--gpu" ]]; then
-    i=$((i+1))
     include_gpu=true
+    title_args+=("gpu")
   elif [[ "${args[${i}]}" = "--no-ftrace" ]]; then
-    i=$((i+1))
     ftrace=false
+    title_args+=("no-ftrace")
   else
     categories+=("${args[${i}]}")
   fi
 done
-
-if [[ -z "${output_file}" ]]; then
-  if [[ -z "${dut}" ]]; then
-    output_file=./perfetto-trace-${now}
-  else
-    output_file=./${dut}-perfetto-trace-${now}
-  fi
-fi
 
 target_name="local"
 [[ -z "${dut}" ]] || target_name="${dut}"
@@ -105,6 +103,20 @@ if [[ "${dut}" == *-arcvm ]]; then
   atrace_categories=($(comm -12 \
       <(echo "${atrace_allowed}" | tr ' ' '\n' | sort ) \
       <(echo "${categories[@]}" | tr ' ' '\n' | sort)))
+fi
+
+title_args+=("${categories[@]}")
+title_args=$(echo "${title_args[@]}" | tr ' ' '-')
+if [[ ! -z "${output_args_file}" ]]; then
+  echo "${title_args}" > "${output_args_file}"
+fi
+
+if [[ -z "${output_file}" ]]; then
+  if [[ -z "${dut}" ]]; then
+    output_file="./perfetto-trace-${title_args}-${now}"
+  else
+    output_file="./${dut}-perfetto-trace-${title_args}-${now}"
+  fi
 fi
 
 # Write perfetto config file
