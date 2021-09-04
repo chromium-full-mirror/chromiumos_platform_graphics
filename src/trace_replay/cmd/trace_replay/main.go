@@ -101,9 +101,7 @@ func runCommand(ctx context.Context, env []string, appName string, args ...strin
 			exitCode = waitStatus.ExitStatus()
 		} else {
 			exitCode = -1
-			if stderr == "" {
-				stderr = err.Error()
-			}
+			stderr = fmt.Sprintf("Error: %s. Stderr: [%s]", err.Error(), stderr)
 		}
 	} else {
 		waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
@@ -412,7 +410,7 @@ func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileN
 		return res, err
 	}
 
-	logMsg(ctx, config.ProxyServer.URL, "Replaying the trace with with the default settings.")
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with the default settings and %d seconds timeout...", replayTimeout))
 	res, err := replayTrace(ctx, traceReplayConfigs[comm.TestFlagDefault], traceFileName, replayTimeout)
 	if err != nil {
 		return res, err
@@ -425,10 +423,11 @@ func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileN
 			continue
 		}
 		// Cool down and flush all pending filesistem pending i/o ops
-		time.Sleep(time.Duration(replayCoolDownTime) * time.Second)
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Cooling down for %d seconds...", replayCoolDownTime))
 		exec.Command("sync").Run()
+		time.Sleep(time.Duration(replayCoolDownTime) * time.Second)
 
-		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace with <%s> flag.", flag))
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with <%s> flag and %d seconds timeout...", flag, replayTimeout))
 		rr, err := replayTrace(ctx, traceReplayConfigs[flag], traceFileName, replayTimeout)
 		if err != nil {
 			return rr, err
