@@ -9,7 +9,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
@@ -167,7 +169,7 @@ func httpRequestWrapper(ctx context.Context, proxyURL string, params url.Values)
 	}
 	parsedURL.RawQuery = params.Encode()
 
-	httpRequest, err := http.NewRequestWithContext(ctx, "GET", parsedURL.String(), nil)
+	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodGet, parsedURL.String(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "http.NewRequestWithContext(%s) failed", parsedURL)
 	}
@@ -180,7 +182,7 @@ func httpRequestWrapper(ctx context.Context, proxyURL string, params url.Values)
 	// We decide to let the caller process to close the body.
 	// defer httpResponse.Body.Close()
 	if httpResponse.StatusCode != http.StatusOK {
-		return nil, errors.New("http status code isn't OK: %d", httpResponse.StatusCode)
+		return nil, errors.New("httpRequestWrapper: HTTP result code: %d %s", httpResponse.StatusCode, http.StatusText(httpResponse.StatusCode))
 	}
 	return httpResponse, nil
 }
@@ -210,6 +212,48 @@ func downloadFile(ctx context.Context, localPath, proxyURL, filePath string) (st
 		return "", errors.Wrap(err, "io.Copy() failed")
 	}
 	return outFile, nil
+}
+
+// uploadFile uploads a file to the host's test results folder which will be published
+// in Stainless along with test log files and other test artifacts
+func uploadFile(ctx context.Context, localFileName, serverURL, remoteFileName string) error {
+	reader, err := os.Open(localFileName)
+	if err != nil {
+		return errors.Wrap(err, "uploadFile: io.Writer.CreateFromFile() failed. Unable to open [%s]", localFileName)
+	}
+	defer reader.Close()
+
+	var buffer bytes.Buffer
+	var formFileWriter io.Writer
+	writer := multipart.NewWriter(&buffer)
+	if formFileWriter, err = writer.CreateFormFile("file", remoteFileName); err != nil {
+		return errors.Wrap(err, "uploadFile: io.Writer.CreateFormFile() failed")
+	}
+	if _, err = io.Copy(formFileWriter, reader); err != nil {
+		return errors.Wrap(err, "uploadFile: io.Copy() failed")
+	}
+	writer.Close()
+
+	uploadURL, err := url.Parse(serverURL)
+	if err != nil {
+		return errors.Wrap(err, "uploadFile: urlParse() failed. Invalid URL: %s", serverURL)
+	}
+	params := url.Values{}
+	params.Add("type", "upload")
+	uploadURL.RawQuery = params.Encode()
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, uploadURL.String(), &buffer)
+	request.Header.Set("Content-Type", writer.FormDataContentType())
+
+	httpClient := &http.Client{}
+	response, err := httpClient.Do(request)
+	if err != nil {
+    return errors.Wrap(err, "uploadFile: http.Do(%v) failed", request)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return errors.New("uploadFile: HTTP status code: %d %s", response.StatusCode, http.StatusText(response.StatusCode))
+	}
+	return nil
 }
 
 // logMsg sends log the message to the host via proxy.
