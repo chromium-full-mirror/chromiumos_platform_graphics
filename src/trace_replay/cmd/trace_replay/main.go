@@ -34,8 +34,6 @@ const (
 	appDataDir        = "trace_replay.tmp"
 	tmpfsDir          = "/tmp"
 	minRequiredSpace  = 1024 * 1024
-	glRetraceAppName  = "glretrace"
-	eglRetraceAppName = "eglretrace"
 	apitraceOutputRE  = `Rendered (\d+) frames in (\d*\.?\d*) secs, average of (\d*\.?\d*) fps`
 	// Default application timeout in seconds
 	defaultTimeout = 60 * 60
@@ -110,6 +108,30 @@ func runCommand(ctx context.Context, env []string, appName string, args ...strin
 		exitCode = waitStatus.ExitStatus()
 	}
 	return
+}
+
+func validateFileSize(ctx context.Context, fileName string, expectedSize uint64) (uint64, error) {
+	fileInfo, err := os.Stat(fileName)
+	if err != nil {
+		return 0, errors.Wrap(err, "Unable to get stat for %s", fileName)
+	}
+
+	if uint64(fileInfo.Size()) != expectedSize {
+		return uint64(fileInfo.Size()), errors.New("File size %db != %db expected (%s)", fileInfo.Size(), expectedSize, path.Base(fileName))
+	}
+	return uint64(fileInfo.Size()), nil
+}
+
+func validateFileMD5(ctx context.Context, fileName string, expectedMD5 string) (string, error) {
+	fileMD5, err := utils.GetFileMD5Sum(ctx, fileName)
+	if err != nil {
+		return fileMD5, errors.Wrap(err, "Unable to calculate MD5 checksum for %s", path.Base(fileName))
+	}
+
+	if fileMD5 != expectedMD5 {
+		return fileMD5, errors.New("MD5 for %s is wrong (%s, expected: %s)", path.Base(fileName), fileMD5, expectedMD5)
+	}
+	return fileMD5, nil
 }
 
 func decompressFile(ctx context.Context, fileName string, expectedExt string) (string, error) {
@@ -217,6 +239,7 @@ func downloadFile(ctx context.Context, localPath, proxyURL, filePath string) (st
 // uploadFile uploads a file to the host's test results folder which will be published
 // in Stainless along with test log files and other test artifacts
 func uploadFile(ctx context.Context, localFileName, serverURL, remoteFileName string) error {
+	logMsg(ctx, serverURL, fmt.Sprintf("Uploading %s to %s...", localFileName, remoteFileName))
 	reader, err := os.Open(localFileName)
 	if err != nil {
 		return errors.Wrap(err, "uploadFile: io.Writer.CreateFromFile() failed. Unable to open [%s]", localFileName)
@@ -538,9 +561,44 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 	return res, nil
 }
 
+// dumpTraceImages captures color buffers of requested frames into PNG files.
+// Returns a result as a map of frameId->fileName or an error
+func dumpTraceImages(ctx context.Context, config *comm.TestGroupConfig, traceFileName string, traceEntry *repo.TraceListEntry, outDir string) (map[uint32]string, error) {
+	res := make(map[uint32]string)
+	callsStr := ""
+	for idx, entry := range traceEntry.ReferenceFrames {
+		if idx !=0 {
+			callsStr += ","
+		}
+		callsStr += strconv.FormatUint(uint64(entry.CallId), 10)
+	}
+	args := []string{"dump-images", "--calls="+callsStr, "-o", path.Join(outDir,"dmp_"), traceFileName}
+	exitCode, _, stderr := runCommand(ctx, []string{"DISPLAY=:0"}, "apitrace", args...)
+	if exitCode != 0 {
+		return nil, errors.New("Failed to dump images for trace file [%s]. Exit code: %d. %s", traceFileName, exitCode, stderr)
+	}
+	for _, entry := range traceEntry.ReferenceFrames {
+		res[entry.CallId] = path.Join(outDir, fmt.Sprintf("dmp_%010d.png", entry.CallId))
+	}
+	return res, nil
+}
+
+func calcRequiredSpace(traceEntry *repo.TraceListEntry) uint64 {
+	// Compressed and decompressed copy of the trace file
+	requiredSpace := traceEntry.StorageFile.Size + traceEntry.TraceFile.Size
+	// Reference and captured frames (assuming that a captured frame will be the same as its reference)
+	for _, refFrame := range traceEntry.ReferenceFrames {
+		requiredSpace += refFrame.FileSize * 2
+	}
+	// Add extra 128 megabytes for logs and unseen circumstances
+	requiredSpace += uint64(128*1024*1024)
+
+	return requiredSpace
+}
+
 func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo.TraceListEntry) (map[string]comm.ValueEntry, error) {
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Preparing to run %v", *traceEntry))
-	requiredSpace := traceEntry.StorageFile.Size + traceEntry.TraceFile.Size + uint64(128*1204*1024)
+	requiredSpace := calcRequiredSpace(traceEntry)
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Required space: %s bytes", utils.FormatSize(requiredSpace)))
 	// First, try to use tmpfs to store the data files
 	storageDir, availableSpace, err := getTempDataStorageDir(tmpfsDir, requiredSpace)
@@ -569,16 +627,12 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	defer os.Remove(downloadedFileName)
 
 	// Perform integrity checks on the downloaded file
-	fileInfo, err := os.Stat(downloadedFileName)
+	downloadedFileSize, err := validateFileSize(ctx, downloadedFileName, traceEntry.StorageFile.Size)
 	if err != nil {
-		return nil, errors.Wrap(err, "Unable to get stat for %s", downloadedFileName)
+		return nil, err
 	}
-	sizeInMB := float64(fileInfo.Size()) / (1024.0 * 1024.0)
+	sizeInMB := float64(downloadedFileSize) / (1024.0 * 1024.0)
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("The %.2f MB file was downloaded to %s in %v (%.2f MB/s)", sizeInMB, downloadedFileName, downloadDuration, sizeInMB/downloadDuration.Seconds()))
-
-	if uint64(fileInfo.Size()) != traceEntry.StorageFile.Size {
-		return nil, errors.New("Actual file size of %s is different from the value in metadata. Actual: %db, expected: %db", downloadedFileName, fileInfo.Size(), traceEntry.StorageFile.Size)
-	}
 
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Decompressing %s", downloadedFileName))
 	traceFileName, err := decompressFile(ctx, downloadedFileName, ".trace")
@@ -588,13 +642,8 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	defer os.Remove(traceFileName)
 
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Validating MD5 checksum for %s", traceFileName))
-	traceFileMD5Sum, err := utils.GetFileMD5Sum(ctx, traceFileName)
-	if err != nil {
-		return nil, errors.Wrap(err, "Unable to calculate MD5 checksum for %s", traceFileName)
-	}
-
-	if traceFileMD5Sum != traceEntry.TraceFile.MD5Sum {
-		return nil, errors.New("Actual file MD5 checksum for %s is different from the value in metadata. Actual: %s, expected: %s", downloadedFileName, traceFileMD5Sum, traceEntry.TraceFile.MD5Sum)
+	if _, err := validateFileMD5(ctx, traceFileName, traceEntry.TraceFile.MD5Sum); err != nil {
+		return nil, err
 	}
 
 	// Cool down and flush all pending filesistem pending i/o ops
@@ -613,7 +662,40 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	if config.ExtendedDuration > 0 {
 		return runReplayRepeatedly(ctx, config, traceFileName, replayTimeout)
 	} else {
-		return runReplayOnce(ctx, config, traceFileName, replayTimeout)
+		result, err := runReplayOnce(ctx, config, traceFileName, replayTimeout)
+		if err != nil {
+			return result, err
+		}
+
+		// TODO(tutankhamen): Add test group flag to enable/disable frames capture/validation
+		if len(traceEntry.ReferenceFrames) > 0 {
+			// Download reference frames and upload them to the host
+			for _, refFrame := range traceEntry.ReferenceFrames {
+				refFrameFile, err := downloadFile(ctx, storageDir, config.ProxyServer.URL, refFrame.FileName)
+				if err != nil {
+					return result, errors.Wrap(err, "Unable to download a reference frame")
+				}
+				if _, err := validateFileMD5(ctx, refFrameFile, refFrame.FileMD5); err != nil {
+					return result, err
+				}
+				refFrameDstFile := fmt.Sprintf("images/reference/%s/%010d.png", refFrame.Board, refFrame.CallId)
+				if err := uploadFile(ctx, refFrameFile, config.ProxyServer.URL, refFrameDstFile); err != nil {
+					return result, errors.Wrap(err, "Unable to upload a reference frame")
+				}
+			}
+			// Dump trace images for comparison
+			dumped, err := dumpTraceImages(ctx, config, traceFileName, traceEntry, storageDir)
+			if err != nil {
+				return result, errors.Wrap(err, "dumpFrameImages failed");
+			}
+			for dmpCallId, dmpImageFile := range dumped {
+				dmpImageDstFile := fmt.Sprintf("images/result/%s/%010d.png", config.Host.Board, dmpCallId)
+				if err := uploadFile(ctx, dmpImageFile, config.ProxyServer.URL, dmpImageDstFile); err != nil {
+					return result, errors.Wrap(err, "Unable to upload a dumped image")
+				}
+			}
+		}
+		return result, nil
 	}
 }
 
