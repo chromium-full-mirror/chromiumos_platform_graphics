@@ -689,6 +689,19 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 				return result, errors.Wrap(err, "dumpFrameImages failed");
 			}
 			for dmpCallId, dmpImageFile := range dumped {
+				var fileSize int64
+				fileInfo, err := os.Stat(dmpImageFile)
+				if err == nil {
+					fileSize = fileInfo.Size()
+				} else {
+					logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Warning: os.Stat() failed for %s", dmpImageFile))
+				}
+				result[fmt.Sprintf("size_%010d", dmpCallId)] = comm.ValueEntry{
+					Unit:      "bytes",
+					Direction: 0,
+					// TODO(tutankhamen): change type of comm.ValueEntry.Value to float64 to prevent precesion limitation related issues
+					Value:     float32(fileSize),
+				}
 				dmpImageDstFile := fmt.Sprintf("images/result/%s/%010d.png", config.Host.Board, dmpCallId)
 				if err := uploadFile(ctx, dmpImageFile, config.ProxyServer.URL, dmpImageDstFile); err != nil {
 					return result, errors.Wrap(err, "Unable to upload a dumped image")
