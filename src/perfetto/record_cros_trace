@@ -27,6 +27,10 @@ if [[ "$1" = "--help" ]]; then
   echo "  $0 --ssh DUT virgls               include virgls category" \
        "(disabled-by-default)"
   echo "  $0 --ssh DUT -d \"*\" virgl gfx     only trace virgl and gfx"
+  echo "special categories:"
+  echo "  chrome.*: Chrome trace categories (\"chrome.\" prefix is removed)"
+  echo "  Chrome gfx: chrome.ui chrome.cc chrome.gpu"
+  echo "  Android gfx: gfx view wm"
   exit 1
 fi
 
@@ -36,6 +40,7 @@ include_gpu=false
 time_ms=''
 ftrace=true
 categories=()
+chrome_categories=''
 disabled_categories=()
 now=$(date +"%Y-%m-%d_%H-%M-%S")
 output_file=''
@@ -85,9 +90,17 @@ for (( i = 0; i < num_args; i++ )); do
     ftrace=false
     title_args+=("no-ftrace")
   else
-    categories+=("${args[${i}]}")
+    cat="${args[${i}]}"
+    if [[ "${cat}" == chrome.* ]]; then
+      chrome_categories+="\\\"${cat#"chrome."}\\\","
+    else
+      categories+=("${cat}")
+    fi
   fi
 done
+
+# Strip trailing comma:
+chrome_categories="${chrome_categories%","}"
 
 target_name="local"
 [[ -z "${dut}" ]] || target_name="${dut}"
@@ -289,6 +302,30 @@ data_sources {
 }
 EOL
 fi
+
+# Record chrome events.
+cat >>"${config_filepath}" <<EOL
+data_sources {
+  config {
+    name: "org.chromium.trace_event"
+    chrome_config {
+      trace_config: "{\"record_mode\":\"record-continuously\",\
+\"included_categories\":[${chrome_categories}],\"memory_dump_config\":{}}"
+      privacy_filtering_enabled: false
+    }
+  }
+}
+data_sources {
+  config {
+    name: "org.chromium.trace_metadata"
+    chrome_config {
+      trace_config: "{\"record_mode\":\"record-continuously\",\
+\"included_categories\":[${chrome_categories}],\"memory_dump_config\":{}}"
+      privacy_filtering_enabled: false
+    }
+  }
+}
+EOL
 
 dut_trace="/tmp/perfetto-trace-${RANDOM}"
 arcvm_trace="/data/misc/perfetto-traces/trace"
