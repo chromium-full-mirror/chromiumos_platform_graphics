@@ -34,6 +34,7 @@ const (
 	appDataDir        = "trace_replay.tmp"
 	tmpfsDir          = "/tmp"
 	minRequiredSpace  = 1024 * 1024
+	maxRefImageSize   = 3 * 1024 * 1024
 	apitraceOutputRE  = `Rendered (\d+) frames in (\d*\.?\d*) secs, average of (\d*\.?\d*) fps`
 	// Default application timeout in seconds
 	defaultTimeout = 60 * 60
@@ -566,6 +567,7 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 func dumpTraceImages(ctx context.Context, config *comm.TestGroupConfig, traceFileName string, traceEntry *repo.TraceListEntry, outDir string) (map[uint32]string, error) {
 	res := make(map[uint32]string)
 	callsStr := ""
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file to dump the reference images..."))
 	for idx, entry := range traceEntry.ReferenceFrames {
 		if idx !=0 {
 			callsStr += ","
@@ -586,9 +588,12 @@ func dumpTraceImages(ctx context.Context, config *comm.TestGroupConfig, traceFil
 func calcRequiredSpace(traceEntry *repo.TraceListEntry) uint64 {
 	// Compressed and decompressed copy of the trace file
 	requiredSpace := traceEntry.StorageFile.Size + traceEntry.TraceFile.Size
-	// Reference and captured frames (assuming that a captured frame will be the same as its reference)
+	// Reference and captured frames
 	for _, refFrame := range traceEntry.ReferenceFrames {
-		requiredSpace += refFrame.FileSize * 2
+		requiredSpace += maxRefImageSize
+		if refFrame.FileSize != 0 {
+			requiredSpace += refFrame.FileSize
+		}
 	}
 	// Add extra 128 megabytes for logs and unseen circumstances
 	requiredSpace += uint64(128*1024*1024)
@@ -669,18 +674,20 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 
 		// TODO(tutankhamen): Add test group flag to enable/disable frames capture/validation
 		if len(traceEntry.ReferenceFrames) > 0 {
-			// Download reference frames and upload them to the host
+			// Download reference frames (if available) and upload them to the host
 			for _, refFrame := range traceEntry.ReferenceFrames {
-				refFrameFile, err := downloadFile(ctx, storageDir, config.ProxyServer.URL, refFrame.FileName)
-				if err != nil {
-					return result, errors.Wrap(err, "Unable to download a reference frame")
-				}
-				if _, err := validateFileMD5(ctx, refFrameFile, refFrame.FileMD5); err != nil {
-					return result, err
-				}
-				refFrameDstFile := fmt.Sprintf("images/reference/%s/%010d.png", refFrame.Board, refFrame.CallId)
-				if err := uploadFile(ctx, refFrameFile, config.ProxyServer.URL, refFrameDstFile); err != nil {
-					return result, errors.Wrap(err, "Unable to upload a reference frame")
+				if refFrame.FileName != "" {
+					refFrameFile, err := downloadFile(ctx, storageDir, config.ProxyServer.URL, refFrame.FileName)
+					if err != nil {
+						return result, errors.Wrap(err, "Unable to download a reference frame")
+					}
+					if _, err := validateFileMD5(ctx, refFrameFile, refFrame.FileMD5); err != nil {
+						return result, err
+					}
+					refFrameDstFile := fmt.Sprintf("images/reference/%s/%010d.png", refFrame.Board, refFrame.CallId)
+					if err := uploadFile(ctx, refFrameFile, config.ProxyServer.URL, refFrameDstFile); err != nil {
+						return result, errors.Wrap(err, "Unable to upload a reference frame")
+					}
 				}
 			}
 			// Dump trace images for comparison
