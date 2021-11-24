@@ -1,29 +1,4 @@
 set noparent
 
-andrescj@chromium.org
-anholt@google.com
-basni@chromium.org
-chadversary@chromium.org
-davidriley@chromium.org
-dbehr@chromium.org
-dcastagna@chromium.org
-ddavenport@chromium.org
-frkoenig@chromium.org
-gildekel@chromium.org
-gurchetansingh@chromium.org
-gwink@chromium.org
-hob@chromium.org
-hoegsberg@chromium.org
-ihf@chromium.org
-jbates@chromium.org
-jchinlee@chromium.org
-jkardatzke@chromium.org
-marcheu@chromium.org
-markyacoub@chromium.org
-mcasas@chromium.org
-olv@chromium.org
-pwang@chromium.org
-robdclark@chromium.org
-sashamcintosh@chromium.org
-seanpaul@chromium.org
-tutankhamen@chromium.org
+# Included separately so they can included elsewhere without `set noparent`
+include /OWNERS.graphics
