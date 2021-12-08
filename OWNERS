@@ -6,7 +6,6 @@ set noparent
 
 # gerrit refuses "-" in OWNERS file names. Hence we replace them with "_".
 include /OWNERS.clvk
-include /OWNERS.cmrt
 include /OWNERS.deqp
 include /OWNERS.deqp_runner
 include /OWNERS.graphics
@@ -21,5 +20,5 @@ include /OWNERS.minigbm
 include /OWNERS.vadumpcaps
 include /OWNERS.virglrenderer
 include /OWNERS.vulkan_layers
-include /OWNERS.vulkan_loaders
+include /OWNERS.vulkan_loader
 include /OWNERS.waffle
