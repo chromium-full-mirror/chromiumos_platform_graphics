@@ -40,6 +40,9 @@ const (
 	defaultTimeout = 60 * 60
 	// Maximum allowed replay time for one trace in seonds
 	replayMaxTime = 15 * 60
+	// Minimum replay timeout for one trace in seconds.
+	// Can't be less than 10 due to nested app timeout which is (replayMinTime-10)
+	replayMinTime = 30
 	// Cooling down time before each trace replay in seconds
 	replayCoolDownTime = 30
 )
@@ -446,10 +449,18 @@ func checkPackageInstalled(ctx context.Context, name string) error {
 }
 
 func replayTrace(ctx context.Context, config replayAppConfig, traceFileName string, timeoutInSeconds uint32) (map[string]comm.ValueEntry, error) {
+	if timeoutInSeconds < replayMinTime {
+		return nil, errors.New("The requested timeout is too short to replay a trace file. Requested: %d, wanted >= %d", timeoutInSeconds, replayMinTime)
+	}
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeoutInSeconds)*time.Second)
 	defer cancel()
+	appArgs := config.Args
 
-	exitCode, stdout, stderr := runCommand(ctx, config.EnvVars, config.AppName, append(config.Args, traceFileName)...)
+	// Add nested timeout to glretrace/eglretrace
+	appArgs = append(appArgs, fmt.Sprintf("--timeout=%d", timeoutInSeconds-10))
+
+	appArgs = append(appArgs, traceFileName)
+	exitCode, stdout, stderr := runCommand(ctx, config.EnvVars, config.AppName, appArgs...)
 	if exitCode != 0 {
 		return nil, errors.New("Failed to replay trace file [%s]. Exit code: %d. %s", traceFileName, exitCode, stderr)
 	}
