@@ -1,4 +1,25 @@
+# It is intentional that any graphics owner can maintain other graphics OWNERS.
+# This is an escape hatch. Membership should still be agreed within the team.
+
+# Avoid inheritance here, but do not "set noparent" in individual files.
 set noparent
 
-# Included separately so they can included elsewhere without `set noparent`
+# gerrit refuses "-" in OWNERS file names. Hence we replace them with "_".
+include /OWNERS.clvk
+include /OWNERS.cmrt
+include /OWNERS.deqp
+include /OWNERS.deqp_runner
 include /OWNERS.graphics
+include /OWNERS.libglvnd
+include /OWNERS.libyuv_test
+include /OWNERS.mesa
+include /OWNERS.mesa_amd
+include /OWNERS.mesa_freedreno
+include /OWNERS.mesa_iris
+include /OWNERS.mesa_panfrost
+include /OWNERS.minigbm
+include /OWNERS.vadumpcaps
+include /OWNERS.virglrenderer
+include /OWNERS.vulkan_layers
+include /OWNERS.vulkan_loaders
+include /OWNERS.waffle
