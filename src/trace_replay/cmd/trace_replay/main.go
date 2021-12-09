@@ -48,7 +48,7 @@ const (
 )
 
 var (
-	retraceArgs      = []string{"--benchmark"}
+	retraceArgs      = []string{"--benchmark", "--watchdog"}
 	requiredPackages = []string{"apitrace", "zstd"}
 )
 
