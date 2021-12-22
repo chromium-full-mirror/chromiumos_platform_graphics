@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -45,11 +46,15 @@ const (
 	replayMinTime = 30
 	// Cooling down time before each trace replay in seconds
 	replayCoolDownTime = 30
+	// Supported guest types
+	GuestType_Borealis = "Borealis"
+	GuestType_Crostini = "Crostini"
 )
 
 var (
-	retraceArgs      = []string{"--benchmark", "--watchdog"}
-	requiredPackages = []string{"apitrace", "zstd"}
+	retraceArgsBorealis = []string{"--benchmark", "--watchdog"}
+	retraceArgsCrostini = []string{"--benchmark"}
+	requiredPackages    = []string{"apitrace", "zstd"}
 )
 
 type replayAppConfig struct {
@@ -59,19 +64,63 @@ type replayAppConfig struct {
 	Postfix string
 }
 
-var traceReplayConfigs = map[string]replayAppConfig{
-	comm.TestFlagDefault: replayAppConfig{
-		AppName: "glretrace",
-		Args:    retraceArgs,
-		EnvVars: []string{"DISPLAY=:0"},
-		Postfix: "",
+// Trace replay configs per guest type per test flag
+// traceReplayConfigs[GuestType][TestFlag]
+var traceReplayConfigs = map[string]map[string]replayAppConfig{
+	GuestType_Borealis: map[string]replayAppConfig {
+		comm.TestFlagDefault: replayAppConfig{
+			AppName: "glretrace",
+			Args:    retraceArgsBorealis,
+			EnvVars: []string{"DISPLAY=:0"},
+			Postfix: "",
+		},
+		comm.TestFlagSurfaceless: replayAppConfig{
+			AppName: "eglretrace",
+			Args:    retraceArgsBorealis,
+			EnvVars: []string{"WAFFLE_PLATFORM=sl", "LD_PRELOAD=libEGL.so.1"},
+			Postfix: "_surfaceless",
+		},
 	},
-	comm.TestFlagSurfaceless: replayAppConfig{
-		AppName: "eglretrace",
-		Args:    retraceArgs,
-		EnvVars: []string{"WAFFLE_PLATFORM=sl", "LD_PRELOAD=libEGL.so.1"},
-		Postfix: "_surfaceless",
+	GuestType_Crostini: map[string]replayAppConfig {
+		comm.TestFlagDefault: replayAppConfig{
+			AppName: "glretrace",
+			Args:    retraceArgsCrostini,
+			EnvVars: []string{"DISPLAY=:0"},
+			Postfix: "",
+		},
+		comm.TestFlagSurfaceless: replayAppConfig{
+			AppName: "eglretrace",
+			Args:    retraceArgsCrostini,
+			EnvVars: []string{"WAFFLE_PLATFORM=sl", "LD_PRELOAD=libEGL.so.1"},
+			Postfix: "_surfaceless",
+		},
 	},
+}
+
+func getGuestType()(string, error) {
+	// TODO(tutankhamen): find a better way to distinguish a guest type
+
+	// Try Borealis first
+	if lsb_file, err := os.Open("/etc/lsb-release"); err == nil {
+		defer lsb_file.Close()
+		scanner := bufio.NewScanner(lsb_file)
+		for scanner.Scan() {
+			if strings.Contains(scanner.Text(), "BOREALIS_STAGE=") {
+				return GuestType_Borealis, nil
+			}
+		}
+	}
+
+	// Check for Crostini
+	hostName, err := os.Hostname()
+	if err != nil {
+		return "", errors.Wrap(err, "Unable to get hostname")
+	}
+	if hostName == "penguin" {
+		return GuestType_Crostini, nil
+	}
+
+	return "", errors.New("Unable to detetermine guest type")
 }
 
 func runCommand(ctx context.Context, env []string, appName string, args ...string) (exitCode int, stdout string, stderr string) {
@@ -484,20 +533,29 @@ func listFiles(path string) (map[string]uint64, error) {
 
 func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileName string, replayTimeout uint32) (map[string]comm.ValueEntry, error) {
 	res := make(map[string]comm.ValueEntry)
+	guestType, err := getGuestType()
+	if err != nil {
+		return res, err
+	}
 
-	if err := notifyInitFinished(ctx, config.ProxyServer.URL); err != nil {
+	if err = notifyInitFinished(ctx, config.ProxyServer.URL); err != nil {
 		return res, err
 	}
 
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with the default settings and %d seconds timeout...", replayTimeout))
-	res, err := replayTrace(ctx, traceReplayConfigs[comm.TestFlagDefault], traceFileName, replayTimeout)
+	replayConfig, ok := traceReplayConfigs[guestType]
+	if !ok {
+		return res, errors.New("No traceReplayConfig is defined for %s", guestType)
+	}
+
+	res, err = replayTrace(ctx, replayConfig[comm.TestFlagDefault], traceFileName, replayTimeout)
 	if err != nil {
 		return res, err
 	}
 
 	// Replay the trace file with custom settings corresponding to an each flag list entry
 	for _, flag := range config.Flags {
-		if _, ok := traceReplayConfigs[flag]; !ok {
+		if _, ok := replayConfig[flag]; !ok {
 			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Warning: Unable to find a trace replay config for <%s> flag! Skipping the test.", flag))
 			continue
 		}
@@ -507,7 +565,7 @@ func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileN
 		time.Sleep(time.Duration(replayCoolDownTime) * time.Second)
 
 		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with <%s> flag and %d seconds timeout...", flag, replayTimeout))
-		rr, err := replayTrace(ctx, traceReplayConfigs[flag], traceFileName, replayTimeout)
+		rr, err := replayTrace(ctx, replayConfig[flag], traceFileName, replayTimeout)
 		if err != nil {
 			return rr, err
 		}
@@ -526,6 +584,15 @@ func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileN
 
 func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, traceFileName string, replayTimeout uint32) (map[string]comm.ValueEntry, error) {
 	res := make(map[string]comm.ValueEntry)
+	guestType, err := getGuestType()
+	if err != nil {
+		return res, err
+	}
+
+	replayConfig, ok := traceReplayConfigs[guestType]
+	if !ok {
+		return res, errors.New("No traceReplayConfig is defined for %s", guestType)
+	}
 
 	exec.Command("sync").Run()
 	if err := notifyInitFinished(ctx, config.ProxyServer.URL); err != nil {
@@ -538,8 +605,8 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 		msg := fmt.Sprintf("Using only the first of the specified replay flags: <%s>", flag)
 		logMsg(ctx, config.ProxyServer.URL, msg)
 	}
-	traceReplayConfig := traceReplayConfigs[flag]
-	traceReplayConfig.Args = append(traceReplayConfigs[flag].Args, "--dump-per-frame-stats=/tmp/per_frame_stats.json")
+	traceReplayConfig := replayConfig[flag]
+	traceReplayConfig.Args = append(replayConfig[flag].Args, "--dump-per-frame-stats=/tmp/per_frame_stats.json")
 
 	time_start := time.Now()
 	time_now := time_start
