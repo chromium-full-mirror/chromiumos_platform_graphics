@@ -32,11 +32,11 @@ import (
 )
 
 const (
-	appDataDir        = "trace_replay.tmp"
-	tmpfsDir          = "/tmp"
-	minRequiredSpace  = 1024 * 1024
-	maxRefImageSize   = 3 * 1024 * 1024
-	apitraceOutputRE  = `Rendered (\d+) frames in (\d*\.?\d*) secs, average of (\d*\.?\d*) fps`
+	appDataDir       = "trace_replay.tmp"
+	tmpfsDir         = "/tmp"
+	minRequiredSpace = 1024 * 1024
+	maxRefImageSize  = 3 * 1024 * 1024
+	apitraceOutputRE = `Rendered (\d+) frames in (\d*\.?\d*) secs, average of (\d*\.?\d*) fps`
 	// Default application timeout in seconds
 	defaultTimeout = 60 * 60
 	// Maximum allowed replay time for one trace in seonds
@@ -44,8 +44,6 @@ const (
 	// Minimum replay timeout for one trace in seconds.
 	// Can't be less than 10 due to nested app timeout which is (replayMinTime-10)
 	replayMinTime = 30
-	// Cooling down time before each trace replay in seconds
-	replayCoolDownTime = 30
 	// Supported guest types
 	GuestType_Borealis = "Borealis"
 	GuestType_Crostini = "Crostini"
@@ -67,7 +65,7 @@ type replayAppConfig struct {
 // Trace replay configs per guest type per test flag
 // traceReplayConfigs[GuestType][TestFlag]
 var traceReplayConfigs = map[string]map[string]replayAppConfig{
-	GuestType_Borealis: map[string]replayAppConfig {
+	GuestType_Borealis: map[string]replayAppConfig{
 		comm.TestFlagDefault: replayAppConfig{
 			AppName: "glretrace",
 			Args:    retraceArgsBorealis,
@@ -81,7 +79,7 @@ var traceReplayConfigs = map[string]map[string]replayAppConfig{
 			Postfix: "_surfaceless",
 		},
 	},
-	GuestType_Crostini: map[string]replayAppConfig {
+	GuestType_Crostini: map[string]replayAppConfig{
 		comm.TestFlagDefault: replayAppConfig{
 			AppName: "glretrace",
 			Args:    retraceArgsCrostini,
@@ -97,7 +95,7 @@ var traceReplayConfigs = map[string]map[string]replayAppConfig{
 	},
 }
 
-func getGuestType()(string, error) {
+func getGuestType() (string, error) {
 	// TODO(tutankhamen): find a better way to distinguish a guest type
 
 	// Try Borealis first
@@ -323,7 +321,7 @@ func uploadFile(ctx context.Context, localFileName, serverURL, remoteFileName st
 	httpClient := &http.Client{}
 	response, err := httpClient.Do(request)
 	if err != nil {
-    return errors.Wrap(err, "uploadFile: http.Do(%v) failed", request)
+		return errors.Wrap(err, "uploadFile: http.Do(%v) failed", request)
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
@@ -559,11 +557,9 @@ func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileN
 			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Warning: Unable to find a trace replay config for <%s> flag! Skipping the test.", flag))
 			continue
 		}
-		// Cool down and flush all pending filesistem pending i/o ops
-		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Cooling down for %d seconds...", replayCoolDownTime))
+		// Flush all pending filesistem pending i/o ops
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Syncing file system"))
 		exec.Command("sync").Run()
-		time.Sleep(time.Duration(replayCoolDownTime) * time.Second)
-
 		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with <%s> flag and %d seconds timeout...", flag, replayTimeout))
 		rr, err := replayTrace(ctx, replayConfig[flag], traceFileName, replayTimeout)
 		if err != nil {
@@ -647,12 +643,12 @@ func dumpTraceImages(ctx context.Context, config *comm.TestGroupConfig, traceFil
 	callsStr := ""
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file to dump the reference images..."))
 	for idx, entry := range traceEntry.ReferenceFrames {
-		if idx !=0 {
+		if idx != 0 {
 			callsStr += ","
 		}
 		callsStr += strconv.FormatUint(uint64(entry.CallId), 10)
 	}
-	args := []string{"dump-images", "--calls="+callsStr, "-o", path.Join(outDir,"dmp_"), traceFileName}
+	args := []string{"dump-images", "--calls=" + callsStr, "-o", path.Join(outDir, "dmp_"), traceFileName}
 	exitCode, _, stderr := runCommand(ctx, []string{"DISPLAY=:0"}, "apitrace", args...)
 	if exitCode != 0 {
 		return nil, errors.New("Failed to dump images for trace file [%s]. Exit code: %d. %s", traceFileName, exitCode, stderr)
@@ -674,7 +670,7 @@ func calcRequiredSpace(traceEntry *repo.TraceListEntry) uint64 {
 		}
 	}
 	// Add extra 128 megabytes for logs and unseen circumstances
-	requiredSpace += uint64(128*1024*1024)
+	requiredSpace += uint64(128 * 1024 * 1024)
 
 	return requiredSpace
 }
@@ -730,8 +726,9 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	}
 
 	// Cool down and flush all pending filesistem pending i/o ops
-	time.Sleep(time.Duration(replayCoolDownTime) * time.Second)
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Syncing file system"))
 	exec.Command("sync").Run()
+	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Syncing has finished"))
 
 	// TODO(tutankhamen): save the trace file with meta information to the local cache
 
@@ -744,57 +741,56 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	// Run the trace replay(s)
 	if config.ExtendedDuration > 0 {
 		return runReplayRepeatedly(ctx, config, traceFileName, replayTimeout)
-	} else {
-		result, err := runReplayOnce(ctx, config, traceFileName, replayTimeout)
-		if err != nil {
-			return result, err
-		}
-
-		// TODO(tutankhamen): Add test group flag to enable/disable frames capture/validation
-		if len(traceEntry.ReferenceFrames) > 0 {
-			// Download reference frames (if available) and upload them to the host
-			for _, refFrame := range traceEntry.ReferenceFrames {
-				if refFrame.FileName != "" {
-					refFrameFile, err := downloadFile(ctx, storageDir, config.ProxyServer.URL, refFrame.FileName)
-					if err != nil {
-						return result, errors.Wrap(err, "Unable to download a reference frame")
-					}
-					if _, err := validateFileMD5(ctx, refFrameFile, refFrame.FileMD5); err != nil {
-						return result, err
-					}
-					refFrameDstFile := fmt.Sprintf("images/reference/%s/%010d.png", refFrame.Board, refFrame.CallId)
-					if err := uploadFile(ctx, refFrameFile, config.ProxyServer.URL, refFrameDstFile); err != nil {
-						return result, errors.Wrap(err, "Unable to upload a reference frame")
-					}
-				}
-			}
-			// Dump trace images for comparison
-			dumped, err := dumpTraceImages(ctx, config, traceFileName, traceEntry, storageDir)
-			if err != nil {
-				return result, errors.Wrap(err, "dumpFrameImages failed");
-			}
-			for dmpCallId, dmpImageFile := range dumped {
-				var fileSize int64
-				fileInfo, err := os.Stat(dmpImageFile)
-				if err == nil {
-					fileSize = fileInfo.Size()
-				} else {
-					logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Warning: os.Stat() failed for %s", dmpImageFile))
-				}
-				result[fmt.Sprintf("size_%010d", dmpCallId)] = comm.ValueEntry{
-					Unit:      "bytes",
-					Direction: 0,
-					// TODO(tutankhamen): change type of comm.ValueEntry.Value to float64 to prevent precesion limitation related issues
-					Value:     float32(fileSize),
-				}
-				dmpImageDstFile := fmt.Sprintf("images/result/%s/%010d.png", config.Host.Board, dmpCallId)
-				if err := uploadFile(ctx, dmpImageFile, config.ProxyServer.URL, dmpImageDstFile); err != nil {
-					return result, errors.Wrap(err, "Unable to upload a dumped image")
-				}
-			}
-		}
-		return result, nil
 	}
+	result, err := runReplayOnce(ctx, config, traceFileName, replayTimeout)
+	if err != nil {
+		return result, err
+	}
+
+	// TODO(tutankhamen): Add test group flag to enable/disable frames capture/validation
+	if len(traceEntry.ReferenceFrames) > 0 {
+		// Download reference frames (if available) and upload them to the host
+		for _, refFrame := range traceEntry.ReferenceFrames {
+			if refFrame.FileName != "" {
+				refFrameFile, err := downloadFile(ctx, storageDir, config.ProxyServer.URL, refFrame.FileName)
+				if err != nil {
+					return result, errors.Wrap(err, "Unable to download a reference frame")
+				}
+				if _, err := validateFileMD5(ctx, refFrameFile, refFrame.FileMD5); err != nil {
+					return result, err
+				}
+				refFrameDstFile := fmt.Sprintf("images/reference/%s/%010d.png", refFrame.Board, refFrame.CallId)
+				if err := uploadFile(ctx, refFrameFile, config.ProxyServer.URL, refFrameDstFile); err != nil {
+					return result, errors.Wrap(err, "Unable to upload a reference frame")
+				}
+			}
+		}
+		// Dump trace images for comparison
+		dumped, err := dumpTraceImages(ctx, config, traceFileName, traceEntry, storageDir)
+		if err != nil {
+			return result, errors.Wrap(err, "dumpFrameImages failed")
+		}
+		for dmpCallId, dmpImageFile := range dumped {
+			var fileSize int64
+			fileInfo, err := os.Stat(dmpImageFile)
+			if err == nil {
+				fileSize = fileInfo.Size()
+			} else {
+				logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Warning: os.Stat() failed for %s", dmpImageFile))
+			}
+			result[fmt.Sprintf("size_%010d", dmpCallId)] = comm.ValueEntry{
+				Unit:      "bytes",
+				Direction: 0,
+				// TODO(tutankhamen): change type of comm.ValueEntry.Value to float64 to prevent precesion limitation related issues
+				Value: float32(fileSize),
+			}
+			dmpImageDstFile := fmt.Sprintf("images/result/%s/%010d.png", config.Host.Board, dmpCallId)
+			if err := uploadFile(ctx, dmpImageFile, config.ProxyServer.URL, dmpImageDstFile); err != nil {
+				return result, errors.Wrap(err, "Unable to upload a dumped image")
+			}
+		}
+	}
+	return result, nil
 }
 
 func main() {
