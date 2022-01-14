@@ -489,8 +489,11 @@ func exitWithError(err error) {
 }
 
 func checkPackageInstalled(ctx context.Context, name string) error {
+	// Attempt to dpkg -l (for Debian/Ubuntu) and, if that fails, pacman -Q (for Arch).
 	if exitCode, _, stderr := runCommand(ctx, nil, "dpkg", "-l", name); exitCode != 0 {
-		return errors.New("dpkg for %s failed with exit code %d! %s", name, exitCode, stderr)
+		if exitCode, _, stderr = runCommand(ctx, nil, "pacman", "-Q", name); exitCode != 0 {
+			return errors.New("dpkg -l and pacman -Q for %s failed with exit code %d! %s", name, exitCode, stderr)
+		}
 	}
 	return nil
 }
