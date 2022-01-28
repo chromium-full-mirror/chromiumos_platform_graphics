@@ -42,6 +42,7 @@ ftrace=true
 categories=()
 chrome_categories=''
 disabled_categories=()
+chrome_disabled_categories=''
 now=$(date +"%Y-%m-%d_%H-%M-%S")
 output_file=''
 config_filename="perfetto-${RANDOM}.config"
@@ -79,7 +80,12 @@ for (( i = 0; i < num_args; i++ )); do
     incremental_update_period_ms="${args[${i}]}"
   elif [[ "${args[${i}]}" = "-d" ]]; then
     i=$((i+1))
-    disabled_categories+=("${args[${i}]}")
+    cat="${args[${i}]}"
+    if [[ "${cat}" == chrome.* ]]; then
+      chrome_disabled_categories+="\\\"${cat#"chrome."}\\\","
+    else
+      disabled_categories+=("${cat}")
+    fi
   elif [[ "${args[${i}]}" = "--write-args" ]]; then
     i=$((i+1))
     output_args_file="${args[${i}]}"
@@ -101,6 +107,7 @@ done
 
 # Strip trailing comma:
 chrome_categories="${chrome_categories%","}"
+chrome_disabled_categories="${chrome_disabled_categories%","}"
 
 target_name="local"
 [[ -z "${dut}" ]] || target_name="${dut}"
@@ -310,7 +317,9 @@ data_sources {
     name: "org.chromium.trace_event"
     chrome_config {
       trace_config: "{\"record_mode\":\"record-continuously\",\
-\"included_categories\":[${chrome_categories}],\"memory_dump_config\":{}}"
+\"included_categories\":[${chrome_categories}],\
+\"excluded_categories\":[${chrome_disabled_categories}],\
+\"memory_dump_config\":{}}"
       privacy_filtering_enabled: false
     }
   }
@@ -320,7 +329,9 @@ data_sources {
     name: "org.chromium.trace_metadata"
     chrome_config {
       trace_config: "{\"record_mode\":\"record-continuously\",\
-\"included_categories\":[${chrome_categories}],\"memory_dump_config\":{}}"
+\"included_categories\":[${chrome_categories}],\
+\"excluded_categories\":[${chrome_disabled_categories}],\
+\"memory_dump_config\":{}}"
       privacy_filtering_enabled: false
     }
   }
