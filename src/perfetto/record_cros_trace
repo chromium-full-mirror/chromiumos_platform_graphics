@@ -139,6 +139,22 @@ if [[ -z "${output_file}" ]]; then
   fi
 fi
 
+perfetto_cmd="perfetto"
+if [[ -n "${dut}" ]]; then
+  if [[ "${is_arcvm}" == true ]]; then
+    perfetto_cmd="ssh ${dut} adb shell perfetto"
+  else
+    perfetto_cmd="ssh ${dut} perfetto"
+  fi
+fi
+
+# Perfetto added --version arg recently, which prints (eg):
+#   "Perfetto v24.2-7cb228c16 (7cb228c16d69aee297a106ad3ccc7461fa0b8045)"
+# Previous versions dump an error (hence 2>/dev/null below).
+perfetto_version=$(${perfetto_cmd} --version 2>/dev/null)
+perfetto_version_major="${perfetto_version#*v}"
+perfetto_version_major="${perfetto_version_major%.*}"
+
 # Write perfetto config file
 
 cat >"${config_filepath}" <<EOL
@@ -213,8 +229,15 @@ data_sources {
   config {
     name: "linux.sys_stats"
     sys_stats_config {
-      cpufreq_period_ms: 1000
+EOL
 
+if [[ ( "${perfetto_version_major}" -ge 24 ) ]]; then
+cat >>"${config_filepath}" <<EOL
+      cpufreq_period_ms: 1000
+EOL
+fi
+
+cat >>"${config_filepath}" <<EOL
       meminfo_period_ms: 1000
       meminfo_counters: MEMINFO_MEM_TOTAL
       meminfo_counters: MEMINFO_MEM_FREE
