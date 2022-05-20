@@ -39,10 +39,7 @@ func PlotCallNameUsagePerFrame(prof *ProfileData, callNameRegex string) error {
 	var s *plotter.Scatter
 	s, err = createScatterPlot(calls, sel, 1, colornames.Blue, draw.PlusGlyph{})
 
-	var p *plot.Plot
-	if p, err = plot.New(); err != nil {
-		return err
-	}
+	var p *plot.Plot = plot.New()
 
 	p.Title.Text = fmt.Sprintf("Calls to %s per frame", callNameRegex)
 	p.X.Label.Text = "frame num"
@@ -115,10 +112,7 @@ func PlotFrameTime(plotType string, prof1 *ProfileData, prof2 *ProfileData) erro
 		}
 	}
 
-	var p *plot.Plot
-	if p, err = plot.New(); err != nil {
-		return err
-	}
+	var p *plot.Plot = plot.New()
 
 	p.Title.Text = fmt.Sprintf("Frame duration")
 	p.X.Label.Text = "frame num"
