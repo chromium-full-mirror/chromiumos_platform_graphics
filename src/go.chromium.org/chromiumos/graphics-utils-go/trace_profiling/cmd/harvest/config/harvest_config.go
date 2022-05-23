@@ -8,7 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"trace_profiling/cmd/profile/profile"
+
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/profile/profile"
 )
 
 // TargetDevice encloses all the information needed for identifying a device

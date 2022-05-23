@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"trace_profiling/cmd/gen_db_result/common"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/gen_db_result/common"
 )
 
 // Interface command defines how individual sub-commands are setup and invoked.

@@ -7,7 +7,7 @@ package utils
 import (
 	"fmt"
 	"path"
-	"trace_profiling/cmd/profile/remote"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/profile/remote"
 )
 
 // GSFetcher is a helper class that knows how to fetch trace data from Google

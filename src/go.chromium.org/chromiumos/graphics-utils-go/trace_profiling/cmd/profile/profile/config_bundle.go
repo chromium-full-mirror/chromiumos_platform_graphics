@@ -11,7 +11,7 @@ import (
 	"os"
 	"reflect"
 
-	"trace_profiling/cmd/profile/remote"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/profile/remote"
 )
 
 // ConfigFiles contains the paths to the three JSON configuration files that

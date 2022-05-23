@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"os"
 
-	"trace_profiling/cmd/profile/profile"
-	"trace_profiling/cmd/profile/remote"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/profile/profile"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/profile/remote"
 )
 
 func runProfiling(prof *profile.Profiler, target *remote.SSHTarget, tunnel *remote.Tunnel) {

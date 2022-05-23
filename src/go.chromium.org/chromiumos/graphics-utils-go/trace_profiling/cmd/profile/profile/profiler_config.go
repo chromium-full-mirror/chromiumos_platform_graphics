@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"trace_profiling/cmd/profile/remote"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/profile/remote"
 )
 
 // List if valid device exec environment. Mirrors ExecutionEnvironment in result.proto.

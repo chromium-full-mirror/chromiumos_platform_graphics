@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"os"
 
-	"trace_profiling/cmd/analyze/analyze"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/analyze/analyze"
 )
 
 type profileData = analyze.ProfileData

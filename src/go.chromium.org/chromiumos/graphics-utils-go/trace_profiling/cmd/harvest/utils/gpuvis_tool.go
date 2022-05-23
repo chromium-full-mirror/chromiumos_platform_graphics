@@ -15,8 +15,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"trace_profiling/cmd/harvest/config"
-	"trace_profiling/cmd/profile/remote"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/harvest/config"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/profile/remote"
 )
 
 const (

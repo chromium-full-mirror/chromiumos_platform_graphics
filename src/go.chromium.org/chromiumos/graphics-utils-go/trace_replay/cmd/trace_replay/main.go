@@ -25,10 +25,10 @@ import (
 	"syscall"
 	"time"
 
-	"trace_replay/cmd/trace_replay/comm"
-	"trace_replay/cmd/trace_replay/repo"
-	"trace_replay/cmd/trace_replay/utils"
-	"trace_replay/pkg/errors"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_replay/cmd/trace_replay/comm"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_replay/cmd/trace_replay/repo"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_replay/cmd/trace_replay/utils"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_replay/pkg/errors"
 )
 
 const (

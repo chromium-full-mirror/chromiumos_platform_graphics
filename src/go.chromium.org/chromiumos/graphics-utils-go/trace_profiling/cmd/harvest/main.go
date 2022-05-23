@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"trace_profiling/cmd/harvest/config"
-	"trace_profiling/cmd/harvest/utils"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/harvest/config"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/harvest/utils"
 )
 
 const (

@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	gen_db "trace_profiling/cmd/gen_db_result/common"
-	"trace_profiling/cmd/harvest/config"
-	remote "trace_profiling/cmd/profile/remote"
+	gen_db "go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/gen_db_result/common"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/harvest/config"
+	remote "go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/profile/remote"
 
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"

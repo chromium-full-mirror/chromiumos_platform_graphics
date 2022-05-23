@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"trace_profiling/cmd/profile/remote"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/profile/remote"
 )
 
 // ProfileParams bundles all the parameters needed to profile traces on a

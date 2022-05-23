@@ -16,8 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"trace_profiling/cmd/harvest/config"
-	"trace_profiling/cmd/profile/profile"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/harvest/config"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/profile/profile"
 )
 
 // FPSRecord records frame-per-second performance data for comparisons between
