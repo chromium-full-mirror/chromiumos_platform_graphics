@@ -47,12 +47,20 @@ const (
 	// Supported guest types
 	GuestType_Borealis = "Borealis"
 	GuestType_Crostini = "Crostini"
+	steamDir           = "/home/chronos/home/chronos/.steam/steam/steamapps/common/"
+	apitraceW32        = "apitrace-10.0-win32/bin/d3dretrace.exe"
+	apitraceW64        = "apitrace-10.0-win64/bin/d3dretrace.exe"
+	slr                = steamDir + "SteamLinuxRuntime_soldier/"
+	proton             = steamDir + "Proton 7.0/"
+	exerun             = "/opt/win_tools/bin/exerun.py"
 )
 
 var (
-	retraceArgsBorealis = []string{"--benchmark", "--watchdog"}
-	retraceArgsCrostini = []string{"--benchmark"}
-	requiredPackages    = []string{"apitrace", "zstd"}
+	retraceArgsBorealisNative       = []string{"--benchmark", "--watchdog"}
+	retraceArgsCrostini             = []string{"--benchmark"}
+	retraceArgsBorealisProtonD3DW32 = []string{"--slr", slr, "--proton", proton, apitraceW32}
+	retraceArgsBorealisProtonD3DW64 = []string{"--slr", slr, "--proton", proton, apitraceW64}
+	requiredPackages                = []string{"apitrace", "zstd"}
 )
 
 type replayAppConfig struct {
@@ -68,15 +76,27 @@ var traceReplayConfigs = map[string]map[string]replayAppConfig{
 	GuestType_Borealis: map[string]replayAppConfig{
 		comm.TestFlagDefault: replayAppConfig{
 			AppName: "glretrace",
-			Args:    retraceArgsBorealis,
+			Args:    retraceArgsBorealisNative,
 			EnvVars: []string{"DISPLAY=:0"},
 			Postfix: "",
 		},
 		comm.TestFlagSurfaceless: replayAppConfig{
 			AppName: "eglretrace",
-			Args:    retraceArgsBorealis,
+			Args:    retraceArgsBorealisNative,
 			EnvVars: []string{"WAFFLE_PLATFORM=sl", "LD_PRELOAD=libEGL.so.1"},
 			Postfix: "_surfaceless",
+		},
+		comm.TestFlagD3DW32: replayAppConfig{
+			AppName: exerun,
+			Args:    retraceArgsBorealisProtonD3DW32,
+			EnvVars: []string{"DISPLAY=:0"},
+			Postfix: "_d3d32",
+		},
+		comm.TestFlagD3DW64: replayAppConfig{
+			AppName: exerun,
+			Args:    retraceArgsBorealisProtonD3DW64,
+			EnvVars: []string{"DISPLAY=:0"},
+			Postfix: "_d3d64",
 		},
 	},
 	GuestType_Crostini: map[string]replayAppConfig{
@@ -93,6 +113,16 @@ var traceReplayConfigs = map[string]map[string]replayAppConfig{
 			Postfix: "_surfaceless",
 		},
 	},
+}
+
+// contains is case insensitive with regards to the tofind param.
+func contains(arr []string, tofind string) bool {
+	for _, val := range arr {
+		if strings.EqualFold(val, tofind) {
+			return true
+		}
+	}
+	return false
 }
 
 func getGuestType() (string, error) {
@@ -517,6 +547,22 @@ func replayTrace(ctx context.Context, config replayAppConfig, traceFileName stri
 	return parseReplayOutput(stdout, config.Postfix)
 }
 
+// TODO(syedfaaiz) : Need to either get rid of the timeout or find out a way to use it in the expected manner.
+func replayTraceProton(ctx context.Context, config replayAppConfig, traceFileName string, timeoutInSeconds uint32) (map[string]comm.ValueEntry, error) {
+	if timeoutInSeconds < replayMinTime {
+		return nil, errors.New("The requested timeout is too short to replay a trace file. Requested: %d, wanted >= %d", timeoutInSeconds, replayMinTime)
+	}
+
+	appArgs := config.Args
+	// Add nested timeout to glretrace/eglretrace
+	appArgs = append(appArgs, traceFileName)
+	exitCode, _, stderr := runCommand(ctx, config.EnvVars, config.AppName, appArgs...)
+	if exitCode != 0 {
+		return nil, errors.New("Failed to replay trace file [%s]. Exit code: %d. %s", traceFileName, exitCode, stderr)
+	}
+	return nil, nil
+}
+
 func listFiles(path string) (map[string]uint64, error) {
 	result := make(map[string]uint64)
 	files, err := ioutil.ReadDir(path)
@@ -543,13 +589,22 @@ func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileN
 		return res, err
 	}
 
-	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with the default settings and %d seconds timeout...", replayTimeout))
 	replayConfig, ok := traceReplayConfigs[guestType]
 	if !ok {
 		return res, errors.New("No traceReplayConfig is defined for %s", guestType)
 	}
 
-	res, err = replayTrace(ctx, replayConfig[comm.TestFlagDefault], traceFileName, replayTimeout)
+	if contains(config.Labels, comm.TestFlagD3DW32) {
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with Proton settings and apitrace win32 binary"))
+		res, err = replayTraceProton(ctx, replayConfig[comm.TestFlagD3DW32], traceFileName, replayTimeout)
+	} else if contains(config.Labels, comm.TestFlagD3DW64) {
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with Proton settings and apitrace win64 binary"))
+		res, err = replayTraceProton(ctx, replayConfig[comm.TestFlagD3DW64], traceFileName, replayTimeout)
+	} else {
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with the default settings and %d seconds timeout...", replayTimeout))
+		res, err = replayTrace(ctx, replayConfig[comm.TestFlagDefault], traceFileName, replayTimeout)
+	}
+
 	if err != nil {
 		return res, err
 	}
@@ -564,7 +619,20 @@ func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileN
 		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Syncing file system"))
 		exec.Command("sync").Run()
 		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with <%s> flag and %d seconds timeout...", flag, replayTimeout))
-		rr, err := replayTrace(ctx, replayConfig[flag], traceFileName, replayTimeout)
+
+		rr := make(map[string]comm.ValueEntry)
+
+		if flag == comm.TestFlagD3DW32 {
+			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with Proton settings and apitrace win32 binary"))
+			rr, err = replayTraceProton(ctx, replayConfig[comm.TestFlagD3DW32], traceFileName, replayTimeout)
+		} else if flag == comm.TestFlagD3DW64 {
+			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with Proton settings and apitrace win64 binary"))
+			rr, err = replayTraceProton(ctx, replayConfig[comm.TestFlagD3DW64], traceFileName, replayTimeout)
+		} else {
+			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with the default settings and %d seconds timeout...", replayTimeout))
+			rr, err = replayTrace(ctx, replayConfig[comm.TestFlagDefault], traceFileName, replayTimeout)
+		}
+
 		if err != nil {
 			return rr, err
 		}
