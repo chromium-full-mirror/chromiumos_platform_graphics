@@ -117,7 +117,7 @@ Use ':' to split between multiple libraries`)
 			for i, attr := range chipSetAttrs {
 				chipSetAttrs[i] = strings.Replace(strings.TrimSpace(attr), "\"", "", -1)
 			}
-			id := chipSetAttrs[0]
+			id := strings.ToLower(chipSetAttrs[0])
 			familyName, err := mapGPUName(chipSetAttrs[2])
 			if err != nil {
 				fmt.Printf("Can't find the gpu name (%s) in our map\n", chipSetAttrs[2])

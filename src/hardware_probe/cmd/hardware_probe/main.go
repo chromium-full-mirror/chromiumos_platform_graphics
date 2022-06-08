@@ -185,7 +185,7 @@ func getGPUFamily() (GPUFamily, error) {
 	}
 	if strings.Contains(vgaDevices[0].Name, intelVGAString) {
 		intelMap := getIntelPCIIDMap()
-		deviceID := vgaDevices[0].DeviceID
+		deviceID := strings.ToLower(vgaDevices[0].DeviceID)
 		gpuName, ok := intelMap[deviceID]
 		if !ok {
 			return "", fmt.Errorf("no matching device id (%v) in Intel pci id map", deviceID)
