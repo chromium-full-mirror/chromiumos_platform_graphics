@@ -44,15 +44,16 @@ const (
 	// Minimum replay timeout for one trace in seconds.
 	// Can't be less than 10 due to nested app timeout which is (replayMinTime-10)
 	replayMinTime = 30
-	// Supported guest types
-	GuestType_Borealis = "Borealis"
-	GuestType_Crostini = "Crostini"
-	steamDir           = "/home/chronos/home/chronos/.steam/steam/steamapps/common/"
-	apitraceW32        = "apitrace-10.0-win32/bin/d3dretrace.exe"
-	apitraceW64        = "apitrace-10.0-win64/bin/d3dretrace.exe"
-	slr                = steamDir + "SteamLinuxRuntime_soldier/"
-	proton             = steamDir + "Proton 7.0/"
-	exerun             = "/opt/win_tools/bin/exerun.py"
+	// GuestTypeBorealis is supported guest type for borealis
+	GuestTypeBorealis = "Borealis"
+	// GuestTypeCrostini is supported guest type for crostini
+	GuestTypeCrostini = "Crostini"
+	steamDir          = "/home/chronos/home/chronos/.steam/steam/steamapps/common/"
+	apitraceW32       = "apitrace-10.0-win32/bin/d3dretrace.exe"
+	apitraceW64       = "apitrace-10.0-win64/bin/d3dretrace.exe"
+	slr               = steamDir + "SteamLinuxRuntime_soldier/"
+	proton            = steamDir + "Proton 7.0/"
+	exerun            = "/opt/win_tools/bin/exerun.py"
 )
 
 var (
@@ -73,40 +74,40 @@ type replayAppConfig struct {
 // Trace replay configs per guest type per test flag
 // traceReplayConfigs[GuestType][TestFlag]
 var traceReplayConfigs = map[string]map[string]replayAppConfig{
-	GuestType_Borealis: map[string]replayAppConfig{
-		comm.TestFlagDefault: replayAppConfig{
+	GuestTypeBorealis: {
+		comm.TestFlagDefault: {
 			AppName: "glretrace",
 			Args:    retraceArgsBorealisNative,
 			EnvVars: []string{"DISPLAY=:0"},
 			Postfix: "",
 		},
-		comm.TestFlagSurfaceless: replayAppConfig{
+		comm.TestFlagSurfaceless: {
 			AppName: "eglretrace",
 			Args:    retraceArgsBorealisNative,
 			EnvVars: []string{"WAFFLE_PLATFORM=sl", "LD_PRELOAD=libEGL.so.1"},
 			Postfix: "_surfaceless",
 		},
-		comm.TestFlagD3DW32: replayAppConfig{
+		comm.TestFlagD3DW32: {
 			AppName: exerun,
 			Args:    retraceArgsBorealisProtonD3DW32,
 			EnvVars: []string{"DISPLAY=:0"},
 			Postfix: "_d3d32",
 		},
-		comm.TestFlagD3DW64: replayAppConfig{
+		comm.TestFlagD3DW64: {
 			AppName: exerun,
 			Args:    retraceArgsBorealisProtonD3DW64,
 			EnvVars: []string{"DISPLAY=:0"},
 			Postfix: "_d3d64",
 		},
 	},
-	GuestType_Crostini: map[string]replayAppConfig{
-		comm.TestFlagDefault: replayAppConfig{
+	GuestTypeCrostini: {
+		comm.TestFlagDefault: {
 			AppName: "glretrace",
 			Args:    retraceArgsCrostini,
 			EnvVars: []string{"DISPLAY=:0"},
 			Postfix: "",
 		},
-		comm.TestFlagSurfaceless: replayAppConfig{
+		comm.TestFlagSurfaceless: {
 			AppName: "eglretrace",
 			Args:    retraceArgsCrostini,
 			EnvVars: []string{"WAFFLE_PLATFORM=sl", "LD_PRELOAD=libEGL.so.1"},
@@ -129,12 +130,12 @@ func getGuestType() (string, error) {
 	// TODO(tutankhamen): find a better way to distinguish a guest type
 
 	// Try Borealis first
-	if lsb_file, err := os.Open("/etc/lsb-release"); err == nil {
-		defer lsb_file.Close()
-		scanner := bufio.NewScanner(lsb_file)
+	if lsbFile, err := os.Open("/etc/lsb-release"); err == nil {
+		defer lsbFile.Close()
+		scanner := bufio.NewScanner(lsbFile)
 		for scanner.Scan() {
 			if strings.Contains(scanner.Text(), "BOREALIS_STAGE=") {
-				return GuestType_Borealis, nil
+				return GuestTypeBorealis, nil
 			}
 		}
 	}
@@ -145,7 +146,7 @@ func getGuestType() (string, error) {
 		return "", errors.Wrap(err, "Unable to get hostname")
 	}
 	if hostName == "penguin" {
-		return GuestType_Crostini, nil
+		return GuestTypeCrostini, nil
 	}
 
 	return "", errors.New("Unable to detetermine guest type")
@@ -246,9 +247,9 @@ func getTempDataStorageDir(storageRoot string, requiredSpace uint64) (string, ui
 		return "", 0, errors.Wrap(err, "Unable to get free space information for %s", storageRoot)
 	}
 
-	space_info := fmt.Sprintf("Available space at <%s>: %s bytes, Required space: %s bytes", storageRoot, utils.FormatSize(freeSpace), utils.FormatSize(requiredSpace))
+	spaceInfo := fmt.Sprintf("Available space at <%s>: %s bytes, Required space: %s bytes", storageRoot, utils.FormatSize(freeSpace), utils.FormatSize(requiredSpace))
 	if freeSpace < requiredSpace {
-		return "", freeSpace, errors.New("Not enough space. %s", space_info)
+		return "", freeSpace, errors.New("Not enough space. %s", spaceInfo)
 	}
 
 	resultDir := path.Join(storageRoot, appDataDir)
@@ -481,15 +482,15 @@ func parseReplayOutput(output string, postfix string) (map[string]comm.ValueEntr
 		return nil, errors.Wrap(err, "failed to parse fps %q", match[3])
 	}
 	return map[string]comm.ValueEntry{
-		"frames" + postfix: comm.ValueEntry{
+		"frames" + postfix: {
 			Unit:      "frame",
 			Direction: 0,
 			Value:     float32(totalFrames),
-		}, "fps" + postfix: comm.ValueEntry{
+		}, "fps" + postfix: {
 			Unit:      "fps",
 			Direction: +1,
 			Value:     float32(averageFPS),
-		}, "time" + postfix: comm.ValueEntry{
+		}, "time" + postfix: {
 			Unit:      "sec",
 			Direction: -1,
 			Value:     float32(durationInSeconds),
@@ -675,23 +676,23 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 	traceReplayConfig := replayConfig[flag]
 	traceReplayConfig.Args = append(replayConfig[flag].Args, "--dump-per-frame-stats=/tmp/per_frame_stats.json")
 
-	time_start := time.Now()
-	time_now := time_start
-	time_end := time_now.Add(time.Duration(config.ExtendedDuration) * time.Second)
-	run_count := 0
+	timeStart := time.Now()
+	timeNow := timeStart
+	timeEnd := timeNow.Add(time.Duration(config.ExtendedDuration) * time.Second)
+	runCount := 0
 	msg := fmt.Sprintf("Extended trace replay session configured to last %0.2f minutes, with <%s> flag", float32(config.ExtendedDuration)/60.0, flag)
 	logMsg(ctx, config.ProxyServer.URL, msg)
-	for time_now.Before(time_end) {
-		time_since_str := strings.ReplaceAll(time.Since(time_start).String(), "µ", "u")
-		msg := fmt.Sprintf("Replaying the trace with <%s> flag, #%d at +%s from test start", flag, run_count+1, time_since_str)
+	for timeNow.Before(timeEnd) {
+		timeSinceStr := strings.ReplaceAll(time.Since(timeStart).String(), "µ", "u")
+		msg := fmt.Sprintf("Replaying the trace with <%s> flag, #%d at +%s from test start", flag, runCount+1, timeSinceStr)
 		logMsg(ctx, config.ProxyServer.URL, msg)
 		rr, err := replayTrace(ctx, traceReplayConfig, traceFileName, replayTimeout)
 		if err != nil {
 			return res, err
 		}
 
-		replayDesc := fmt.Sprintf("replay%03d", run_count+1)
-		if err := notifyReplayFinished(ctx, config.ProxyServer.URL, replayDesc, float64(time_now.UnixNano()/1e9)); err != nil {
+		replayDesc := fmt.Sprintf("replay%03d", runCount+1)
+		if err := notifyReplayFinished(ctx, config.ProxyServer.URL, replayDesc, float64(timeNow.UnixNano()/1e9)); err != nil {
 			return res, err
 		}
 
@@ -700,8 +701,8 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 			res[fmt.Sprintf("%s_%s", replayDesc, k)] = v
 		}
 
-		time_now = time.Now()
-		run_count++
+		timeNow = time.Now()
+		runCount++
 	}
 
 	return res, nil
@@ -717,7 +718,7 @@ func dumpTraceImages(ctx context.Context, config *comm.TestGroupConfig, traceFil
 		if idx != 0 {
 			callsStr += ","
 		}
-		callsStr += strconv.FormatUint(uint64(entry.CallId), 10)
+		callsStr += strconv.FormatUint(uint64(entry.CallID), 10)
 	}
 	args := []string{"dump-images", "--calls=" + callsStr, "-o", path.Join(outDir, "dmp_"), traceFileName}
 	exitCode, _, stderr := runCommand(ctx, []string{"DISPLAY=:0"}, "apitrace", args...)
@@ -725,7 +726,7 @@ func dumpTraceImages(ctx context.Context, config *comm.TestGroupConfig, traceFil
 		return nil, errors.New("Failed to dump images for trace file [%s]. Exit code: %d. %s", traceFileName, exitCode, stderr)
 	}
 	for _, entry := range traceEntry.ReferenceFrames {
-		res[entry.CallId] = path.Join(outDir, fmt.Sprintf("dmp_%010d.png", entry.CallId))
+		res[entry.CallID] = path.Join(outDir, fmt.Sprintf("dmp_%010d.png", entry.CallID))
 	}
 	return res, nil
 }
@@ -830,7 +831,7 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 				if _, err := validateFileMD5(ctx, refFrameFile, refFrame.FileMD5); err != nil {
 					return result, err
 				}
-				refFrameDstFile := fmt.Sprintf("images/reference/%s/%010d.png", refFrame.Board, refFrame.CallId)
+				refFrameDstFile := fmt.Sprintf("images/reference/%s/%010d.png", refFrame.Board, refFrame.CallID)
 				if err := uploadFile(ctx, refFrameFile, config.ProxyServer.URL, refFrameDstFile); err != nil {
 					return result, errors.Wrap(err, "Unable to upload a reference frame")
 				}
@@ -841,7 +842,7 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 		if err != nil {
 			return result, errors.Wrap(err, "dumpFrameImages failed")
 		}
-		for dmpCallId, dmpImageFile := range dumped {
+		for dmpCallID, dmpImageFile := range dumped {
 			var fileSize int64
 			fileInfo, err := os.Stat(dmpImageFile)
 			if err == nil {
@@ -849,13 +850,13 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 			} else {
 				logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Warning: os.Stat() failed for %s", dmpImageFile))
 			}
-			result[fmt.Sprintf("size_%010d", dmpCallId)] = comm.ValueEntry{
+			result[fmt.Sprintf("size_%010d", dmpCallID)] = comm.ValueEntry{
 				Unit:      "bytes",
 				Direction: 0,
 				// TODO(tutankhamen): change type of comm.ValueEntry.Value to float64 to prevent precesion limitation related issues
 				Value: float32(fileSize),
 			}
-			dmpImageDstFile := fmt.Sprintf("images/result/%s/%010d.png", config.Host.Board, dmpCallId)
+			dmpImageDstFile := fmt.Sprintf("images/result/%s/%010d.png", config.Host.Board, dmpCallID)
 			if err := uploadFile(ctx, dmpImageFile, config.ProxyServer.URL, dmpImageDstFile); err != nil {
 				return result, errors.Wrap(err, "Unable to upload a dumped image")
 			}

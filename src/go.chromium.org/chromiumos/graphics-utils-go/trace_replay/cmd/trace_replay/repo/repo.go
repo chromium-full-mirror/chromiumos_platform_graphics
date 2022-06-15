@@ -23,13 +23,13 @@ type TraceFileInfo struct {
 
 // ReferenceFrameEntry contains all the necessary reference frame information
 type ReferenceFrameEntry struct {
-	Board      string   `json:"Board"`
-	CallId     uint32   `json:"CallId,string"`
-	Tags       []string `json:"Tags"`
-	Notes      string   `json:"Notes"`
-	FileName   string   `json:"FileName"`
-	FileSize   uint64   `json:"FileSize,string"`
-	FileMD5    string   `json:"FileMD5"`
+	Board    string   `json:"Board"`
+	CallID   uint32   `json:"CallId,string"`
+	Tags     []string `json:"Tags"`
+	Notes    string   `json:"Notes"`
+	FileName string   `json:"FileName"`
+	FileSize uint64   `json:"FileSize,string"`
+	FileMD5  string   `json:"FileMD5"`
 }
 
 // TraceListEntry struct contains the detailed information about one trace file
