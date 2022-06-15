@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"go.chromium.org/chromiumos/graphics-utils-go/trace_replay/cmd/trace_replay/comm"
+	"go.chromium.org/chromiumos/graphics-utils-go/trace_replay/cmd/trace_replay/labels"
 	"go.chromium.org/chromiumos/graphics-utils-go/trace_replay/cmd/trace_replay/repo"
 	"go.chromium.org/chromiumos/graphics-utils-go/trace_replay/cmd/trace_replay/utils"
 	"go.chromium.org/chromiumos/graphics-utils-go/trace_replay/pkg/errors"
@@ -429,38 +430,6 @@ func getTraceList(ctx context.Context, config *comm.TestGroupConfig) (*repo.Trac
 	}
 
 	return &traceList, nil
-}
-
-// checks if a set of labels |a| is a subset of labels |b|
-func matchLabels(a *[]string, b *[]string) bool {
-	if len(*a) == 0 || len(*b) == 0 {
-		return false
-	}
-
-	for _, aval := range *a {
-		bFound := false
-		for _, bval := range *b {
-			if strings.EqualFold(aval, bval) {
-				bFound = true
-				break
-			}
-		}
-		if bFound == false {
-			return false
-		}
-	}
-	return true
-}
-
-// getTraceEntries function selects the trace entries for the specified labels
-func getTraceEntries(traceList *repo.TraceList, queryLabels *[]string) ([]repo.TraceListEntry, error) {
-	var result []repo.TraceListEntry
-	for _, entry := range traceList.Entries {
-		if matchLabels(queryLabels, &entry.Labels) == true {
-			result = append(result, entry)
-		}
-	}
-	return result, nil
 }
 
 func parseReplayOutput(output string, postfix string) (map[string]comm.ValueEntry, error) {
@@ -879,7 +848,7 @@ func main() {
 		fmt.Println(string(versionInfoJSON))
 		os.Exit(0)
 	}
-	// Unmarshal the  config argument json
+	// Unmarshal the config argument json
 	var config comm.TestGroupConfig
 	err := json.Unmarshal([]byte(os.Args[1]), &config)
 	if err != nil {
@@ -927,7 +896,7 @@ func main() {
 
 	// TODO(tutankhamen): check if trace file is already exist in the local cache
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Filter test entries based on label: %v", config.Labels))
-	traceEntries, err := getTraceEntries(traceList, &config.Labels)
+	traceEntries, err := labels.GetTraceEntries(traceList, &config.Labels)
 	if err != nil {
 		exitWithError(err)
 	}
