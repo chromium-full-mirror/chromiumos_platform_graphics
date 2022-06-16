@@ -1,3 +1,5 @@
+# jasperlake boards: dedede
+
 dEQP-VK.api.tooling_info.validate_getter,Crash
 dEQP-VK.api.tooling_info.validate_tools_properties,Crash
 dEQP-VK.info.instance_extensions,Fail

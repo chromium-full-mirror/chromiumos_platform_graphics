@@ -1,3 +1,6 @@
+# alderlake-P boards: brask, brya, draco, skolas
+# alderlake-N boards: nissa
+
 dEQP-VK.api.tooling_info.validate_getter,Crash
 dEQP-VK.api.tooling_info.validate_tools_properties,Crash
 dEQP-VK.drm_format_modifiers.export_import.a4r4g4b4_unorm_pack16,Fail

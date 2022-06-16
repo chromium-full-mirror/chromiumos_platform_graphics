@@ -1,3 +1,5 @@
+# kabylake boards: atlas, eve fizz, kalista, nami, nautilus, nocturn, poppy, rammus, soraka
+
 dEQP-VK.info.instance_extensions,Fail
 
 # This test is buggy in the CTS and should be fixed on the next CTS release.

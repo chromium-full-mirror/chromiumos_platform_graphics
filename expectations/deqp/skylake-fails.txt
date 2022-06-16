@@ -1,3 +1,5 @@
+# skylake boards: asuka, caroline, cave, chell, lars, pbody, sentry
+
 # Possibly related to https://gitlab.freedesktop.org/mesa/mesa/-/issues/1478
 dEQP-VK.glsl.builtin.precision.cos.highp.scalar,Fail
 dEQP-VK.glsl.builtin.precision.cos.mediump.scalar,Fail
