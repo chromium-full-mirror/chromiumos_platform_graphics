@@ -1,0 +1,4 @@
+# Skip tests on all borealis
+
+# https://buganizer.corp.google.com/issues/234387653#comment4
+dEQP-VK.info.instance_extensions
