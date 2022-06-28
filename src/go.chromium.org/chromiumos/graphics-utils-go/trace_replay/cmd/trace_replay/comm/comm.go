@@ -52,13 +52,13 @@ type SystemInfo struct {
 // to define a trace replay test group configuration as well as a container to deliver
 // the required host environment related information inside the guest
 type TestGroupConfig struct {
-	Labels           []string        `json:"Labels"`
-	Flags            []string        `json:"Flags"`
-	Repository       RepositoryInfo  `json:"Repository"`
-	Host             SystemInfo      `json:"Host"`
-	ProxyServer      ProxyServerInfo `json:"ProxyServer"`
-	Timeout          uint32          `json:"Timeout,string"`
-	ExtendedDuration uint32          `json:"ExtendedDuration,string"`
+	Labels           []string        `json:"Labels"`                  // Labels to filter the traces.
+	Flags            []string        `json:"Flags"`                   // Flags determines how to run the traces.
+	Repository       RepositoryInfo  `json:"Repository"`              // Traces repository informational.
+	Host             SystemInfo      `json:"Host"`                    // Information related to the host it is running on.
+	ProxyServer      ProxyServerInfo `json:"ProxyServer"`             // Information for proxy server.
+	Timeout          uint32          `json:"Timeout,string"`          // Timeout in second.
+	ExtendedDuration uint32          `json:"ExtendedDuration,string"` // If set, run in extended mode with extra timeout in second.
 }
 
 // ValueEntry struct contains the result metrics for one trace replay test
