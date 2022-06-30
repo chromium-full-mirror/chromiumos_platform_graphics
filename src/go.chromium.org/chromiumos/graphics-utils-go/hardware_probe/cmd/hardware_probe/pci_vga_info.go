@@ -31,7 +31,7 @@ func GetVGADevices() ([]VGADevice, error) {
 	}
 	vgaDevices := []VGADevice{}
 	for _, line := range strings.Split(string(out), "\n") {
-		if !strings.Contains(line, "VGA") {
+		if !strings.Contains(line, "VGA compatible controller") {
 			continue
 		}
 		matches := pciRegex.FindStringSubmatch(line)

@@ -151,9 +151,9 @@ func getWaffleInfo() (string, error) {
 
 // getGPUFamily returns the GPU family name for the host.
 func getGPUFamily() (GPUFamily, error) {
-	hasMali, _ := hasMaliGPUEnabled()
-	// TODO: Add some ARM soc here once ARM soc family detection works.
-	if hasMali {
+	if hasMali, err := hasMaliGPUEnabled(); err != nil {
+		return "", errors.Wrap(err, "failed to determine Mali")
+	} else if hasMali {
 		wflinfo, err := getWaffleInfo()
 		if err != nil {
 			return "", errors.Wrap(err, "failed to get waffle info")
