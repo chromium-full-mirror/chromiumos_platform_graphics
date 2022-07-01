@@ -33,11 +33,22 @@ const (
 	socAMD
 	socX64
 	socX86
+	socQualcomm
 )
 
 // GPUFamily is type of GPU family.
 type GPUFamily string
 
+// listGrep returns true if items in list matches specific regex pattern.
+func listGrep(list []string, query string) bool {
+	re := regexp.MustCompile(query)
+	for _, item := range list {
+		if match := re.FindStringSubmatch(item); match != nil {
+			return true
+		}
+	}
+	return false
+}
 func getCPUArch() (CPUArch, error) {
 	var archPrefixes = map[CPUArch][]string{
 		archArm: {"aarch64", "arm"},
@@ -61,24 +72,31 @@ func getCPUArch() (CPUArch, error) {
 	return archUnknown, fmt.Errorf("Unsupported machine type %s", machineName)
 }
 
-func getCPUSOCFamily() (CPUSOCFamily, error) {
-	// listGrep returns true if items in list matches specific regex pattern.
-	listGrep := func(list []string, re *regexp.Regexp) bool {
-		for _, item := range list {
-			if match := re.FindStringSubmatch(item); match != nil {
-				return true
-			}
-		}
-		return false
+// getARMSOCFamilyFromCompatible determines the ARM SOC we're running on based on 'compatible' property of the base node of devicetree.
+func getARMSOCFamilyFromCompatible() (CPUSOCFamily, error) {
+	out, err := ioutil.ReadFile("/sys/firmware/devicetree/base/compatible")
+	if err != nil {
+		return socUnknown, errors.Wrap(err, "failed to read compatible file")
 	}
+	compatibles := strings.Split(string(out), "\000")
+	if listGrep(compatibles, "^qcom,") {
+		return socQualcomm, nil
+	}
+	return socUnknown, fmt.Errorf("Failed to determine ARM SOC from compatible: %v", compatibles)
+}
+
+func getARMSOCFamily() (CPUSOCFamily, error) {
+	return getARMSOCFamilyFromCompatible()
+}
+
+func getCPUSOCFamily() (CPUSOCFamily, error) {
 
 	// Use cpuinfo to figure out AMD
 	out, err := ioutil.ReadFile("/proc/cpuinfo")
 	if err != nil {
 		return socUnknown, errors.Wrap(err, "failed to read /proc/cpuinfo")
 	}
-	re := regexp.MustCompile(`^vendor_id.*:.*AMD`)
-	if listGrep(strings.Split(string(out), "\n"), re) {
+	if listGrep(strings.Split(string(out), "\n"), "^vendor_id.*:.*AMD") {
 		return socAMD, nil
 	}
 
@@ -87,7 +105,7 @@ func getCPUSOCFamily() (CPUSOCFamily, error) {
 		return socUnknown, errors.Wrap(err, "failed to get cpu arch type")
 	}
 	if cpuArch == archArm {
-		// TODO: Figure out arm SOC family name
+		return getARMSOCFamily()
 	}
 	if cpuArch == archX64 {
 		return socX64, nil
@@ -165,7 +183,13 @@ func getGPUFamily() (GPUFamily, error) {
 		}
 		return GPUFamily(strings.ToLower(matches[1])), nil
 	}
-	// TODO: Use CPUSOCFamily information to determine GPU with ARM CPU, e.g. qualcomm.
+	socFamily, err := getCPUSOCFamily()
+	if err != nil {
+		return "", errors.Wrap(err, "failed to determine CPU SOC family")
+	}
+	if socFamily == socQualcomm {
+		return "qualcomm", nil
+	}
 
 	// For AMD and intel, check the pci_id_map for their respecitive GPU.
 	const (
