@@ -205,7 +205,13 @@ func getGPUFamily() (GPUFamily, error) {
 	}
 
 	if strings.Contains(vgaDevices[0].Name, amdVGAString) {
-		// TODO: figure out AMD, we need similar file as autotest's amd_pci_ids.json file.
+		amdMap := getAMDPCIIDMap()
+		deviceID := strings.ToLower(vgaDevices[0].DeviceID)
+		gpuName, ok := amdMap[deviceID]
+		if !ok {
+			return "", fmt.Errorf("no matching device id (%v) in AMD pci id map, please update src/platform/graphics/.../hardware_probe/.../amd_pci_ids.go", deviceID)
+		}
+		return gpuName, nil
 	}
 	if strings.Contains(vgaDevices[0].Name, intelVGAString) {
 		intelMap := getIntelPCIIDMap()
