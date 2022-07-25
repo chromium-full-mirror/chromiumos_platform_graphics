@@ -169,6 +169,12 @@ func getWaffleInfo() (string, error) {
 
 // getGPUFamily returns the GPU family name for the host.
 func getGPUFamily() (GPUFamily, error) {
+	// Check for rogue
+	if _, err := os.Stat("/sys/kernel/debug/pvr"); err == nil {
+		return "rogue", nil
+	}
+
+	// Check for mali
 	if hasMali, err := hasMaliGPUEnabled(); err != nil {
 		return "", errors.Wrap(err, "failed to determine Mali")
 	} else if hasMali {
@@ -183,6 +189,8 @@ func getGPUFamily() (GPUFamily, error) {
 		}
 		return GPUFamily(strings.ToLower(matches[1])), nil
 	}
+
+	// Check for qualcomm
 	socFamily, err := getCPUSOCFamily()
 	if err != nil {
 		return "", errors.Wrap(err, "failed to determine CPU SOC family")
