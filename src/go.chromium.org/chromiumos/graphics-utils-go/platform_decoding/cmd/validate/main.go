@@ -13,8 +13,22 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 )
+
+// extractChecksumData extracts MD5 checksum data
+func extractChecksumData(input []string) []string {
+	var data []string
+	for i := range input {
+		// Checks to see if string is a MD5 checksum
+		if match, _ := regexp.MatchString("^[0-9a-fA-F]{32}$", input[i]); match == true {
+			data = append(data, input[i])
+		}
+	}
+
+	return data
+}
 
 // readMetadata reads metadata from metadata json.
 func readMetadata(metadataPath string) (map[string]interface{}, error) {
@@ -43,7 +57,10 @@ func verifyContent(expectedHashesPath, actualOutput string) error {
 		return fmt.Errorf("`md5_checksums` in metadata at %s not a slice; got %v", expectedHashesPath, meta["md5_checksums"])
 	}
 
+	// Extracts MD5 checksum data from stdout
 	actual := strings.Split(strings.TrimSpace(actualOutput), "\n")
+	actual = extractChecksumData(actual)
+
 	if len(expected) != len(actual) {
 		return fmt.Errorf("expected and actual number of frames mismatched (%d != %d)", len(expected), len(actual))
 	}
