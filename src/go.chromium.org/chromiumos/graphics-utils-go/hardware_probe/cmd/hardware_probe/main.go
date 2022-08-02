@@ -169,10 +169,6 @@ func getWaffleInfo() (string, error) {
 
 // getGPUFamily returns the GPU family name for the host.
 func getGPUFamily() (GPUFamily, error) {
-	// Check for rogue
-	if _, err := os.Stat("/sys/kernel/debug/pvr"); err == nil {
-		return "rogue", nil
-	}
 
 	// Check for mali
 	if hasMali, err := hasMaliGPUEnabled(); err != nil {
@@ -197,6 +193,11 @@ func getGPUFamily() (GPUFamily, error) {
 	}
 	if socFamily == socQualcomm {
 		return "qualcomm", nil
+	}
+
+	// Check for rogue
+	if out, err := ioutil.ReadFile("/sys/kernel/debug/pvr/version"); err == nil && listGrep(strings.Split(string(out), "\n"), "^Driver Version: +Rogue") {
+		return "rogue", nil
 	}
 
 	// For AMD and intel, check the pci_id_map for their respecitive GPU.
