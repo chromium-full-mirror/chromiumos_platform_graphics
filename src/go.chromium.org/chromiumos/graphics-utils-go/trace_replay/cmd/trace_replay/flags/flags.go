@@ -33,8 +33,10 @@ type ReplayAppConfig struct {
 }
 
 const (
-	apitraceW32 = "apitrace-10.0-win32/bin/d3dretrace.exe"
-	apitraceW64 = "apitrace-10.0-win64/bin/d3dretrace.exe"
+	// ApitraceW32 keeps track of the 32 bit binary for d3dretrace.
+	ApitraceW32 = "d3dretrace32.exe"
+	// ApitraceW64 keeps track of the 64 bit binary for d3dretrace.
+	ApitraceW64 = "d3dretrace64.exe"
 	steamDir    = "/home/chronos/home/chronos/.steam/steam/steamapps/common/"
 	slr         = steamDir + "SteamLinuxRuntime_soldier/"
 	proton      = steamDir + "Proton 7.0/"
@@ -56,13 +58,13 @@ var configs = map[guestType]map[string]ReplayAppConfig{
 		},
 		comm.TestFlagD3DW32: {
 			AppName: "/opt/win_tools/bin/exerun.py",
-			Args:    []string{"--slr", slr, "--proton", proton, apitraceW32},
+			Args:    []string{"--slr", slr, "--proton", proton, ApitraceW32},
 			EnvVars: []string{"DISPLAY=:0"},
 			Postfix: "_d3d32",
 		},
 		comm.TestFlagD3DW64: {
 			AppName: "/opt/win_tools/bin/exerun.py",
-			Args:    []string{"--slr", slr, "--proton", proton, apitraceW64},
+			Args:    []string{"--slr", slr, "--proton", proton, ApitraceW64},
 			EnvVars: []string{"DISPLAY=:0"},
 			Postfix: "_d3d64",
 		},

@@ -416,6 +416,7 @@ func replayTrace(ctx context.Context, config flags.ReplayAppConfig, traceFileNam
 
 // TODO(syedfaaiz) : Need to either get rid of the timeout or find out a way to use it in the expected manner.
 func replayTraceProton(ctx context.Context, config flags.ReplayAppConfig, traceFileName string, timeoutInSeconds uint32) (map[string]comm.ValueEntry, error) {
+	copyD3dBinaries(ctx)
 	if timeoutInSeconds < replayMinTime {
 		return nil, errors.New("The requested timeout is too short to replay a trace file. Requested: %d, wanted >= %d", timeoutInSeconds, replayMinTime)
 	}
@@ -423,11 +424,11 @@ func replayTraceProton(ctx context.Context, config flags.ReplayAppConfig, traceF
 	appArgs := config.Args
 	// Add nested timeout to glretrace/eglretrace
 	appArgs = append(appArgs, traceFileName)
-	exitCode, _, stderr := runCommand(ctx, config.EnvVars, config.AppName, appArgs...)
+	exitCode, stdout, stderr := runCommand(ctx, config.EnvVars, config.AppName, appArgs...)
 	if exitCode != 0 {
 		return nil, errors.New("Failed to replay trace file [%s]. Exit code: %d. %s", traceFileName, exitCode, stderr)
 	}
-	return nil, nil
+	return parseReplayOutput(stdout, config.Postfix)
 }
 
 func listFiles(path string) (map[string]uint64, error) {
@@ -443,6 +444,22 @@ func listFiles(path string) (map[string]uint64, error) {
 		}
 	}
 	return result, nil
+}
+
+// TODO(syedfaaiz) : Remove this copy once paths related issue is resolved.
+// The destination directory is a file d3dretrace32/64.exe located on the home directory.
+// This work-around prints out the average fps of each trace, which in turn can be then picked up
+// by the regex and saved in results-chart.json for analysis.
+func copyD3dBinaries(ctx context.Context) error {
+	exitCode, _, stderr := runCommand(ctx, nil, "cp", "apitrace-10.0-win32/bin/d3dretrace.exe", flags.ApitraceW32)
+	if exitCode != 0 {
+		return errors.New("failed to copy d3dretrace32. Exit code  %d. %s", exitCode, stderr)
+	}
+	exitCode, _, stderr = runCommand(ctx, nil, "cp", "apitrace-10.0-win64/bin/d3dretrace.exe", flags.ApitraceW64)
+	if exitCode != 0 {
+		return errors.New("failed to copy d3dretrace64. Exit code : %d. %s", exitCode, stderr)
+	}
+	return nil
 }
 
 func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileName string, replayTimeout uint32) (map[string]comm.ValueEntry, error) {
