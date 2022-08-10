@@ -59,6 +59,9 @@ func verifyContent(expectedHashesPath, actualOutput string) error {
 
 	// Extracts MD5 checksum data from stdout
 	actual := strings.Split(strings.TrimSpace(actualOutput), "\n")
+	for i := range actual {
+		actual[i] = strings.TrimSpace(actual[i])
+	}
 	actual = extractChecksumData(actual)
 
 	if len(expected) != len(actual) {
@@ -71,7 +74,7 @@ func verifyContent(expectedHashesPath, actualOutput string) error {
 		if _, ok := ex.(string); !ok {
 			return fmt.Errorf("failed to cast expected hash %v of type %T to string", ex, ex)
 		}
-		if got, wanted := strings.TrimSpace(actual[i]), strings.TrimSpace(ex.(string)); got != wanted {
+		if got, wanted := actual[i], strings.TrimSpace(ex.(string)); got != wanted {
 			count++
 			if first == "" {
 				first = fmt.Sprintf("frame %d (got %s, want %s)", i, got, wanted)
