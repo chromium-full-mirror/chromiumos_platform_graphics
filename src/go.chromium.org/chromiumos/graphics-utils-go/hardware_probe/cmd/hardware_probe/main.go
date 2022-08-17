@@ -34,6 +34,7 @@ const (
 	socX64
 	socX86
 	socQualcomm
+	socMT8173
 )
 
 // GPUFamily is type of GPU family.
@@ -81,6 +82,8 @@ func getARMSOCFamilyFromCompatible() (CPUSOCFamily, error) {
 	compatibles := strings.Split(string(out), "\000")
 	if listGrep(compatibles, "^qcom,") {
 		return socQualcomm, nil
+	} else if listGrep(compatibles, "^mediatek,mt8173") {
+		return socMT8173, nil
 	}
 	return socUnknown, fmt.Errorf("Failed to determine ARM SOC from compatible: %v", compatibles)
 }
@@ -169,7 +172,6 @@ func getWaffleInfo() (string, error) {
 
 // getGPUFamily returns the GPU family name for the host.
 func getGPUFamily() (GPUFamily, error) {
-
 	// Check for mali
 	if hasMali, err := hasMaliGPUEnabled(); err != nil {
 		return "", errors.Wrap(err, "failed to determine Mali")
@@ -186,7 +188,7 @@ func getGPUFamily() (GPUFamily, error) {
 		return GPUFamily(strings.ToLower(matches[1])), nil
 	}
 
-	// Check for qualcomm
+	// Check for qualcomm, rogue
 	socFamily, err := getCPUSOCFamily()
 	if err != nil {
 		return "", errors.Wrap(err, "failed to determine CPU SOC family")
@@ -194,9 +196,8 @@ func getGPUFamily() (GPUFamily, error) {
 	if socFamily == socQualcomm {
 		return "qualcomm", nil
 	}
-
-	// Check for rogue
-	if out, err := ioutil.ReadFile("/sys/kernel/debug/pvr/version"); err == nil && listGrep(strings.Split(string(out), "\n"), "^Driver Version: +Rogue") {
+	if socFamily == socMT8173 {
+		// MT8173 doesn't have mali, instead it have rogue driver.
 		return "rogue", nil
 	}
 
