@@ -60,13 +60,13 @@ var configs = map[guestType]map[string]ReplayAppConfig{
 			AppName: "/opt/win_tools/bin/exerun.py",
 			Args:    []string{"--slr", slr, "--proton", proton, ApitraceW32},
 			EnvVars: []string{"DISPLAY=:0"},
-			Postfix: "_d3d32",
+			Postfix: "",
 		},
 		comm.TestFlagD3DW64: {
 			AppName: "/opt/win_tools/bin/exerun.py",
 			Args:    []string{"--slr", slr, "--proton", proton, ApitraceW64},
 			EnvVars: []string{"DISPLAY=:0"},
-			Postfix: "_d3d64",
+			Postfix: "",
 		},
 	},
 	guestTypeCrostini: {
