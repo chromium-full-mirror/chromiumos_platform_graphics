@@ -97,7 +97,7 @@ if [[ "${is_arcvm}" == true ]]; then
   trap "ssh -q ${host} adb shell am force-stop ${sync_app}" EXIT
 fi
 
-find_tsc_offsets="find /sys/kernel/debug/ -name 'tsc-offset'"
+find_tsc_offsets="find /sys/kernel/debug/ -name 'tsc-offset' -or -name 'cntvoff'"
 
 vm_pids=$(ssh -q "${host}" "${find_tsc_offsets}" \
           | sed -r 's/.*kvm\/([0-9]*).*/\1/g' | sort | uniq)
@@ -132,9 +132,24 @@ else
     exit 1
   fi
 
+  tsc_offset_files=$(ssh -q "${host}" "${find_tsc_offsets} \
+              | grep ${found_guest_pid}-")
+
   # Make sure the tsc offsets are all the same for each vcpu.
   tsc_offset=$(ssh -q "${host}" "${find_tsc_offsets} \
               | grep ${found_guest_pid}- | xargs cat" | uniq)
+
+
+  for f in ${tsc_offset_files}; do
+    f=`basename $f`
+    echo "f: $f"
+    # The cntvoff in debugfs on arm64 inverts the sign compared to
+    # tsc-offset on x86:
+    if [ "$f" = "cntvoff" ]; then
+      tsc_offset=$((-tsc_offset))
+    fi
+    break
+  done
 
   if [[ ! $(echo "${tsc_offset}" | wc -w) == "1" ]]; then
     echo "error: guest tsc offsets are inconsistent; file a bug on this script"
