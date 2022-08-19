@@ -9,7 +9,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -52,7 +51,7 @@ func parseHashes(stdout string) ([]string, error) {
 		tok := strings.Split(l, ",")
 		hash := strings.TrimSpace(tok[len(tok)-1])
 		if len(hash) != 32 {
-			return nil, errors.New(fmt.Sprintf("expected MD5 sum, got %v", hash))
+			return nil, fmt.Errorf("expected MD5 sum, got %v", hash)
 		}
 		hashes = append(hashes, tok[len(tok)-1])
 	}
@@ -75,6 +74,7 @@ func main() {
 				"hash per line.\n\n"+
 				"Flags:\n"+
 				"\tvideo: Required. Path to video to decode.\n"+
+				"\toutput: Optional. Path to write md5 checksum data. Defaults to stdout.\n"+
 				"\tflags: Optional. Additional flags to ffmpeg. Pass space-separated\n"+
 				"\t       flags individually, i.e. `--flags -hwaccel --flags vaapi`\n"+
 				"\t       to pass `-hwaccel vaapi` to ffmpeg.\n")
@@ -82,8 +82,10 @@ func main() {
 
 	var flags multiFlags
 	var video string
+	var outputPath string
 	flag.Var(&flags, "flags", "additional flags to ffmpeg: for space-separated flags, pass each individually with --flags")
 	flag.StringVar(&video, "video", "", "path to video to decode")
+	flag.StringVar(&outputPath, "output", "", "path to md5 checksum log")
 	flag.Parse()
 
 	args := append(flags, []string{
@@ -109,5 +111,14 @@ func main() {
 	if hashes, err = parseHashes(stdout); err != nil {
 		exitWithError(stdout, "", err)
 	}
-	fmt.Println(strings.Join(hashes, "\n"))
+
+	var f = os.Stdout
+	if len(outputPath) > 0 {
+		if f, err = os.Create(outputPath); err != nil {
+			exitWithError(stdout, "", err)
+		}
+	}
+	f.WriteString(strings.Join(hashes, "\n"))
+	f.Close()
+
 }
