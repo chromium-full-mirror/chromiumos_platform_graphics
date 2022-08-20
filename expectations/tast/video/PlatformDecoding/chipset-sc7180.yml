@@ -1,0 +1,70 @@
+video.PlatformDecoding.v4l2_vp9_0_group1_frm_resize:
+  expectation: FAIL
+  tickets:
+  - b/189500115
+  comments: Trogdor has an issue with dynamic resolution changes that requires a firmware
+    update. Qualcomm is working on a fix.
+  since_build: R108-15175.0.0
+video.PlatformDecoding.v4l2_vp9_0_group1_sub8x8_sf:
+  expectation: FAIL
+  tickets:
+  - b/189500115
+  comments: Trogdor has an issue with dynamic resolution changes that requires a firmware
+    update. Qualcomm is working on a fix.
+  since_build: R108-15175.0.0
+video.PlatformDecoding.v4l2_vp9_0_group2_frm_resize:
+  expectation: FAIL
+  tickets:
+  - b/189500115
+  comments: Trogdor has an issue with dynamic resolution changes that requires a firmware
+    update. Qualcomm is working on a fix.
+  since_build: R108-15175.0.0
+video.PlatformDecoding.v4l2_vp9_0_group2_sub8x8_sf:
+  expectation: FAIL
+  tickets:
+  - b/189500115
+  comments: Trogdor has an issue with dynamic resolution changes that requires a firmware
+    update. Qualcomm is working on a fix.
+  since_build: R108-15175.0.0
+video.PlatformDecoding.v4l2_vp9_0_group3_frm_resize:
+  expectation: FAIL
+  tickets:
+  - b/189500115
+  comments: Trogdor has an issue with dynamic resolution changes that requires a firmware
+    update. Qualcomm is working on a fix.
+  since_build: R108-15175.0.0
+video.PlatformDecoding.v4l2_vp9_0_group3_sub8x8_sf:
+  expectation: FAIL
+  tickets:
+  - b/189500115
+  comments: Trogdor has an issue with dynamic resolution changes that requires a firmware
+    update. Qualcomm is working on a fix.
+  since_build: R108-15175.0.0
+video.PlatformDecoding.v4l2_vp9_0_group4_frm_resize:
+  expectation: FAIL
+  tickets:
+  - b/189500115
+  comments: Trogdor has an issue with dynamic resolution changes that requires a firmware
+    update. Qualcomm is working on a fix.
+  since_build: R108-15175.0.0
+video.PlatformDecoding.v4l2_vp9_0_group4_sub8x8_sf:
+  expectation: FAIL
+  tickets:
+  - b/189500115
+  comments: Trogdor has an issue with dynamic resolution changes that requires a firmware
+    update. Qualcomm is working on a fix.
+  since_build: R108-15175.0.0
+video.PlatformDecoding.v4l2_vp9_0_level5_0_frm_resize:
+  expectation: FAIL
+  tickets:
+  - b/189500115
+  comments: Trogdor has an issue with dynamic resolution changes that requires a firmware
+    update. Qualcomm is working on a fix.
+  since_build: R108-15175.0.0
+video.PlatformDecoding.v4l2_vp9_0_level5_0_sub8x8_sf:
+  expectation: FAIL
+  tickets:
+  - b/189500115
+  comments: Trogdor has an issue with dynamic resolution changes that requires a firmware
+    update. Qualcomm is working on a fix.
+  since_build: R108-15175.0.0
