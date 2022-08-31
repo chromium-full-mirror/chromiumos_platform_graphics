@@ -1,0 +1,61 @@
+#!/bin/sh
+
+# Copyright 2022 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+usage() {
+  cat <<EOD
+Usage: $0 [OPTION]... [--] COMMAND ARGUMENTS
+
+Options:
+  --help              Displays this message.
+  --gpu GPU_ID        GPU to target.
+  --cache CACHE_DIR   Mesa shader cache directory.
+EOD
+}
+
+base="$(dirname "$0")/${base}"
+basedir="${base%/*}"
+
+gpu="RENOIR"
+
+while true; do
+  case "$1" in
+    --gpu)
+      gpu="$2"
+      shift 2
+      ;;
+    --cache)
+      cache="$2"
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    -*)
+      echo "$0: invalid option: $1"
+      usage
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+export RADV_FORCE_FAMILY="${gpu}"
+export VK_ICD_FILENAMES="${basedir}/share/vulkan/icd.d/radeon_icd.x86_64.json"
+export MESA_SHADER_CACHE_DISABLE=false
+export MESA_DISK_CACHE_SINGLE_FILE=1
+if [ -n "${cache}" ]; then
+  export MESA_SHADER_CACHE_DIR="${cache}"
+fi
+PATH="${basedir}/bin:${PATH}"
+
+exec "$@"
