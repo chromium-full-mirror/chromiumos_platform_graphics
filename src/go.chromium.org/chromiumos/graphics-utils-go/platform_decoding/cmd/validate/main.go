@@ -57,7 +57,7 @@ func verifyContent(expectedHashesPath, actualOutput string) error {
 		return fmt.Errorf("`md5_checksums` in metadata at %s not a slice; got %v", expectedHashesPath, meta["md5_checksums"])
 	}
 
-	// Extracts MD5 checksum data from stdout
+	// Extracts MD5 checksum data from data source
 	actual := strings.Split(strings.TrimSpace(actualOutput), "\n")
 	for i := range actual {
 		actual[i] = strings.TrimSpace(actual[i])
@@ -113,6 +113,7 @@ func main() {
 	execPtr := flag.String("exec", "", "path to decoder executable")
 	argsPtr := flag.String("args", "", "full args to decoder")
 	metaPtr := flag.String("metadata", "", "path to metadata JSON")
+	md5Ptr := flag.String("md5", "", "path to md5 checksum file")
 	flag.Parse()
 
 	fmt.Printf("Running `%s %s`\n", *execPtr, *argsPtr)
@@ -122,7 +123,19 @@ func main() {
 		exitWithError(stdout, stderr, err)
 	}
 
-	if err := verifyContent(*metaPtr, stdout); err != nil {
-		exitWithError(stdout, stderr, err)
+	if md5Ptr == nil {
+		if err := verifyContent(*metaPtr, stdout); err != nil {
+			exitWithError(stdout, stderr, err)
+		}
+	} else {
+		md5Log, err := os.ReadFile(*md5Ptr)
+		if err != nil {
+			exitWithError(stdout, stderr, err)
+		}
+
+		if err := verifyContent(*metaPtr, string(md5Log)); err != nil {
+			exitWithError(stdout, stderr, err)
+		}
 	}
+
 }
