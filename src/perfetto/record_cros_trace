@@ -291,6 +291,11 @@ data_sources {
 }
 data_sources {
   config {
+    name: "gpu.renderstages.intel"
+  }
+}
+data_sources {
+  config {
     name: "gpu.counters.msm"
     gpu_counter_config {
       counter_period_ns: 100000
