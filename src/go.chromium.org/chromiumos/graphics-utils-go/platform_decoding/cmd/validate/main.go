@@ -1,4 +1,4 @@
-// Copyright 2021 The Chromium OS Authors. All rights reserved.
+// Copyright 2021 The ChromiumOS Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -123,7 +123,7 @@ func main() {
 		exitWithError(stdout, stderr, err)
 	}
 
-	if md5Ptr == nil {
+	if *md5Ptr == "" {
 		if err := verifyContent(*metaPtr, stdout); err != nil {
 			exitWithError(stdout, stderr, err)
 		}
