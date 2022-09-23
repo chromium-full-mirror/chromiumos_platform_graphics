@@ -1,0 +1,4 @@
+# Skip tests on all borealis
+
+# GLES3 is not built for piglit in borealis
+spec@oes_viewport_array@viewport-gs-write-simple
