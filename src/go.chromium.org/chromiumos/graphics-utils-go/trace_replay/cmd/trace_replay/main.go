@@ -538,7 +538,7 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 	runCount := 0
 	msg := fmt.Sprintf("Extended trace replay session configured to last %0.2f minutes, with <%s> flag", float32(config.ExtendedDuration)/60.0, flag)
 	logMsg(ctx, config.ProxyServer.URL, msg)
-	for timeNow.Before(timeEnd) {
+	for (config.ExtendedDuration > 0 && timeNow.Before(timeEnd)) || (config.RepeatCount > 0 && runCount < int(config.RepeatCount)) {
 		timeSinceStr := strings.ReplaceAll(time.Since(timeStart).String(), "µ", "u")
 		msg := fmt.Sprintf("Replaying the trace with <%s> flag, #%d at +%s from test start", flag, runCount+1, timeSinceStr)
 		logMsg(ctx, config.ProxyServer.URL, msg)
@@ -666,8 +666,12 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 		replayTimeout = traceEntry.ReplayTimeout
 	}
 
+	if config.ExtendedDuration > 0 && config.RepeatCount > 0 {
+		return nil, errors.New("Couldn't specify both ExtendedDuration and RepeatCount at the same time for the test setting")
+	}
 	// Run the trace replay(s)
-	if config.ExtendedDuration > 0 {
+	if config.ExtendedDuration > 0 || config.RepeatCount > 0 {
+		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Running trace replay in extended mode"))
 		return runReplayRepeatedly(ctx, config, traceFileName, replayTimeout)
 	}
 	result, err := runReplayOnce(ctx, config, traceFileName, replayTimeout)

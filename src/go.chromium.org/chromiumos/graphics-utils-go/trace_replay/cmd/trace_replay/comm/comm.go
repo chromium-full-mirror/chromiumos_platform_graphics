@@ -59,6 +59,7 @@ type TestGroupConfig struct {
 	ProxyServer      ProxyServerInfo `json:"ProxyServer"`             // Information for proxy server.
 	Timeout          uint32          `json:"Timeout,string"`          // Timeout in second.
 	ExtendedDuration uint32          `json:"ExtendedDuration,string"` // If set, run in extended mode with extra timeout in second.
+	RepeatCount      uint32          `json:"RepeatCount,string"`      // If set, run in extended mode replaying the traces `RepeatCount` times.
 }
 
 // ValueEntry struct contains the result metrics for one trace replay test
