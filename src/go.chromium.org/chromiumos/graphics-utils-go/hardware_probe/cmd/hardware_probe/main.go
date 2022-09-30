@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -31,25 +32,40 @@ type CPUSOCFamily int
 const (
 	socUnknown CPUSOCFamily = iota
 	socAMD
-	socX64
-	socX86
+	socIntel
 	socQualcomm
-	socMT8173
+	socMediaTek
 )
+
+func (s CPUSOCFamily) String() string {
+	switch s {
+	case socIntel:
+		return "intel"
+	case socAMD:
+		return "amd"
+	case socQualcomm:
+		return "qualcomm"
+	case socMediaTek:
+		return "mediatek"
+	default:
+		return "unknown"
+	}
+}
 
 // GPUFamily is type of GPU family.
 type GPUFamily string
 
-// listGrep returns true if items in list matches specific regex pattern.
-func listGrep(list []string, query string) bool {
+// listGrep returns the matches of the first items in list matches the specific regex pattern.
+func listGrep(list []string, query string) []string {
 	re := regexp.MustCompile(query)
 	for _, item := range list {
 		if match := re.FindStringSubmatch(item); match != nil {
-			return true
+			return match
 		}
 	}
-	return false
+	return nil
 }
+
 func getCPUArch() (CPUArch, error) {
 	var archPrefixes = map[CPUArch][]string{
 		archArm: {"aarch64", "arm"},
@@ -80,10 +96,10 @@ func getARMSOCFamilyFromCompatible() (CPUSOCFamily, error) {
 		return socUnknown, errors.Wrap(err, "failed to read compatible file")
 	}
 	compatibles := strings.Split(string(out), "\000")
-	if listGrep(compatibles, "^qcom,") {
+	if listGrep(compatibles, "^qcom,") != nil {
 		return socQualcomm, nil
-	} else if listGrep(compatibles, "^mediatek,mt8173") {
-		return socMT8173, nil
+	} else if listGrep(compatibles, "^mediatek,") != nil {
+		return socMediaTek, nil
 	}
 	return socUnknown, fmt.Errorf("Failed to determine ARM SOC from compatible: %v", compatibles)
 }
@@ -93,13 +109,12 @@ func getARMSOCFamily() (CPUSOCFamily, error) {
 }
 
 func getCPUSOCFamily() (CPUSOCFamily, error) {
-
 	// Use cpuinfo to figure out AMD
 	out, err := ioutil.ReadFile("/proc/cpuinfo")
 	if err != nil {
 		return socUnknown, errors.Wrap(err, "failed to read /proc/cpuinfo")
 	}
-	if listGrep(strings.Split(string(out), "\n"), "^vendor_id.*:.*AMD") {
+	if listGrep(strings.Split(string(out), "\n"), "^vendor_id.*:.*AMD") != nil {
 		return socAMD, nil
 	}
 
@@ -110,11 +125,9 @@ func getCPUSOCFamily() (CPUSOCFamily, error) {
 	if cpuArch == archArm {
 		return getARMSOCFamily()
 	}
-	if cpuArch == archX64 {
-		return socX64, nil
-	}
-	if cpuArch == archX86 {
-		return socX86, nil
+	if cpuArch == archX86 || cpuArch == archX64 {
+		// AMD is determined earlier in this function.
+		return socIntel, nil
 	}
 	return socUnknown, fmt.Errorf("failed to determine soc")
 }
@@ -170,6 +183,18 @@ func getWaffleInfo() (string, error) {
 	return string(out), nil
 }
 
+func getMediaTekSoc() (string, error) {
+	out, err := ioutil.ReadFile("/sys/firmware/devicetree/base/compatible")
+	if err != nil {
+		return "", errors.Wrap(err, "failed to read compatible file")
+	}
+	compatibles := strings.Split(string(out), "\000")
+	if match := listGrep(compatibles, "^mediatek,(.*)"); match != nil {
+		return match[1], nil
+	}
+	return "", errors.Errorf("failed to find mediatek in compatible file: %v", compatibles)
+}
+
 // getGPUFamily returns the GPU family name for the host.
 func getGPUFamily() (GPUFamily, error) {
 	// Check for mali
@@ -196,15 +221,19 @@ func getGPUFamily() (GPUFamily, error) {
 	if socFamily == socQualcomm {
 		return "qualcomm", nil
 	}
-	if socFamily == socMT8173 {
-		// MT8173 doesn't have mali, instead it have rogue driver.
-		return "rogue", nil
+	if socFamily == socMediaTek {
+		mediaTekSoc, err := getMediaTekSoc()
+		if err == nil && mediaTekSoc == "mt8173" {
+			// MT8173 doesn't have mali, instead it have rogue driver.
+			return "rogue", nil
+		}
 	}
 
 	// For AMD and intel, check the pci_id_map for their respecitive GPU.
 	const (
-		amdVGAString   = "Advanced Micro Devices"
-		intelVGAString = "Intel Corporation"
+		amdVGAString    = "Advanced Micro Devices"
+		intelVGAString  = "Intel Corporation"
+		nvidiaVGAString = "NVIDIA Corporation"
 	)
 	vgaDevices, err := GetVGADevices()
 	if err != nil {
@@ -232,17 +261,56 @@ func getGPUFamily() (GPUFamily, error) {
 		}
 		return gpuName, nil
 	}
+	if strings.Contains(vgaDevices[0].Name, nvidiaVGAString) {
+		nvidiaMap := getNvidiaPCIIDMap()
+		deviceID := strings.ToLower(vgaDevices[0].DeviceID)
+		gpuName, ok := nvidiaMap[deviceID]
+		if !ok {
+			return "", fmt.Errorf("no matching device id (%v) in Nvidia pci id map, please update src/platform/graphics/.../hardware_probe/.../nvidia_pci_ids.go", deviceID)
+		}
+		return gpuName, nil
+	}
 	return "", fmt.Errorf("failed to determine GPU from vgaDevices: %q", vgaDevices[0])
 }
 
 func main() {
-	gpuQuery := flag.Bool("gpu-family", true, "Output the GPU family")
+	gpuQuery := flag.Bool("gpu-family", false, "Output the GPU family")
+	cpuQuery := flag.Bool("cpu-soc-family", false, "Output the CPU family")
 	flag.Parse()
 
+	result := map[string]string{}
 	if *gpuQuery {
 		gpuFamily, err := getGPUFamily()
 		if err != nil {
 			fmt.Printf("Failed to detemine GPU: %v\n", err)
+		} else {
+			result["GPU_Family"] = string(gpuFamily)
+		}
+	}
+	if *cpuQuery {
+		cpuSocFamily, err := getCPUSOCFamily()
+		if err != nil {
+			fmt.Printf("Failed to determine CPU SOC family: %v\n", err)
+		} else {
+			result["CPU_SOC_Family"] = cpuSocFamily.String()
+		}
+	}
+
+	if len(result) != 0 {
+		// Sort the keys so the order of output is stable.
+		keys := make([]string, 0, len(result))
+		for k := range result {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			fmt.Printf("%s: %s\n", k, result[k])
+		}
+	} else {
+		// Simply returns the gpuFamily.
+		gpuFamily, err := getGPUFamily()
+		if err != nil {
+			fmt.Printf("Failed to determine GPU: %v\n", err)
 		}
 		fmt.Printf("%v\n", gpuFamily)
 	}
