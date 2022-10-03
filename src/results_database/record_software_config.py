@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Copyright 2020 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -16,6 +16,7 @@ import subprocess
 
 from chromiumos.config.api.test.results.v1 import software_config_pb2
 import results_database
+
 
 def init_argparse():
     """Creates argument parser.
@@ -159,6 +160,23 @@ def parse_ec_info(config, d):
     """
     results_database.tryset(config, 'ec_version', d, 'fw_version')
 
+def find_arch_packages(config):
+    """Determine list of Arch system packages.
+
+    Args:
+        config: SoftwareConfig protobuf to store results in.
+    """
+    try:
+        output = subprocess.check_output([
+            'pacman',
+            '-Q',
+        ])
+        for p in output.splitlines():
+            package = config.packages.add()
+            (package.name, package.version) = p.rstrip().split()
+    except FileNotFoundError:
+        pass
+
 def find_debian_packages(config):
     """Determine list of Debian system packages.
 
@@ -220,6 +238,7 @@ def main():
     # Only fill in information if an existing protobuf wasn't loaded.
     if not args.load:
         if args.packages:
+            find_arch_packages(config)
             find_debian_packages(config)
             find_gentoo_packages(config, args.gentoo_pkg_db)
         config.kernel_release = results_database.get_cmd_output(['uname', '-r'])
