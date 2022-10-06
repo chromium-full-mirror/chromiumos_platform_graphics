@@ -3,6 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+echo "WARNING: this script might not work as expected.  See README.md."
+
 print_prereqs_and_exit () {
   echo "error: $1"
   echo """
