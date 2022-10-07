@@ -41,6 +41,9 @@ def init_argparse():
     parser.add_argument('--skip_packages', action='store_false',
                         dest='packages',
                         help='skip recording of packages')
+    parser.add_argument('--json',
+                        action='store_true',
+                        help='Force json output')
     return parser
 
 def read_pkg_yaml(file):
@@ -250,6 +253,6 @@ def main():
         parse_ec_info(config, results_database.read_bios_keyval_file(
             '/var/log/ec_info.txt'))
 
-    results_database.output_pb(config, args.output)
+    results_database.output_pb(config, args.output, force_json=args.json)
 
 main()

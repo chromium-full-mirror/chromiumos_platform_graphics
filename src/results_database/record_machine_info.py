@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Copyright 2020 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -14,6 +14,7 @@ import os
 
 from chromiumos.config.api.test.results.v1 import machine_pb2
 import results_database
+
 
 def init_argparse():
     """Creates argument parser.
@@ -31,6 +32,9 @@ def init_argparse():
                         help='File to write output to')
     parser.add_argument('--owner',
                         help='Owner to assign')
+    parser.add_argument('--json',
+                        action='store_true',
+                        help='Force json output')
     return parser
 
 def parse_bios_info(config, d):
@@ -50,6 +54,6 @@ def main():
     parse_bios_info(config, results_database.read_bios_keyval_file(
             '/var/log/bios_info.txt'))
 
-    results_database.output_pb(config, args.output)
+    results_database.output_pb(config, args.output, force_json=args.json)
 
 main()

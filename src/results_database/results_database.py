@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Copyright 2020 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -16,6 +16,7 @@ import sys
 import uuid
 
 from google.protobuf import json_format
+
 
 def error(*args, **kwargs):
     """Print an error message."""
@@ -51,19 +52,23 @@ def is_json(filename):
     """
     return re.search(r'\.json$', filename)
 
-def output_pb(pb, filename):
+def output_pb(pb, filename, force_json=False):
     """Output protobuf as json, protobuf or to stdout.
 
     Args:
         pb: Protobuf to output>
         filename: File to write to in either json or binary format.
             If not specified, print to stdout.
+        force_json: Always generate json.
     """
-    if filename:
-        if is_json(filename):
-            with open(filename, 'w') as f:
-                f.write(json_format.MessageToJson(pb))
-                f.write('\n')
+    if force_json or filename:
+        if force_json or is_json(filename):
+            j = json_format.MessageToJson(pb) + '\n'
+            if filename:
+                with open(filename, 'w') as f:
+                    f.write(j)
+            else:
+                print(j)
         else:
             with open(filename, 'wb') as f:
                 f.write(pb.SerializeToString(deterministic=True))
