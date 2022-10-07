@@ -1,0 +1,40 @@
+## @file
+# Copyright 2022 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+#
+##
+
+[Defines]
+ PLATFORM_NAME              = VmPerfEval
+ PLATFORM_GUID              = C3226C96-BD4D-40F8-9A81-370281E47CC5
+ PLATFORM_VERSION           = 0.1
+ DSC_SPECIFICATION          = 0x00010005
+ OUTPUT_DIRECTORY           = Build/VmPerfEval
+ SUPPORTED_ARCHITECTURES    = X64
+ BUILD_TARGETS              = DEBUG|RELEASE|NOOPT
+ SKUID_IDENTIFIER           = DEFAULT
+
+
+[LibraryClasses]
+ UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
+
+ BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
+ BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
+ UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
+ PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
+ MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
+ UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
+ UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
+ UefiRuntimeLib|MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf
+ DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
+ PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+ DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
+ DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
+
+[LibraryClasses.X64]
+ RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
+
+ 
+[Components]
+ VmPerfEvalPkg/Application/VmPerfHelloWorld/VmPerfHelloWorld.inf

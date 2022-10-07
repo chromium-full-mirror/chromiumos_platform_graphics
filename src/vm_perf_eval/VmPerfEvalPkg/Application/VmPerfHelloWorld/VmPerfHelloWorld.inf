@@ -1,0 +1,26 @@
+## @file
+# Copyright 2022 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+##
+
+[Defines]
+   INF_VERSION              = 0x00010005
+   BASE_NAME                = VmPerfEvalHelloWorld
+   FILE_GUID                = F179FC9C-B3FC-4027-B28A-6763864A8CC7
+   MODULE_TYPE              = UEFI_APPLICATION
+   VERSION_STRING           = 1.0
+   ENTRY_POINT              = UefiMain
+
+
+[Sources]
+   VmPerfHelloWorld.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ShellPkg/ShellPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+ UefiApplicationEntryPoint
+ UefiLib

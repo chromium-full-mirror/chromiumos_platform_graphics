@@ -1,0 +1,26 @@
+## @file
+# Copyright 2022 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+#
+# Abstract
+# An application that can be used to evaluate multiple aspects of virtual
+# machine performance. Primarily focused on x86.
+#
+##
+
+[Defines]
+  DEC_SPECIFICATION                         = 0x00010005
+  PACKAGE_NAME                              = VmPerfEvalPkg
+  PACKAGE_GUID                              = 330793E7-7E64-44FE-9A5D-2774ABDC1F6F
+  PACKAGE_VERSION                           = 0.1
+
+[Includes.common]
+  Include
+
+# We can add architecture specific includes later
+# [Includes.X64]
+
+# We have no GUID section as this package does not provide GUIDs to other modules
+
+  
