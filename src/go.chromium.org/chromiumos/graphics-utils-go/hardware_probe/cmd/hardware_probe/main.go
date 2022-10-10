@@ -1,10 +1,11 @@
-// Copyright 2022 The Chromium OS Authors. All rights reserved.
+// Copyright 2022 The ChromiumOS Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/pkg/errors"
@@ -195,123 +196,111 @@ func getMediaTekSoc() (string, error) {
 	return "", errors.Errorf("failed to find mediatek in compatible file: %v", compatibles)
 }
 
-// getGPUFamily returns the GPU family name for the host.
-func getGPUFamily() (GPUFamily, error) {
+// getGPUFamilies returns the GPU family name for the host.
+func getGPUFamilies() ([]GPUFamily, error) {
 	// Check for mali
 	if hasMali, err := hasMaliGPUEnabled(); err != nil {
-		return "", errors.Wrap(err, "failed to determine Mali")
+		return nil, errors.Wrap(err, "failed to determine Mali")
 	} else if hasMali {
 		wflinfo, err := getWaffleInfo()
 		if err != nil {
-			return "", errors.Wrap(err, "failed to get waffle info")
+			return nil, errors.Wrap(err, "failed to get waffle info")
 		}
 		maliReg := regexp.MustCompile(`OpenGL renderer string: (Mali-\w+)`)
 		matches := maliReg.FindStringSubmatch(wflinfo)
 		if matches == nil {
-			return "mali-unrecognized", nil
+			return []GPUFamily{"mali-unrecognized"}, nil
 		}
-		return GPUFamily(strings.ToLower(matches[1])), nil
+		return []GPUFamily{GPUFamily(strings.ToLower(matches[1]))}, nil
 	}
 
 	// Check for qualcomm, rogue
 	socFamily, err := getCPUSOCFamily()
 	if err != nil {
-		return "", errors.Wrap(err, "failed to determine CPU SOC family")
+		return nil, errors.Wrap(err, "failed to determine CPU SOC family")
 	}
 	if socFamily == socQualcomm {
-		return "qualcomm", nil
+		return []GPUFamily{"qualcomm"}, nil
 	}
 	if socFamily == socMediaTek {
 		mediaTekSoc, err := getMediaTekSoc()
 		if err == nil && mediaTekSoc == "mt8173" {
 			// MT8173 doesn't have mali, instead it have rogue driver.
-			return "rogue", nil
+			return []GPUFamily{"rogue"}, nil
 		}
 	}
 
 	// For AMD and intel, check the pci_id_map for their respecitive GPU.
-	const (
-		amdVGAString    = "Advanced Micro Devices"
-		intelVGAString  = "Intel Corporation"
-		nvidiaVGAString = "NVIDIA Corporation"
-	)
 	vgaDevices, err := GetVGADevices()
 	if err != nil {
-		return "", errors.Wrap(err, "failed to get VGA info")
+		return nil, errors.Wrap(err, "failed to get VGA info")
 	}
-	if len(vgaDevices) > 1 {
-		return "", fmt.Errorf("multiple VGA devices detected: %v", vgaDevices)
+	// If multiple VGA devices are found, sort it so that devices with BootVGA start first.
+	sort.Slice(vgaDevices, func(i, j int) bool {
+		return vgaDevices[i].BootVGA
+	})
+	if len(vgaDevices) == 0 {
+		return nil, fmt.Errorf("failed to determine GPU from vgaDevices: %v", vgaDevices)
 	}
+	gpuNames := []GPUFamily{}
+	for _, device := range vgaDevices {
+		gpuNames = append(gpuNames, device.GPUFamily)
+	}
+	return gpuNames, nil
+}
 
-	if strings.Contains(vgaDevices[0].Name, amdVGAString) {
-		amdMap := getAMDPCIIDMap()
-		deviceID := strings.ToLower(vgaDevices[0].DeviceID)
-		gpuName, ok := amdMap[deviceID]
-		if !ok {
-			return "", fmt.Errorf("no matching device id (%v) in AMD pci id map, please update src/platform/graphics/.../hardware_probe/.../amd_pci_ids.go", deviceID)
-		}
-		return gpuName, nil
-	}
-	if strings.Contains(vgaDevices[0].Name, intelVGAString) {
-		intelMap := getIntelPCIIDMap()
-		deviceID := strings.ToLower(vgaDevices[0].DeviceID)
-		gpuName, ok := intelMap[deviceID]
-		if !ok {
-			return "", fmt.Errorf("no matching device id (%v) in Intel pci id map", deviceID)
-		}
-		return gpuName, nil
-	}
-	if strings.Contains(vgaDevices[0].Name, nvidiaVGAString) {
-		nvidiaMap := getNvidiaPCIIDMap()
-		deviceID := strings.ToLower(vgaDevices[0].DeviceID)
-		gpuName, ok := nvidiaMap[deviceID]
-		if !ok {
-			return "", fmt.Errorf("no matching device id (%v) in Nvidia pci id map, please update src/platform/graphics/.../hardware_probe/.../nvidia_pci_ids.go", deviceID)
-		}
-		return gpuName, nil
-	}
-	return "", fmt.Errorf("failed to determine GPU from vgaDevices: %q", vgaDevices[0])
+type probeResult struct {
+	CPUFamily   string      `json:"CPU_SOC_Family"`
+	GPUFamilies []GPUFamily `json:"GPU_Family"`
+	VGADevices  []VGADevice `json:"VGA_Devices"`
+}
+
+func fatal(format string, args ...interface{}) {
+	fmt.Printf(format+"\n", args)
+	os.Exit(1)
 }
 
 func main() {
-	gpuQuery := flag.Bool("gpu-family", false, "Output the GPU family")
-	cpuQuery := flag.Bool("cpu-soc-family", false, "Output the CPU family")
+	gpuQuery := flag.Bool("gpu-family", false, "Output the GPU family to stdout")
+	cpuQuery := flag.Bool("cpu-soc-family", false, "Output the CPU family to stdout")
+	outputFile := flag.String("output", "", "Output result to file in json format")
 	flag.Parse()
 
-	result := map[string]string{}
+	result := probeResult{}
+	cpuSocFamily, err := getCPUSOCFamily()
+	if err != nil {
+		fatal("Failed to determine CPU SOC family: %v", err)
+	}
+	result.CPUFamily = cpuSocFamily.String()
+
+	gpuFamily, err := getGPUFamilies()
+	if err != nil {
+		fatal("Failed to detemine GPU: %v", err)
+	}
+	result.GPUFamilies = gpuFamily
+
+	vgaDevices, err := GetVGADevices()
+	if err != nil {
+		fatal("Failed to determine VGA device: %v", err)
+	}
+	result.VGADevices = vgaDevices
+
 	if *gpuQuery {
-		gpuFamily, err := getGPUFamily()
-		if err != nil {
-			fmt.Printf("Failed to detemine GPU: %v\n", err)
-		} else {
-			result["GPU_Family"] = string(gpuFamily)
+		for _, gpu := range result.GPUFamilies {
+			fmt.Printf("GPU_Family: %v\n", gpu)
 		}
 	}
 	if *cpuQuery {
-		cpuSocFamily, err := getCPUSOCFamily()
-		if err != nil {
-			fmt.Printf("Failed to determine CPU SOC family: %v\n", err)
-		} else {
-			result["CPU_SOC_Family"] = cpuSocFamily.String()
-		}
+		fmt.Printf("CPU_SOC_Family: %v\n", result.CPUFamily)
 	}
 
-	if len(result) != 0 {
-		// Sort the keys so the order of output is stable.
-		keys := make([]string, 0, len(result))
-		for k := range result {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		for _, k := range keys {
-			fmt.Printf("%s: %s\n", k, result[k])
-		}
-	} else {
-		// Simply returns the gpuFamily.
-		gpuFamily, err := getGPUFamily()
+	if len(*outputFile) != 0 {
+		b, err := json.Marshal(result)
 		if err != nil {
-			fmt.Printf("Failed to determine GPU: %v\n", err)
+			fatal("Failed to marshal result: %v", result)
 		}
-		fmt.Printf("%v\n", gpuFamily)
+		if err := os.WriteFile(*outputFile, b, 0755); err != nil {
+			fatal("Failed to write to %v: %v", *outputFile, err)
+		}
 	}
 }
