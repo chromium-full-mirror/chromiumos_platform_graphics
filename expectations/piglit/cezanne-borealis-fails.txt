@@ -1,0 +1,3 @@
+# cezanne/green_sardine boards: guybrush
+
+spec@arb_gpu_shader_fp64@execution@built-in-functions@fs-distance-dvec4-dvec4
