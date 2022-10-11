@@ -1,7 +1,7 @@
 # General
 
 The expectations in this directory are used by graphics and video
-tests, including [DEQP](deqp) and [piglit](piglit).
+tests, including [DEQP](deqp), [piglit](piglit), and [tast](tast).
 
 They get installed by chromeos-base/graphics-expectations.ebuild to
 /usr/local/graphics/expectations/
