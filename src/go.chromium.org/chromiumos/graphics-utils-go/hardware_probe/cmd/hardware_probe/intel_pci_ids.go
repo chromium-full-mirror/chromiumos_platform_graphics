@@ -1,4 +1,4 @@
-// Copyright 2022 The Chromium OS Authors. All rights reserved.
+// Copyright 2022 The ChromiumOS Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,8 +10,8 @@ package main
 // go run cmd/hardware_probe/gen/gen_intel_pci_ids.go
 // gofmt -w -d -s cmd/hardware_probe/intel_pci_ids.go
 
-func getIntelPCIIDMap() map[string]GPUFamily {
-	return map[string]GPUFamily{
+func getIntelPCIIDMap() map[string]string {
+	return map[string]string{
 
 		"0x0a84": "broxton",
 		"0x1602": "broadwell",
@@ -89,6 +89,7 @@ func getIntelPCIIDMap() map[string]GPUFamily {
 		"0x4682": "alderlake",
 		"0x4688": "alderlake",
 		"0x468a": "alderlake",
+		"0x468b": "alderlake",
 		"0x4690": "alderlake",
 		"0x4692": "alderlake",
 		"0x4693": "alderlake",

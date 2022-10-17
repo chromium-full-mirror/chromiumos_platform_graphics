@@ -4,8 +4,8 @@
 
 package main
 
-func getNvidiaPCIIDMap() map[string]GPUFamily {
-	return map[string]GPUFamily{
+func getNvidiaPCIIDMap() map[string]string {
+	return map[string]string{
 		"0x1430": "maxwell",
 		"0x1dba": "volta",
 		"0x25a0": "ampere",

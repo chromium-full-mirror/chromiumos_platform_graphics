@@ -1,4 +1,4 @@
-// Copyright 2022 The Chromium OS Authors. All rights reserved.
+// Copyright 2022 The ChromiumOS Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -55,7 +55,7 @@ type generateParams struct {
 }
 
 func genConstant(params generateParams) error {
-	const tmplStr = `// Copyright {{.CopyrightYear}} The Chromium OS Authors. All rights reserved.
+	const tmplStr = `// Copyright {{.CopyrightYear}} The ChromiumOS Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -67,8 +67,8 @@ package main
 // go run cmd/hardware_probe/gen/gen_intel_pci_ids.go
 // gofmt -w -d -s cmd/hardware_probe/intel_pci_ids.go
 
-func getIntelPCIIDMap() map[string]GPUFamily {
-    return map[string]GPUFamily{
+func getIntelPCIIDMap() map[string]string {
+    return map[string]string{
         {{range $key, $val := .ConstantMappings}}
         "{{$key}}" : "{{$val}}",{{end}}
     }
@@ -87,7 +87,7 @@ func getIntelPCIIDMap() map[string]GPUFamily {
 
 func main() {
 	outPath := flag.String("output", "cmd/hardware_probe/intel_pci_ids.go", "Output JSON file name")
-	mesaPath := flag.String("mesa", "../../../../third_party/mesa", "Path to the mesa repository")
+	mesaPath := flag.String("mesa", "../../../../../../../third_party/mesa", "Path to the mesa repository")
 	pciLibariesPath := flag.String("library", "i915_pci_ids.h:iris_pci_ids.h", `Path to libaries under $mesa/include/pci_ids/.
 Use ':' to split between multiple libraries`)
 	flag.Parse()

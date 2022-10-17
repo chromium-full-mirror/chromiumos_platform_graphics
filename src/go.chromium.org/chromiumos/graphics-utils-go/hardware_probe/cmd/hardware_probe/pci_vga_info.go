@@ -16,12 +16,12 @@ import (
 
 // VGADevice contains the information retrieved from running lspci.
 type VGADevice struct {
-	BDF       string    // PCI device's BDF information
-	Class     string    // PCI device's class name
-	Name      string    // PCI device's name, which also contains its vendor's name
-	DeviceID  string    // Device ID based on its BDF value.
-	BootVGA   bool      // True if the PCI device boot_vga is true.
-	GPUFamily GPUFamily // GPU Family name.
+	BDF      string  // PCI device's BDF information
+	Class    string  // PCI device's class name
+	Name     string  // PCI device's name, which also contains its vendor's name
+	DeviceID string  // Device ID based on its BDF value.
+	BootVGA  bool    // True if the PCI device boot_vga is true.
+	GPUInfo  GPUInfo // GPU Family name.
 }
 
 var pciRegex = regexp.MustCompile(`(\S+) (.*): (.*)`)
@@ -67,25 +67,25 @@ func GetVGADevices() ([]VGADevice, error) {
 			}
 		}
 
-		gpuFamily, err := MapGPUFamilyName(matches[3], deviceID)
+		gpuInfo, err := mapPCINameToGPUInfo(matches[3], deviceID)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to map %v to family name", matches[3])
 		}
 
 		vgaDevices = append(vgaDevices, VGADevice{
-			BDF:       matches[1],
-			Class:     matches[2],
-			Name:      matches[3],
-			DeviceID:  deviceID,
-			BootVGA:   bootVGA,
-			GPUFamily: gpuFamily,
+			BDF:      matches[1],
+			Class:    matches[2],
+			Name:     matches[3],
+			DeviceID: deviceID,
+			BootVGA:  bootVGA,
+			GPUInfo:  gpuInfo,
 		})
 	}
 	return vgaDevices, nil
 }
 
-// MapGPUFamilyName maps the name of the PCI devices with deviceID to a family name, e.g. alderlake, ampere etc.
-func MapGPUFamilyName(name, deviceID string) (GPUFamily, error) {
+// mapPCINameToGPUInfo maps the name of the PCI devices with deviceID to a family name, e.g. alderlake, ampere etc.
+func mapPCINameToGPUInfo(name, deviceID string) (GPUInfo, error) {
 	const (
 		amdVGAString    = "Advanced Micro Devices"
 		intelVGAString  = "Intel Corporation"
@@ -96,25 +96,25 @@ func MapGPUFamilyName(name, deviceID string) (GPUFamily, error) {
 		deviceID := strings.ToLower(deviceID)
 		gpuName, ok := amdMap[deviceID]
 		if !ok {
-			return "", fmt.Errorf("no matching device id (%v) in AMD pci id map, please update src/platform/graphics/.../hardware_probe/.../amd_pci_ids.go", deviceID)
+			return GPUInfo{}, fmt.Errorf("no matching device id (%v) in AMD pci id map, please update src/platform/graphics/.../hardware_probe/.../amd_pci_ids.go", deviceID)
 		}
-		return gpuName, nil
+		return GPUInfo{Family: gpuName, GPUVendor: vendorAMD}, nil
 	} else if strings.Contains(name, intelVGAString) {
 		intelMap := getIntelPCIIDMap()
 		deviceID := strings.ToLower(deviceID)
 		gpuName, ok := intelMap[deviceID]
 		if !ok {
-			return "", fmt.Errorf("no matching device id (%v) in Intel pci id map", deviceID)
+			return GPUInfo{}, fmt.Errorf("no matching device id (%v) in Intel pci id map", deviceID)
 		}
-		return gpuName, nil
+		return GPUInfo{Family: gpuName, GPUVendor: vendorIntel}, nil
 	} else if strings.Contains(name, nvidiaVGAString) {
 		nvidiaMap := getNvidiaPCIIDMap()
 		deviceID := strings.ToLower(deviceID)
 		gpuName, ok := nvidiaMap[deviceID]
 		if !ok {
-			return "", fmt.Errorf("no matching device id (%v) in Nvidia pci id map, please update src/platform/graphics/.../hardware_probe/.../nvidia_pci_ids.go", deviceID)
+			return GPUInfo{}, fmt.Errorf("no matching device id (%v) in Nvidia pci id map, please update src/platform/graphics/.../hardware_probe/.../nvidia_pci_ids.go", deviceID)
 		}
-		return gpuName, nil
+		return GPUInfo{Family: gpuName, GPUVendor: vendorNvidia}, nil
 	}
-	return "", fmt.Errorf("Unrecognized PCI device name: %v", name)
+	return GPUInfo{}, fmt.Errorf("Unrecognized PCI device name: %v", name)
 }
