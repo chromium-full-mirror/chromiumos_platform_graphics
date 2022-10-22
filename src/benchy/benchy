@@ -9,7 +9,9 @@
 import argparse
 import logging
 
+from lib import build
 from lib import create
+from lib import device
 from lib import run
 
 
@@ -26,6 +28,8 @@ def create_parser():
     subparsers = parser.add_subparsers(dest='command', required=True)
 
     create.add_subparser(subparsers)
+    build.add_subparser(subparsers)
+    device.add_subparser(subparsers)
     run.add_subparser(subparsers)
 
     return parser
