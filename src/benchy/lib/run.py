@@ -42,6 +42,7 @@ import lib.common as common
 # protobufs that are ready to be uploded to BigQuery.
 
 # The list of artifacts that can be stored in a job.
+EXECUTED_PLAN_TAG = ('executedplan', '.json')
 MACHINE_INFO_TAG = ('machineinfo', '.json')
 SOFTWARE_CONFIG_HOST_TAG = ('softwareconfighost', '.json')
 SOFTWARE_CONFIG_GUEST_TAG = ('softwareconfigguest', '.json')
@@ -152,6 +153,13 @@ def get_owner():
     """Get the owner for results database entries."""
     return os.environ['USER']
 
+def make_run_label(dirname=None, start_time=None):
+    """Get a unique label for the run."""
+    if not start_time:
+        start_time = datetime.datetime.now()
+    start = start_time.strftime('%Y%M%d-%H%M%S')
+    return f'{get_owner()}-{dirname}-{start}'
+
 def find_tast_results_dir(tast_log):
     """Parse tast output to find the results dir."""
     for line in tast_log.splitlines():
@@ -193,6 +201,7 @@ class JobInfo:
     Parameters are like their own individual family.
     """
     # Top level families.
+    RUN = 'run'
     DEVICE = 'device'
     BUILD = 'build'
     WORKLOAD = 'workload'
@@ -214,15 +223,17 @@ class JobInfo:
         """Internal method to add a pre-constructed Field object."""
         self.fields.append(field)
 
-    def add_name(self, family, value):
+    def add_name(self, family, value, path_component=True):
         """Add a top-level keyed value.
 
         Args:
             family: Family being entered (eg build, device)
             value: Name of entity being entered
+            path_component: Should the value be included in any filenames.
         """
         # All the top-level values will be added as labels under 'benchy.'
-        field = Field(value, ('benchy', family), f'{family}_name', True)
+        field = Field(value, ('benchy', family), f'{family}_name',
+                      path_component)
         self.add_field(field)
 
     def add(self, family, tag, value):
@@ -269,8 +280,11 @@ class JobOutput:
     def get_filename(self, job_info, tag):
         """Determines filename for tag given job_info."""
         identifier = '-'.join(job_info.make_file_parts())
-        return os.path.join(self.output_dir,
-                            f'{tag[0]}-{identifier}{tag[1]}')
+        if identifier:
+            file = f'{tag[0]}-{identifier}{tag[1]}'
+        else:
+            file = f'{tag[0]}{tag[1]}'
+        return os.path.join(self.output_dir, file)
 
     def exists(self, job_info, tag):
         """Checks if the specified file exists."""
@@ -504,6 +518,13 @@ def execute(plan, output_dir, parallel=False):
         logging.info('making job directory %s', output_dir)
         os.makedirs(output_dir)
     job = JobOutput(output_dir)
+    job_info = job.start()
+
+    # Create a unique identifier for the run.
+    run_label = make_run_label(os.path.basename(os.path.abspath(output_dir)))
+    job_info.add_name(JobInfo.RUN, run_label, path_component=False)
+    plan_json = json_format.MessageToJson(plan)
+    job.write_file(job_info, EXECUTED_PLAN_TAG, plan_json)
 
     # TODO(davidriley): This (and the other execute methods) only handles
     # non-empty configurations, but if a configuration isn't present should
@@ -516,13 +537,13 @@ def execute(plan, output_dir, parallel=False):
         else:
             mapfunc = map
         results = mapfunc(lambda x: execute_device(plan, param_combinations,
-                                                   x, job, job.start()),
+                                                   x, job, job_info.copy()),
                           plan.devices)
 
     # Flatten results from list of lists into a  flat list.
     results = list(itertools.chain(*results))
 
-    logging.info('%d total runs', len(results))
+    logging.info('%d total runs -> run label: %s', len(results), run_label)
 
 def execute_device(plan, param_combinations, device_pb, job, job_info):
     """Execute the plan for a given device."""
