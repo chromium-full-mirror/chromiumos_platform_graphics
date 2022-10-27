@@ -31,6 +31,7 @@
  PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
  DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
  DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
+ IdentityPtLib|VmPerfEvalPkg/Library/IdentityPtLib/IdentityPtLib.inf
 
 [LibraryClasses.X64]
  RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf

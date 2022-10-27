@@ -1,0 +1,25 @@
+## @file
+# Copyright 2022 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+##
+
+[Defines]
+   INF_VERSION              = 0x00010005
+   BASE_NAME                = IdentityPtLib
+   FILE_GUID                = 5421F0CC-6E26-4C02-AEB0-179321955018
+   MODULE_TYPE              = BASE
+   VERSION_STRING           = 1.0
+   LIBRARY_CLASS            = IdentityPtLib
+
+
+[Sources]
+   IdentityPtLib.c
+   IdentityPtLibDefaults.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  VmPerfEvalPkg/VmPerfEvalPkg.dec
+
+[LibraryClasses]
