@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""benchy create subcommand."""
+"""benchy device subcommand."""
 
 # pylint: disable=import-error
 import lib.common as common
