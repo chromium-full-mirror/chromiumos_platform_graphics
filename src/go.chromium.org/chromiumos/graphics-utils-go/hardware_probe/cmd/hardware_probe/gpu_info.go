@@ -22,6 +22,8 @@ const (
 	vendorQualcomm
 	vendorMediatek
 	vendorNvidia
+	vendorVirtio
+	vendorVmware
 )
 
 // String is string representation of the enum.
@@ -37,6 +39,10 @@ func (s gpuVendor) String() string {
 		return "intel"
 	case vendorNvidia:
 		return "nvidia"
+	case vendorVirtio:
+		return "virtio"
+	case vendorVmware:
+		return "vmware"
 	default:
 		return "unknown"
 	}

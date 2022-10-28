@@ -90,7 +90,11 @@ func mapPCINameToGPUInfo(name, deviceID string) (GPUInfo, error) {
 		amdVGAString    = "Advanced Micro Devices"
 		intelVGAString  = "Intel Corporation"
 		nvidiaVGAString = "NVIDIA Corporation"
+		virtioVGAString = "Virtio GPU"
+		vmwareVGAString = "VMWare"
 	)
+
+	// We are looking for the REAL GPU first then the VM GPU.
 	if strings.Contains(name, amdVGAString) {
 		amdMap := getAMDPCIIDMap()
 		deviceID := strings.ToLower(deviceID)
@@ -115,6 +119,22 @@ func mapPCINameToGPUInfo(name, deviceID string) (GPUInfo, error) {
 			return GPUInfo{}, fmt.Errorf("no matching device id (%v) in Nvidia pci id map, please update src/platform/graphics/.../hardware_probe/.../nvidia_pci_ids.go", deviceID)
 		}
 		return GPUInfo{Family: gpuName, GPUVendor: vendorNvidia}, nil
+	} else if strings.Contains(name, virtioVGAString) {
+		virtioMap := getVMPCIIDMap()
+		deviceID := strings.ToLower(deviceID)
+		gpuName, ok := virtioMap[deviceID]
+		if !ok {
+			return GPUInfo{}, fmt.Errorf("no matching device id (%v) in VM pci id map, please update src/platform/graphics/.../hardware_probe/.../vm_pci_ids.go", deviceID)
+		}
+		return GPUInfo{Family: gpuName, GPUVendor: vendorVirtio}, nil
+	} else if strings.Contains(name, vmwareVGAString) {
+		virtioMap := getVMPCIIDMap()
+		deviceID := strings.ToLower(deviceID)
+		gpuName, ok := virtioMap[deviceID]
+		if !ok {
+			return GPUInfo{}, fmt.Errorf("no matching device id (%v) in VM pci id map, please update src/platform/graphics/.../hardware_probe/.../vm_pci_ids.go", deviceID)
+		}
+		return GPUInfo{Family: gpuName, GPUVendor: vendorVmware}, nil
 	}
 	return GPUInfo{}, fmt.Errorf("Unrecognized PCI device name: %v", name)
 }
