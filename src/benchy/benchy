@@ -13,6 +13,7 @@ from lib import build
 from lib import create
 from lib import device
 from lib import run
+from lib import workload
 
 
 def create_parser():
@@ -31,6 +32,7 @@ def create_parser():
     build.add_subparser(subparsers)
     device.add_subparser(subparsers)
     run.add_subparser(subparsers)
+    workload.add_subparser(subparsers)
 
     return parser
 
