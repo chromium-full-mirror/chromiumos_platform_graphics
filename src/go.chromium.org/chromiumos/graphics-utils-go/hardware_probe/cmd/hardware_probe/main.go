@@ -133,57 +133,6 @@ func getCPUSOCFamily() (CPUSOCFamily, error) {
 	return socUnknown, fmt.Errorf("failed to determine soc")
 }
 
-// hasMaliGPUEnabled checks if mali driver is in the device.
-func hasMaliGPUEnabled() (bool, error) {
-	if _, err := os.Stat("/dev/mali0"); err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return false, nil
-		}
-		return false, errors.Wrap(err, "failed to determine if the device has mali driver")
-	}
-	return true, nil
-}
-
-func getWaffleInfo() (string, error) {
-	getUseFlags := func() ([]string, error) {
-		flags := []string{}
-		out, err := ioutil.ReadFile("/etc/ui_use_flags.txt")
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to read ui_use_flags")
-		}
-		// Remove all comment
-		for _, line := range strings.Split(string(out), "\n") {
-			flagBeforeComment := strings.TrimSpace(strings.Split(line, "#")[0])
-			if len(flagBeforeComment) == 0 {
-				continue
-			}
-			flags = append(flags, flagBeforeComment)
-		}
-		return flags, nil
-	}
-	getGraphicsAPI := func() (string, error) {
-		useFlags, err := getUseFlags()
-		if err != nil {
-			return "", errors.Wrap(err, "failed to get use flags")
-		}
-		for _, flag := range useFlags {
-			if "opengles" == flag {
-				return "gles2", nil
-			}
-		}
-		return "gl", nil
-	}
-	graphicsAPI, err := getGraphicsAPI()
-	if err != nil {
-		return "", errors.Wrap(err, "failed to get graphcis api")
-	}
-	out, err := exec.Command("wflinfo", "-p", "null", "-a", graphicsAPI).Output()
-	if err != nil {
-		return "", errors.Wrap(err, "failed to run wflinfo")
-	}
-	return string(out), nil
-}
-
 type probeResult struct {
 	CPUFamily  CPUSOCFamily `json:"CPU_SOC_Family"`
 	GPUInfos   []GPUInfo    `json:"GPU_Family"`
@@ -219,11 +168,13 @@ func main() {
 	}
 	result.GPUInfos = gpuInfos
 
-	vgaDevices, err := GetVGADevices()
-	if err != nil {
-		fatal("Failed to determine VGA device: %v", err)
+	if cpuSocFamily == socIntel || cpuSocFamily == socAMD {
+		vgaDevices, err := GetVGADevices()
+		if err != nil {
+			fatal("Failed to determine VGA device: %v", err)
+		}
+		result.VGADevices = vgaDevices
 	}
-	result.VGADevices = vgaDevices
 
 	if *gpuQuery {
 		for _, gpu := range result.GPUInfos {

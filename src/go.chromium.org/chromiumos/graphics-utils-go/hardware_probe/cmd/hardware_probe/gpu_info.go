@@ -8,6 +8,9 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/pkg/errors"
+	"io/ioutil"
+	"os"
+	"os/exec"
 	"regexp"
 	"sort"
 	"strings"
@@ -62,13 +65,66 @@ type GPUInfo struct {
 	GPUVendor gpuVendor // GPUVendor is the vendor of the GPU, e.g. Intel, qualcomm, mediatek, etc.
 }
 
+// hasMaliGPUEnabled checks if mali driver is in the device.
+func hasMaliGPUEnabled() (bool, error) {
+	if _, err := os.Stat("/dev/mali0"); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+		return false, errors.Wrap(err, "failed to determine if the device has mali driver")
+	}
+	return true, nil
+}
+
+func getWaffleInfo() (string, error) {
+	getUseFlags := func() ([]string, error) {
+		flags := []string{}
+		out, err := ioutil.ReadFile("/etc/ui_use_flags.txt")
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to read ui_use_flags")
+		}
+		// Remove all comment
+		for _, line := range strings.Split(string(out), "\n") {
+			flagBeforeComment := strings.TrimSpace(strings.Split(line, "#")[0])
+			if len(flagBeforeComment) == 0 {
+				continue
+			}
+			flags = append(flags, flagBeforeComment)
+		}
+		return flags, nil
+	}
+	getGraphicsAPI := func() (string, error) {
+		useFlags, err := getUseFlags()
+		if err != nil {
+			return "", errors.Wrap(err, "failed to get use flags")
+		}
+		for _, flag := range useFlags {
+			if "opengles" == flag {
+				return "gles2", nil
+			}
+		}
+		return "gl", nil
+	}
+	graphicsAPI, err := getGraphicsAPI()
+	if err != nil {
+		return "", errors.Wrap(err, "failed to get graphcis api")
+	}
+	out, err := exec.Command("wflinfo", "-p", "null", "-a", graphicsAPI).Output()
+	if err != nil {
+		return "", errors.Wrap(err, "failed to run wflinfo")
+	}
+	return string(out), nil
+}
+
 // getGPUInfos returns the GPU family name for the host.
 // TODO(ddmail): Support returning mulitple mali/qualcomm GPUs.
 func getGPUInfos() ([]GPUInfo, error) {
 	// Check for mali
-	if hasMali, err := hasMaliGPUEnabled(); err != nil {
+	hasMali, err := hasMaliGPUEnabled()
+	if err != nil {
 		return nil, errors.Wrap(err, "failed to determine Mali")
-	} else if hasMali {
+	}
+	if hasMali {
 		wflinfo, err := getWaffleInfo()
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get waffle info")
