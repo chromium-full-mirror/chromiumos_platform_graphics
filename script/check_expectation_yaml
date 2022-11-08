@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+
+# Copyright 2022 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+"""Check yaml file is valid-formed."""
+
+import os
+import sys
+
+
+def validate_tast_expectation(config) -> None:
+    """Validate tast expectation."""
+    schema = """
+  type: object
+  properties:
+    expectation:
+      type: string
+      enum:
+        - PASS
+        - FAIL
+    tickets:
+      type: array
+      items:
+        type: string
+    comments:
+      type: string
+    since_build:
+      type: string
+  required:
+    - expectation
+  """
+    try:
+        import yaml  # pylint: disable=import-outside-toplevel
+    except ImportError as e:
+        raise ImportError('yaml is not found. ' +
+                          'Run apt install python3-yaml to install.') from e
+    try:
+        import jsonschema  # pylint: disable=import-outside-toplevel
+    except ImportError as e:
+        raise ImportError(
+            'jsonschema is not found. ' +
+            'Run apt install python3-jsonschema to install.') from e
+    tast_schema = yaml.safe_load(schema)
+    for test in config.keys():
+        try:
+            jsonschema.validate(config[test], tast_schema)
+            print(f'Successfully validate {test}')
+        except jsonschema.ValidationError as e:
+            raise Exception(f'Failed to validate {test}') from e
+
+
+def main(argv) -> None:
+    """Main function."""
+    yaml_files = [
+        file for file in argv[1:]
+        if os.path.splitext(file)[1] in ['.yaml', '.yml']
+    ]
+    if len(yaml_files) == 0:
+        return
+
+    try:
+        import yaml  # pylint: disable=import-outside-toplevel
+    except ImportError as e:
+        raise ImportError('yaml is not found. ' +
+                          'Run apt install python3-yaml to install.') from e
+    for file in yaml_files:
+        with open(file, 'r') as f:
+            config = yaml.safe_load(f)
+        if 'expectations/tast' not in file:
+            continue
+        validate_tast_expectation(config)
+
+
+if __name__ == '__main__':
+    main(sys.argv)
