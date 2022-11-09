@@ -1,0 +1,8 @@
+graphics.Idle.psr:
+  expectation: FAIL
+  tickets:
+    - "b/258467594"
+graphics.Idle.psr_arc:
+  expectation: FAIL
+  tickets:
+    - "b/258467594"
