@@ -340,9 +340,13 @@ class TastRunner:
         if not force and self.job.exists(self.job_info, TAST_LOG_TAG):
             tast_log = self.job.read_file(self.job_info, TAST_LOG_TAG)
             tast_dir = find_tast_results_dir(tast_log)
-
+        # TODO(lsuhua): make the vars as options in plan instead of hardcoding.
         if not tast_dir:
-            cmd = ('cros_sdk tast run -buildbundle=crosint '
+            cmd = ('cros_sdk tast run '
+                   '-buildbundle=crosint '
+                   '-var=borealis.keepState=true '
+                   '-var=borealis.noShutDown=1 '
+                   '-var=borealis.Benchmark.repeatCount=5 '
                    f'{self.hostname} {self.test}')
             logging.info('running test: %s', cmd)
             if dry_run:
@@ -464,7 +468,12 @@ class Workload:
         r.execution_environment = result_pb2.Result.ExecutionEnvironment.STEAM
         r.invocation_source = invocation_source
         r.test_name = full_name
-        r.benchmark = 'apitrace' if 'TraceReplay' in full_name else 'tast'
+        if 'TraceReplay' in full_name:
+            r.benchmark = 'apitrace'
+        elif 'Benchmark' in full_name:
+            r.benchmark = 'benchmark_mode_game'
+        else:
+            r.benchmark = 'tast'
         r.trace.value = full_name
 
         # Add the metrics.
@@ -474,13 +483,33 @@ class Workload:
             r.trace.value = trace
             for metric, values in metrics.items():
                 larger_is_better = values['improvement_direction'] == 'up'
+                # For benchmark mode games run in tuning mode, we repeat each game multiple
+                # times, the metrics in results-chart.json will be an array containing results
+                # for each run. And we generate the average of values from multiple runs as the
+                # final metric.
+                if r.benchmark == "benchmark_mode_game":
+                    vs = values['values']
+                    if len(vs) == 0:
+                        continue
+                    value = sum(vs) / len(vs)
+                    metric = f'mean_{metric}'
+                else:
+                    value = values['value']
+
                 r.metrics.add(name=metric,
-                              index=0,
-                              value=values['value'],
-                              units=values['units'],
-                              larger_is_better=larger_is_better,
-                              externally_gathered=False)
-        r.primary_metric_name = 'fps'
+                            index=0,
+                            value=value,
+                            units=values['units'],
+                            larger_is_better=larger_is_better,
+                            externally_gathered=False)
+
+        if r.benchmark == "benchmark_mode_game":
+            # For benchmark mode games, the in-game metrics are of diverse formats,
+            # some of the format (min_fps, avg_fps, max_fps), some can be (avg_fps, fps_variability)
+            r.primary_metric_name = 'mean_avg_fps'
+        else:
+            # For traces, the metrics are of uniform format.
+            r.primary_metric_name = 'fps'
 
         # Add the labels.
         for (grouping, name), value in labels.items():
