@@ -23,3 +23,5 @@
   VmPerfEvalPkg/VmPerfEvalPkg.dec
 
 [LibraryClasses]
+ BaseLib
+ UefiBootServicesTableLib

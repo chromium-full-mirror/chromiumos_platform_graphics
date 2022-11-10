@@ -32,10 +32,12 @@
  DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
  DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
  IdentityPtLib|VmPerfEvalPkg/Library/IdentityPtLib/IdentityPtLib.inf
+ VmPerfEvalLib|VmPerfEvalPkg/Library/VmPerfEvalLib/VmPerfEvalLib.inf
+ UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
 
 [LibraryClasses.X64]
  RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
 
- 
+
 [Components]
  VmPerfEvalPkg/Application/VmPerfHelloWorld/VmPerfHelloWorld.inf

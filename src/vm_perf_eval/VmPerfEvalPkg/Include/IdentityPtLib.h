@@ -239,4 +239,18 @@ IdentityPtMap(
     IN UINT8                 AggregationMask
 );
 
+/**
+ * This function is offered as a helper function.
+ *
+ * Its purpose is to calculate the number of physical address bits needed
+ * to access the entire memory address space as described by the EFI memory
+ * map. This can be used to restrict the amount of tag memory space
+ * needed by the identity page table generator.
+ *
+ * @returns UINT32  Number of Physical Address Bits
+*/
+UINT32
+EFIAPI
+IdentityPtGetSystemPaBits();
+
 #endif  // __IDENTITY_PT_LIB__

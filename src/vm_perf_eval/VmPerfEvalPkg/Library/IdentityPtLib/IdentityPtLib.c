@@ -7,6 +7,8 @@
 
 #include <IdentityPtLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/UefiLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 
 /* A structure used to hold the "broken down" address */
 typedef struct
@@ -630,4 +632,110 @@ IdentityPtMap (
                         AggregationMask, Tag);
 
     return;
+}
+
+/*
+* We need to do it this way because it is possible for DescriptorSize
+* to not be equal to the structure size. In fact, this is the case
+* on all systems tested.
+*/
+static
+EFI_PHYSICAL_ADDRESS
+IdentityPtGetMaxEndAddress(
+    VOID *MemoryMap,
+    UINT32 DescriptorSize,
+    UINTN MemoryMapSize
+)
+{
+    EFI_PHYSICAL_ADDRESS MaxEndAddress = 0;
+    EFI_PHYSICAL_ADDRESS CurrentEndAddress = 0;
+    EFI_MEMORY_DESCRIPTOR *MemoryDescriptor;
+    VOID *CurrentDescriptor;
+
+    CurrentDescriptor = MemoryMap;
+
+    while (MemoryMapSize > 0) {
+        MemoryDescriptor = (EFI_MEMORY_DESCRIPTOR *)CurrentDescriptor;
+
+        CurrentEndAddress = MemoryDescriptor->PhysicalStart +
+                            EFI_PAGES_TO_SIZE(MemoryDescriptor->NumberOfPages);
+
+        CurrentEndAddress--;
+
+        if (MaxEndAddress < CurrentEndAddress)
+            MaxEndAddress = CurrentEndAddress;
+
+        CurrentDescriptor += DescriptorSize;
+        MemoryMapSize -= DescriptorSize;
+    }
+
+    return MaxEndAddress;
+}
+
+UINT32
+EFIAPI
+IdentityPtGetSystemPaBits()
+{
+    UINT32 PaBits = 0;
+    EFI_PHYSICAL_ADDRESS MapMemory, MaxEndAddress;
+    UINT32 MapMemoryPages;
+    UINTN MemoryMapSize = 0;
+    UINTN DescriptorSize;
+    UINT32 DescriptorVersion;
+    UINTN MapKey;
+    EFI_STATUS status;
+
+    status = gBS->GetMemoryMap(&MemoryMapSize, NULL, &MapKey,
+                               &DescriptorSize, &DescriptorVersion);
+    if (status == EFI_BUFFER_TOO_SMALL) {
+        /* We expect this return code to come to us */
+
+        /*
+        * Given the above information, calculate how many pages
+        * we should allocate from the system.
+        */
+        MapMemoryPages = EFI_SIZE_TO_PAGES(MemoryMapSize);
+
+        /**
+         * We need to account for the fact that allocating memory will
+         * complicate the memory map a bit. In order to do this,
+         * we will check to see how close we are to a page boundary,
+         * if too close, tack on an extra page
+         *
+         * Assumes that a DescriptorSize is no where near EFI_PAGE_SIZE
+        */
+        if ((EFI_PAGE_SIZE - (MemoryMapSize % EFI_PAGE_SIZE) <
+            (4 * DescriptorSize))) {
+                MapMemoryPages++;
+        }
+
+        status = gBS->AllocatePages(AllocateAnyPages, EfiLoaderData,
+                                    MapMemoryPages, &MapMemory);
+        if (status == EFI_SUCCESS) {
+            /* Fetch the memory map*/
+            MemoryMapSize = EFI_PAGES_TO_SIZE(MapMemoryPages);
+
+            status = gBS->GetMemoryMap(&MemoryMapSize,
+                                       (EFI_MEMORY_DESCRIPTOR *)MapMemory,
+                                       &MapKey, &DescriptorSize,
+                                       &DescriptorVersion);
+
+            if (status == EFI_SUCCESS) {
+                MaxEndAddress = IdentityPtGetMaxEndAddress((VOID *)MapMemory,
+                                                           DescriptorSize,
+                                                           MemoryMapSize);
+                PaBits = 64 - __builtin_clzll(MaxEndAddress);
+            }
+
+            /* Release the memory back to the system */
+            gBS->FreePages(MapMemory, MapMemoryPages);
+        }
+    }
+
+    /* If any of the above has failed, use a reasonable default */
+    if (PaBits == 0) {
+        PaBits = 36;
+    }
+
+    return PaBits;
 }
