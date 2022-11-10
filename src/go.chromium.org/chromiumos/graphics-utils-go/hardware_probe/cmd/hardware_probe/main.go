@@ -36,6 +36,7 @@ const (
 	socIntel
 	socQualcomm
 	socMediaTek
+	socRockchip
 )
 
 func (s CPUSOCFamily) String() string {
@@ -48,6 +49,8 @@ func (s CPUSOCFamily) String() string {
 		return "qualcomm"
 	case socMediaTek:
 		return "mediatek"
+	case socRockchip:
+		return "rockchip"
 	default:
 		return "unknown"
 	}
@@ -106,6 +109,8 @@ func getARMSOCFamilyFromCompatible() (CPUSOCFamily, string, error) {
 		return socQualcomm, match[1], nil
 	} else if match = listGrep(compatibles, `^mediatek,(\S+)`); match != nil {
 		return socMediaTek, match[1], nil
+	} else if match = listGrep(compatibles, `^rockchip,(\S+)`); match != nil {
+		return socRockchip, match[1], nil
 	}
 	return socUnknown, "", fmt.Errorf("Failed to determine ARM SOC from compatible: %v", compatibles)
 }
