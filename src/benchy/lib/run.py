@@ -16,6 +16,7 @@ import subprocess
 import sys
 
 # pylint: disable=import-error
+from chromiumos.config.api.test.benchy.v1 import plan_pb2
 from chromiumos.config.api.test.results.v1 import machine_pb2
 from chromiumos.config.api.test.results.v1 import result_pb2
 from chromiumos.config.api.test.results.v1 import software_config_pb2
@@ -71,15 +72,18 @@ def add_subparser(subparsers):
                            help='do not test in parallel')
     subparser.set_defaults(func=run)
 
-def perform_call(local, command_line, cmd_args, stdout=False):
+def perform_call(execution_mode, command_line, cmd_args, stdout=False):
     """Execute a local or remote shell command."""
 
     cmd = command_line % cmd_args
     if cmd:
-        if local:
+        if execution_mode == plan_pb2.Parameter.ExecutionMode.EXECUTION_LOCAL:
             local_call(cmd, stdout=stdout)
-        else:
+        elif execution_mode == plan_pb2.Parameter.ExecutionMode.EXECUTION_DUT:
             remote_call(cmd_args['device_hostname'], cmd, stdout=stdout)
+        else:
+            logging.error("unspecifed execution mode for cmd: %s", cmd)
+            sys.exit()
 
 def local_call(cmd, stdout=False):
     """Execute a local shell command."""
@@ -94,8 +98,15 @@ def remote_call(dut, cmd, stdout=False):
     ssh_cmd = ['ssh', '-q', dut, cmd]
     if stdout:
         return subprocess.check_output(ssh_cmd).decode(sys.stdout.encoding)
-    subprocess.check_call(ssh_cmd)
+    # If the modification of the parameter failed, directly exit.
+    try:
+        logging.info("remote call: %s", " ".join(ssh_cmd))
+        subprocess.check_call([" ".join(ssh_cmd)], shell=True)
+    except subprocess.CalledProcessError as e:
+        logging.debug("modify parameter failed with error: %s", e)
+        sys.exit()
     return None
+
 
 def get_device_machine_info(cmd_args):
     """Retrieves the machine info json from the device."""
@@ -328,11 +339,12 @@ class JobOutput:
 
 class TastRunner:
     """Helper to run a tast test."""
-    def __init__(self, job, job_info, hostname, test):
+    def __init__(self, job, job_info, hostname, test, tast_parameter=None):
         self.job = job
         self.job_info = job_info
         self.hostname = hostname
         self.test = test
+        self.tast_parameter = tast_parameter
 
     def run(self, force=False, dry_run=False):
         """Runs the tast test."""
@@ -342,11 +354,13 @@ class TastRunner:
             tast_dir = find_tast_results_dir(tast_log)
         # TODO(lsuhua): make the vars as options in plan instead of hardcoding.
         if not tast_dir:
+            tast_parameter = self.tast_parameter if self.tast_parameter else ""
             cmd = ('cros_sdk tast run '
                    '-buildbundle=crosint '
                    '-var=borealis.keepState=true '
                    '-var=borealis.noShutDown=1 '
                    '-var=borealis.Benchmark.repeatCount=5 '
+                   f'{tast_parameter} '
                    f'{self.hostname} {self.test}')
             logging.info('running test: %s', cmd)
             if dry_run:
@@ -422,8 +436,17 @@ class Parameter:
     def set_parameter(self, value, job_info):
         """Set a parameter on a device."""
         job_info.set_parameter(self.pb.name, value)
-        perform_call(self.pb.local_execution,
-                     self.pb.command_line, job_info.make_args())
+        # If the paramter is a tast variable no-op here.
+        # For example, the tast variable can handle the cmd line that needs to be
+        # run on guest. The workload we defined for performance tuning is
+        # via tast tests. Inside tast tests, we always create a new VM instance.
+        # Setting up guest cmd outside of the tast test will be converted back
+        # to the default values when the tast test is running. For this case,
+        # we pass this cmd that needs to be conducted on guest as a parameter of the
+        # tast test and run it inside the tast test after VM is created.
+        if self.pb.execution_mode != plan_pb2.Parameter.ExecutionMode.EXECUTION_TAST_VARIABLE:
+            perform_call(self.pb.execution_mode,
+                         self.pb.command_line, job_info.make_args())
 
 def make_result_db_id(invocation_source, full_name, start_time):
     """Create a results database id for a run."""
@@ -432,15 +455,16 @@ def make_result_db_id(invocation_source, full_name, start_time):
 
 class Workload:
     """Manages executing a workload."""
-    def __init__(self, pb, job_info):
+    def __init__(self, pb, job_info, tast_parameter=""):
         self.pb = pb
         job_info.add_name(JobInfo.WORKLOAD, self.pb.name)
+        self.tast_parameter = tast_parameter
 
     def run(self, job, job_info):
         """Run a workload."""
         cmd_args = job_info.make_args()
         runner = TastRunner(job, job_info, cmd_args['device_hostname'],
-                            self.pb.name)
+                            self.pb.name, self.tast_parameter)
         return runner.run(dry_run=False)
 
     def generate_result(self,
@@ -621,11 +645,17 @@ def execute_build(plan, param_combinations, build_pb, job, job_info, machine):
 def execute_workload_with_params(workload_pb, parameter_set,
                                  job, job_info, machine, software_config):
     """Execute the plan for a given workload and set of parameters."""
-    workload = Workload(workload_pb, job_info)
+
     # Set each parameter on the device (and fill in the job_info).
+    tast_parameter_list = []
     for p, v in parameter_set:
+        logging.info("running workload %s with parameter %s as: %s", workload_pb.name, p.name, v)
         param = Parameter(p)
         param.set_parameter(v, job_info)
+        if p.execution_mode == plan_pb2.Parameter.ExecutionMode.EXECUTION_TAST_VARIABLE:
+            tast_parameter_list.append("-var=" + p.command_line % job_info.make_args())
+    logging.info("tast_prameter_list is : %s", tast_parameter_list)
+    workload = Workload(workload_pb, job_info, " ".join(tast_parameter_list))
     logging.debug('>>> workload %s', job_info.make_id())
 
     # TODO(davidriley): This should handle when old results are used

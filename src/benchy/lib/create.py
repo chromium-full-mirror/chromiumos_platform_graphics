@@ -42,11 +42,18 @@ def create(args):
             name='host_swappiness',
             values=['10', '15'],
             command_line='echo setting %(parameter_name)s %(parameter_value)s',
-            local_execution=False)
+            execution_mode=plan_pb2.Parameter.ExecutionMode.EXECUTION_DUT)
+        # Currently, we support a single parameter change for guest,
+        # can extend it when necessary.
+        plan.parameters.add(
+            name='guest_swappiness',
+            values=['20', '10'],
+            command_line='borealis.Benchmark.guestTuningCmd="sysctl vm.swappiness=%(parameter_value)s"',
+            execution_mode=plan_pb2.Parameter.ExecutionMode.EXECUTION_TAST_VARIABLE)
         plan.parameters.add(
             name='abc',
             values=['a', 'b'],
             command_line='echo set abc %(parameter_name)s %(parameter_value)s',
-            local_execution=False)
+            execution_mode=plan_pb2.Parameter.ExecutionMode.EXECUTION_LOCAL)
 
     common.write_plan(plan, args.output)
