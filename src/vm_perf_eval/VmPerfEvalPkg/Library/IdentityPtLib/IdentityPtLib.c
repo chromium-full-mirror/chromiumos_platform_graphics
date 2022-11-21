@@ -120,6 +120,38 @@ static VOID IdentityPtStepPartAddr (
     }
 }
 
+static BOOLEAN IdentityPtCanAggregate (
+    IN IDENTITY_PT_BUILDER *Builder,
+    IN UINT32 Level
+)
+{
+    BOOLEAN CanAggregate = FALSE;
+    IDENTITY_PT_LEVEL_DESC *LevelDesc;
+    IDENTITY_PT_DESC *PtDesc;
+
+    PtDesc = &Builder->BuilderPtDesc;
+
+    if (Level < PtDesc->NumLevels) {
+        LevelDesc = &PtDesc->Levels[Level];
+
+        /*
+        * Check if this level supports aggregation according to the
+        * page table description.
+        */
+        if (LevelDesc->LevelFlags & LEVEL_FLAG_CAN_AGGREGATE) {
+            if (!PtDesc->FuncCanAggregate) {
+                /* If NULL and flag is set, return TRUE */
+                CanAggregate = TRUE;
+            } else {
+                /* Consult the function */
+                CanAggregate = PtDesc->FuncCanAggregate(LevelDesc, Level);
+            }
+        }
+    }
+
+    return CanAggregate;
+}
+
 static UINT64 IdentityPtMarkPages (
     IN IDENTITY_PT_BUILDER *Builder,
     IN IDENTITY_PT_PART_ADDR *Addr,
@@ -131,7 +163,6 @@ static UINT64 IdentityPtMarkPages (
 {
     UINT64 PagesMarked = 0;
     IDENTITY_PT_LEVEL_INFO *LvlInfo = &Builder->BuilderPtInfo.Info[Level];
-    IDENTITY_PT_LEVEL_DESC *LvlDesc = &Builder->BuilderPtDesc.Levels[Level];
     UINT64 RemainingPages = PagesToMark;
     UINT8 *BaseTag = Builder->TagBuffer;
 
@@ -139,72 +170,58 @@ static UINT64 IdentityPtMarkPages (
     UINT64 OffsetInBase = IdentityPtCalcTagIndex(Builder, Addr, Level);
     BaseTag += OffsetInBase;
 
-    if (PagesToMark < LvlInfo->EndPagesPerBlock) {
+    UINT32 EntriesLeftInBlock = LvlInfo->PopulatedEntries -
+                                Addr->Index[Level];
+
+    while (RemainingPages > 0 && EntriesLeftInBlock > 0) {
+
         /*
-        * We need to go down a level as the blocks here are too large
-        * Indicate this in our tag buffer and recurse downwards
+        * In order to aggregate pages from a lower level here,
+        * the following needs to be true:
+        *
+        * 1. The bits in the address for (ALL) the lower levels needs
+        * to be zero
+        * 2. We must have at least 1 blocks worth of end pages remaining
+        * 3. Aggregation must be supported for this level as indicated
+        * in the page table description
+        * 4. The appropriate bit in the aggregation mask must be set
+        * 5. Aggregation for this level must be supported on this CPU.
         */
-        *BaseTag = (Tag | TAG_MAPPING_DOWNLEVEL);
-        BaseTag++;
-        return IdentityPtMarkPages(Builder, Addr, Level + 1,
-                                   PagesToMark, AggregationMask, Tag);
-    } else {
+        if (IdentityPtRemainingLevelsZero(Builder, Addr, Level) &&
+            RemainingPages >= LvlInfo->EndPagesPerBlock &&
+            IdentityPtCanAggregate(Builder, Level)) {
+            /* Combine into a large translation unit */
+            RemainingPages -= LvlInfo->EndPagesPerBlock;
+            PagesMarked += LvlInfo->EndPagesPerBlock;
+            IdentityPtStepPartAddr(Builder, Addr, Level);
 
-        UINT32 EntriesLeftInBlock = LvlInfo->PopulatedEntries -
-                                    Addr->Index[Level];
-
-        while (RemainingPages > 0 && EntriesLeftInBlock > 0) {
-
-            /*
-            * In order to aggregate pages from a lower level here,
-            * the following needs to be true:
-            *
-            * 1. The bits in the address for (ALL) the lower levels needs
-            * to be zero
-            * 2. We must have at least 1 blocks worth of end pages remaining
-            * 3. Aggregation must be supported for this level as indicated
-            * in the page table description
-            * 4. The appropriate bit in the aggregation mask must be set
-            */
-            if (IdentityPtRemainingLevelsZero(Builder, Addr, Level) &&
-                RemainingPages >= LvlInfo->EndPagesPerBlock &&
-                (LvlDesc->LevelFlags & LEVEL_FLAG_CAN_AGGREGATE) &&
-                (AggregationMask & (1 << Level))
-            ) {
-                /* Combine into a large translation unit */
-                RemainingPages -= LvlInfo->EndPagesPerBlock;
-                PagesMarked += LvlInfo->EndPagesPerBlock;
-                IdentityPtStepPartAddr(Builder, Addr, Level);
+            *BaseTag = (Tag | TAG_MAPPING_DIRECT);
+            BaseTag++;
+        } else {
+            if (Level == Builder->BuilderPtDesc.NumLevels - 1) {
+                /* Marking End pages */
+                RemainingPages--;
+                PagesMarked++;
 
                 *BaseTag = (Tag | TAG_MAPPING_DIRECT);
                 BaseTag++;
+                IdentityPtStepPartAddr(Builder, Addr, Level);
             } else {
-                if (Level == Builder->BuilderPtDesc.NumLevels - 1) {
-                    /* Marking End pages */
-                    RemainingPages--;
-                    PagesMarked++;
+                /* We need to use a smaller translation unit size */
+                UINT64 LevelMarkedPages =
+                    IdentityPtMarkPages(Builder, Addr, Level + 1,
+                                        RemainingPages, AggregationMask,
+                                        Tag);
 
-                    *BaseTag = (Tag | TAG_MAPPING_DIRECT);
-                    BaseTag++;
+                RemainingPages -= LevelMarkedPages;
+                PagesMarked += LevelMarkedPages;
 
-                    IdentityPtStepPartAddr(Builder, Addr, Level);
-                } else {
-                    /* We need to use a smaller translation unit size */
-                    UINT64 LevelMarkedPages =
-                        IdentityPtMarkPages(Builder, Addr, Level + 1,
-                                            RemainingPages, AggregationMask,
-                                            Tag);
-
-                    RemainingPages -= LevelMarkedPages;
-                    PagesMarked += LevelMarkedPages;
-
-                    *BaseTag = (Tag | TAG_MAPPING_DOWNLEVEL);
-                    BaseTag++;
-                }
+                *BaseTag = (Tag | TAG_MAPPING_DOWNLEVEL);
+                BaseTag++;
             }
-
-            EntriesLeftInBlock--;
         }
+
+        EntriesLeftInBlock--;
     }
 
     return PagesMarked;

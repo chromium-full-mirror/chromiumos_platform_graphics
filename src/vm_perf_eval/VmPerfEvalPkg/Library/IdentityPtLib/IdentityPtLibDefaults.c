@@ -6,10 +6,15 @@
 */
 
 #include <IdentityPtLib.h>
+#include <Library/BaseLib.h>
+#include <Register/Intel/Cpuid.h>
+
 
 VOID Pml4WritePtEntry(VOID *Pte, UINT8 Tag, UINT64 Phys, UINT32 Level);
 VOID X86PmWritePtEntry(VOID *Pte, UINT8 Tag, UINT64 Phys, UINT32 Level);
 VOID X86PaeWritePtEntry(VOID *Pte, UINT8 Tag, UINT64 Phys, UINT32 Level);
+BOOLEAN Pml4CanAggregateAtLevel(IDENTITY_PT_LEVEL_DESC *LevelDesc,
+                                UINT32 Level);
 
 #define IDENTITY_PT_MASK_4K     (~((UINT64)0xFFF))
 #define IDENTITY_PT_MASK_2M     (~((UINT64)0x1FFFFF))
@@ -67,6 +72,7 @@ IDENTITY_PT_DESC g_X86PmDesc = {
     .VaBits = 32,
     .PaBits = 32,
     .FuncWritePte = X86PmWritePtEntry,
+    .FuncCanAggregate = NULL,
     .Levels =
     {
         /* 4M */
@@ -94,6 +100,7 @@ IDENTITY_PT_DESC g_X86PaeDesc = {
     .VaBits = 32,
     .PaBits = 32,
     .FuncWritePte = X86PaeWritePtEntry,
+    .FuncCanAggregate = NULL,
     .Levels =
     {
         /* 1G */
@@ -147,6 +154,35 @@ IDENTITY_PT_DESC g_X86PaeDesc = {
 #define X86_PM_RW               0x2
 #define X86_PM_RO               0x0
 
+
+BOOLEAN Pml4CanAggregateAtLevel(IDENTITY_PT_LEVEL_DESC *LevelDesc, UINT32 Level)
+{
+    BOOLEAN CanAggregate = TRUE;
+    UINT32 Edx;
+    UINT32 Eax;
+    CPUID_EXTENDED_CPU_SIG_EDX ExtendedSigEdx;
+
+    if (Level == 1) {
+        /* This is the 1GiB level */
+
+        /* TODO: This might be a little heavy to call every single time when
+        *  building a page table, see if the results can be cached.
+        */
+        AsmCpuid(CPUID_EXTENDED_FUNCTION, &Eax, NULL, NULL, NULL);
+        if (Eax < CPUID_EXTENDED_CPU_SIG) {
+            /* CPU DEFINITELY does not support 1GiB pages */
+            CanAggregate = FALSE;
+        } else {
+            /* Determine if the CPU supports 1GiB pages */
+            AsmCpuid(CPUID_EXTENDED_CPU_SIG, NULL, NULL, NULL, &Edx);
+
+            ExtendedSigEdx.Uint32 = Edx;
+            CanAggregate = (ExtendedSigEdx.Bits.Page1GB) ? TRUE : FALSE;
+        }
+    }
+
+    return CanAggregate;
+}
 
 /*
 * The PAT/PCD/PWT bits actually encode an index

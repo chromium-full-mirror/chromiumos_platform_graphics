@@ -36,7 +36,6 @@
 #define     TAG_BITS_MASK_ACCESS_TYPE   0x10
 #define         TAG_ACCESS_RO           0x00    /* Read only access */
 #define         TAG_ACCESS_RW           0x10    /* R/W access */
-
 /*
 *  Function prototype to write a page table entry
 *  The will be used to write entries into the page table
@@ -65,6 +64,18 @@ typedef struct {
     UINT64 NotPresentWord;
 } IDENTITY_PT_LEVEL_DESC;
 
+/*
+ * Function prototype to determine if aggregation can be done at this
+ * level. The level description will describe what is possible with the
+ * page table format, however, it may not be possible to support aggregation
+ * because of the device we are running on.
+ *
+ * Example, PML4 supports 1GiB pages, but certain x86-64 CPU's do not support
+ * this (Sandy Bridge client devices for example).
+*/
+typedef BOOLEAN (*CanAggregateAtLevel)(IDENTITY_PT_LEVEL_DESC *LevelDesc,
+                                       UINT32 Level);
+
 typedef struct {
     /* Number of levels in the overall page table */
     UINT32               NumLevels;
@@ -76,6 +87,18 @@ typedef struct {
     UINT32               EndPageSize;
     /* Page Table Entry write function */
     WritePteEntry        FuncWritePte;
+
+    /*
+    * Function hook to check if the device supports aggregation
+    * at a particular level.
+    * Setting this to NULL will result in LevelFlags
+    * making the sole decision.
+    * As with most other decisions with respect to aggregation
+    * all votes must agree. If any of the votes indicate NO,
+    * aggregation will not be performed.
+    */
+    CanAggregateAtLevel  FuncCanAggregate;
+
     /* Description array for each level */
     IDENTITY_PT_LEVEL_DESC  Levels[MAX_LEVELS];
 } IDENTITY_PT_DESC;
