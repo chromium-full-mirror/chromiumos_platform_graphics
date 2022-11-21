@@ -258,7 +258,7 @@ func createTestResultsQueryString() (string, error) {
 		queryString = addQueryCriteria(queryString, "test", testRegex)
 	}
 
-	queryString = queryString + "\nGROUP BY\n  `row`, `col`\n;"
+	queryString = queryString + "\nGROUP BY\n  `row`, `col`\nORDER BY row\n;"
 	return queryString, nil
 }
 
