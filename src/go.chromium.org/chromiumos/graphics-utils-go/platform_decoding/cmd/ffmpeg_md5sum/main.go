@@ -93,6 +93,7 @@ func main() {
 		"-loglevel", "verbose",
 		"-i", video,
 		"-vf", "format=pix_fmts=yuv420p",
+		"-autoscale", "0",
 		"-f", "framemd5", "-",
 	}...)
 	ctx := context.Background()
