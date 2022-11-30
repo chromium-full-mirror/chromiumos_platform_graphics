@@ -122,7 +122,8 @@ static VOID IdentityPtStepPartAddr (
 
 static BOOLEAN IdentityPtCanAggregate (
     IN IDENTITY_PT_BUILDER *Builder,
-    IN UINT32 Level
+    IN UINT32 Level,
+    IN UINT32 AggregationMask
 )
 {
     BOOLEAN CanAggregate = FALSE;
@@ -138,7 +139,8 @@ static BOOLEAN IdentityPtCanAggregate (
         * Check if this level supports aggregation according to the
         * page table description.
         */
-        if (LevelDesc->LevelFlags & LEVEL_FLAG_CAN_AGGREGATE) {
+        if (LevelDesc->LevelFlags & LEVEL_FLAG_CAN_AGGREGATE &&
+            (AggregationMask & (1 << Level))) {
             if (!PtDesc->FuncCanAggregate) {
                 /* If NULL and flag is set, return TRUE */
                 CanAggregate = TRUE;
@@ -189,12 +191,12 @@ static UINT64 IdentityPtMarkPages (
         */
         if (IdentityPtRemainingLevelsZero(Builder, Addr, Level) &&
             RemainingPages >= LvlInfo->EndPagesPerBlock &&
-            IdentityPtCanAggregate(Builder, Level)) {
+            IdentityPtCanAggregate(Builder, Level, AggregationMask)) {
             /* Combine into a large translation unit */
             RemainingPages -= LvlInfo->EndPagesPerBlock;
             PagesMarked += LvlInfo->EndPagesPerBlock;
             IdentityPtStepPartAddr(Builder, Addr, Level);
-
+            Builder->LevelMapCount[Level]++;
             *BaseTag = (Tag | TAG_MAPPING_DIRECT);
             BaseTag++;
         } else {
@@ -206,6 +208,7 @@ static UINT64 IdentityPtMarkPages (
                 *BaseTag = (Tag | TAG_MAPPING_DIRECT);
                 BaseTag++;
                 IdentityPtStepPartAddr(Builder, Addr, Level);
+                Builder->LevelMapCount[Level]++;
             } else {
                 /* We need to use a smaller translation unit size */
                 UINT64 LevelMarkedPages =
@@ -569,8 +572,16 @@ IdentityPtReset (
     IN IDENTITY_PT_BUILDER *Builder
 )
 {
+    UINT32 i;
+
     /* Zero out the tag buffer */
     SetMem(Builder->TagBuffer, Builder->TagBufferSize, 0);
+
+    /* Zero our map level counts */
+    for (i = 0; i < MAX_LEVELS; i++) {
+        Builder->LevelMapCount[i] = 0;
+    }
+
     return;
 }
 

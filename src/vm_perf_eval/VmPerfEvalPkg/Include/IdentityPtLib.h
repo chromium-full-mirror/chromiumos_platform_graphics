@@ -145,6 +145,7 @@ typedef struct {
     IDENTITY_PT_BUILD_INFO  PtBuildInfo;
     UINT64                  TagBufferSize;
     UINT8                   *TagBuffer;
+    UINT64                  LevelMapCount[MAX_LEVELS];
 } IDENTITY_PT_BUILDER;
 
 
