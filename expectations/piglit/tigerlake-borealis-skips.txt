@@ -198,6 +198,8 @@ spec@arb_framebuffer_object@fbo-scissor-blit window
 spec@arb_framebuffer_srgb@framebuffer-srgb
 spec@arb_get_texture_sub_image@arb_get_texture_sub_image-get
 spec@arb_get_texture_sub_image@arb_get_texture_sub_image-getcompressed
+spec@arb_gpu_shader5@texturegather@fs-rg-0-int-2darray
+spec@arb_gpu_shader5@texturegather@fs-rgba-1-uint-2darray
 spec@arb_gpu_shader5@texturegatheroffset@fs-rgb-2-float-2drect
 spec@arb_gpu_shader_fp64@execution@built-in-functions@fs-inversesqrt-dvec4
 spec@arb_gpu_shader_fp64@execution@built-in-functions@fs-op-div-dmat2x3-dmat2x3
@@ -894,6 +896,11 @@ spec@arb_texture_float@texwrap formats offset
 spec@arb_texture_float@texwrap formats offset@GL_ALPHA16F_ARB
 spec@arb_texture_float@texwrap formats offset@GL_ALPHA16F_ARB- NPOT
 spec@arb_texture_float@texwrap formats offset@GL_ALPHA16F_ARB- swizzled
+spec@arb_texture_gather@texturegatheroffset@fs-rgb-none-unorm-2d
+spec@arb_texture_gather@texturegather@vs-rgb-none-int-2darray
+spec@arb_texture_gather@texturegather@vs-rgb-red-unorm-cubearray
+spec@arb_texture_gather@texturegather@vs-rg-red-uint-2d
+spec@arb_texture_multisample@texelfetch fs sampler2dmsarray 4 98x129x1-98x129x9
 spec@arb_texture_rectangle@copyteximage rect
 spec@arb_texture_rectangle@copyteximage rect samples=16
 spec@arb_texture_rectangle@copyteximage rect samples=2
@@ -1219,8 +1226,10 @@ spec@ext_packed_float@texwrap formats offset
 spec@ext_packed_float@texwrap formats offset@GL_R11F_G11F_B10F
 spec@ext_packed_float@texwrap formats offset@GL_R11F_G11F_B10F- NPOT
 spec@ext_packed_float@texwrap formats offset@GL_R11F_G11F_B10F- swizzled
+spec@ext_texture_array@fbo-depth-array depth-draw
 spec@ext_texture_array@fbo-depth-array depth-layered-clear
 spec@ext_texture_array@fbo-depth-array fs-writes-depth
+spec@ext_texture_array@fbo-depth-array fs-writes-stencil
 spec@ext_texture_array@fbo-generatemipmap-array s3tc_dxt1
 spec@ext_texture_array@gen-mipmap
 spec@ext_texture_array@getteximage-targets 1d_array
@@ -1424,6 +1433,7 @@ spec@ext_texture_integer@texwrap formats offset@GL_RGBA8I- swizzled
 spec@ext_texture_integer@texwrap formats offset@GL_RGBA8UI
 spec@ext_texture_integer@texwrap formats offset@GL_RGBA8UI- NPOT
 spec@ext_texture_integer@texwrap formats offset@GL_RGBA8UI- swizzled
+spec@ext_texture_lod_bias@lodbias
 spec@ext_texture_shared_exponent@texwrap formats
 spec@ext_texture_shared_exponent@texwrap formats bordercolor
 spec@ext_texture_shared_exponent@texwrap formats bordercolor@GL_RGB9_E5- border color only
@@ -1613,6 +1623,7 @@ spec@glsl-1.30@execution@fs-large-local-array
 spec@glsl-1.30@execution@interpolation@interpolation-flat-gl_frontsecondarycolor-smooth-vertex
 spec@glsl-1.30@execution@open-coded-bitfieldreverse
 spec@glsl-1.30@execution@texelfetch fs sampler1d 1-513
+spec@glsl-1.30@execution@texelfetch fs sampler2darray 98x1x9-98x129x9
 spec@glsl-1.30@execution@texelfetch@fs-texelfetch-isampler1darray
 spec@glsl-1.30@execution@texelfetch@fs-texelfetch-sampler1darray
 spec@glsl-1.30@execution@texelfetch@fs-texelfetch-usampler1darray
@@ -1934,6 +1945,7 @@ spec@!opengl 1.1@texwrap formats offset@GL_RGBA8- NPOT
 spec@!opengl 1.1@texwrap formats offset@GL_RGBA8- swizzled
 spec@!opengl 1.1@windowoverlap
 spec@!opengl 1.2@copyteximage 3d
+spec@!opengl 1.2@texture-packed-formats
 spec@!opengl 1.2@texwrap 3d
 spec@!opengl 1.2@texwrap 3d bordercolor
 spec@!opengl 1.2@texwrap 3d bordercolor@GL_RGBA8- border color only

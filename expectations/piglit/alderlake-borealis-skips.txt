@@ -19,6 +19,7 @@ glx@glx_arb_sync_control@waitformsc
 glx@glx_ext_no_config_context@no fbconfig
 glx@glx-visuals-depth
 glx@glx-visuals-depth -pixmap
+glx@glx-visuals-stencil
 glx@glx-visuals-stencil -pixmap
 shaders@glsl-fs-raytrace-bug27060
 shaders@glsl-fs-texturecube-2
@@ -66,6 +67,7 @@ spec@amd_shader_trinary_minmax@execution@built-in-functions@vs-mid3-uint-uint-ui
 spec@amd_shader_trinary_minmax@execution@built-in-functions@vs-min3-int-int-int
 spec@amd_shader_trinary_minmax@execution@built-in-functions@vs-min3-uvec2-uvec2-uvec2
 spec@arb_clear_texture@arb_clear_texture-depth
+spec@arb_color_buffer_float@gl_rgba8_snorm-render
 spec@arb_compute_shader@local-id-explosion
 spec@arb_copy_image@arb_copy_image-formats
 spec@arb_copy_image@arb_copy_image-formats@Source: GL_COMPRESSED_RED_RGTC1/Destination: GL_COMPRESSED_RED_RGTC1
@@ -226,6 +228,7 @@ spec@arb_fragment_program@fp-indirections2
 spec@arb_framebuffer_srgb@framebuffer-srgb
 spec@arb_get_texture_sub_image@arb_get_texture_sub_image-get
 spec@arb_get_texture_sub_image@arb_get_texture_sub_image-getcompressed
+spec@arb_gpu_shader5@texturegather@vs-rg-1-unorm-2drect
 spec@arb_gpu_shader_fp64@execution@built-in-functions@fs-equal-dvec2-dvec2
 spec@arb_gpu_shader_fp64@execution@built-in-functions@fs-op-div-dmat2x3-dmat2x3
 spec@arb_gpu_shader_fp64@execution@built-in-functions@fs-op-div-dmat4-dmat4
@@ -263,6 +266,8 @@ spec@arb_gpu_shader_fp64@varying-packing@simple dmat2x4 separate
 spec@arb_occlusion_query@occlusion_query_meta_no_fragments
 spec@arb_occlusion_query@occlusion_query_meta_save
 spec@arb_pixel_buffer_object@texsubimage array pbo
+spec@arb_pixel_buffer_object@texsubimage cube_map_array pbo
+spec@arb_pixel_buffer_object@texsubimage-unpack pbo
 spec@arb_point_parameters@arb_point_parameters-point-attenuation
 spec@arb_point_sprite@arb_point_sprite-mipmap
 spec@arb_program_interface_query@arb_program_interface_query-getprogramresourceindex
@@ -937,6 +942,10 @@ spec@arb_texture_float@texwrap formats offset@GL_ALPHA16F_ARB
 spec@arb_texture_float@texwrap formats offset@GL_ALPHA16F_ARB- NPOT
 spec@arb_texture_float@texwrap formats offset@GL_ALPHA16F_ARB- swizzled
 spec@arb_texture_gather@texturegatheroffset@fs-rg-none-uint-2darray
+spec@arb_texture_gather@texturegather@vs-rgb-none-int-2darray
+spec@arb_texture_gather@texturegather@vs-rg-red-uint-2d
+spec@arb_texture_multisample@texelfetch@16-fs-isampler2dmsarray
+spec@arb_texture_multisample@texelfetch fs sampler2dmsarray 4 1x129x9-98x129x9
 spec@arb_texture_multisample@texelfetch fs sampler2dmsarray 4 98x129x1-98x129x9
 spec@arb_texture_rectangle@copyteximage rect
 spec@arb_texture_rectangle@copyteximage rect samples=16
@@ -1199,6 +1208,7 @@ spec@ext_framebuffer_multisample@no-color 8 depth-computed single
 spec@ext_framebuffer_multisample@no-color 8 depth single
 spec@ext_framebuffer_object@fbo-blending-format-quirks
 spec@ext_framebuffer_object@fbo-fragcoord
+spec@ext_framebuffer_object@fbo-readpixels
 spec@ext_framebuffer_object@fbo-readpixels-depth-formats
 spec@ext_framebuffer_object@fbo-readpixels-depth-formats@GL_DEPTH_COMPONENT24/GL_FLOAT
 spec@ext_framebuffer_object@fbo-readpixels-depth-formats@GL_DEPTH_COMPONENT32/GL_UNSIGNED_INT
@@ -1231,6 +1241,7 @@ spec@ext_image_dma_buf_import@ext_image_dma_buf_import-sample_y416
 spec@ext_image_dma_buf_import@ext_image_dma_buf_import-sample_yuv420
 spec@ext_image_dma_buf_import@ext_image_dma_buf_import-sample_yuyv
 spec@ext_image_dma_buf_import@ext_image_dma_buf_import-sample_yvu420
+spec@ext_packed_depth_stencil@fbo-clear-formats
 spec@ext_packed_depth_stencil@fbo-depthstencil-gl_depth24_stencil8-copypixels
 spec@ext_packed_depth_stencil@fbo-depthstencil-gl_depth24_stencil8-drawpixels-24_8
 spec@ext_packed_depth_stencil@fbo-depthstencil-gl_depth24_stencil8-drawpixels-32f_24_8_rev
@@ -1259,6 +1270,7 @@ spec@ext_packed_float@texwrap formats offset
 spec@ext_packed_float@texwrap formats offset@GL_R11F_G11F_B10F
 spec@ext_packed_float@texwrap formats offset@GL_R11F_G11F_B10F- NPOT
 spec@ext_packed_float@texwrap formats offset@GL_R11F_G11F_B10F- swizzled
+spec@ext_texture_array@copyteximage 2d_array samples=8
 spec@ext_texture_array@fbo-depth-array depth-clear
 spec@ext_texture_array@fbo-depth-array depth-draw
 spec@ext_texture_array@fbo-depth-array depth-layered-clear
@@ -1269,6 +1281,7 @@ spec@ext_texture_array@fbo-depth-array stencil-draw
 spec@ext_texture_array@fbo-generatemipmap-array s3tc_dxt1
 spec@ext_texture_array@gen-mipmap
 spec@ext_texture_array@getteximage-targets 1d_array
+spec@ext_texture_array@maxlayers
 spec@ext_texture_array@texsubimage array
 spec@ext_texture_compression_rgtc@texwrap formats
 spec@ext_texture_compression_rgtc@texwrap formats bordercolor
@@ -1678,6 +1691,8 @@ spec@glsl-1.30@execution@built-in-functions@vs-op-assign-bitand-uint-uint
 spec@glsl-1.30@execution@built-in-functions@vs-op-rshift-int-int
 spec@glsl-1.30@execution@fs-texturegrad-miplevels
 spec@glsl-1.30@execution@texelfetch fs sampler1d 1-513
+spec@glsl-1.30@execution@texelfetch fs sampler1darray 1x281-501x281
+spec@glsl-1.30@execution@texelfetch fs sampler2d 1x281-501x281
 spec@glsl-1.30@execution@texelfetch fs sampler2darray 1x129x9-98x129x9
 spec@glsl-1.30@execution@texelfetch fs sampler2darray 98x1x9-98x129x9
 spec@glsl-1.30@execution@texelfetch@fs-texelfetch-isampler1darray
@@ -1795,6 +1810,7 @@ spec@nv_copy_image@nv_copy_image-formats@Source: GL_DEPTH_COMPONENT24/Destinatio
 spec@nv_read_depth@read_depth_gles3
 spec@!opengl 1.0@gl-1.0-edgeflag
 spec@!opengl 1.0@gl-1.0-edgeflag-quads
+spec@!opengl 1.0@gl-1.0-read-cache-stress-test
 spec@!opengl 1.0@gl-1.0-scissor-bitmap
 spec@!opengl 1.0@gl-1.0-spot-light
 spec@!opengl 1.0@rasterpos
@@ -1820,6 +1836,7 @@ spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=4
 spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=6
 spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=8
 spec@!opengl 1.1@draw-sync
+spec@!opengl 1.1@getteximage-formats
 spec@!opengl 1.1@linestipple
 spec@!opengl 1.1@linestipple@Factor 2x
 spec@!opengl 1.1@linestipple@Factor 3x
@@ -2020,6 +2037,7 @@ spec@!opengl 1.1@texwrap formats offset@GL_RGBA8- swizzled
 spec@!opengl 1.1@windowoverlap
 spec@!opengl 1.2@copyteximage 3d
 spec@!opengl 1.2@tex3d
+spec@!opengl 1.2@texture-packed-formats
 spec@!opengl 1.2@texwrap 3d
 spec@!opengl 1.2@texwrap 3d bordercolor
 spec@!opengl 1.2@texwrap 3d bordercolor@GL_RGBA8- border color only
