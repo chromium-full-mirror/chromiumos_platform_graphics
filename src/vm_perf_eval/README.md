@@ -120,10 +120,53 @@ Retrieve the BIOS from here:
 
 This can be run with something along the lines of (with 'bios' being the file from above):
 
-`crosvm run --bios bios --rwdisk imageName.img`
+`crosvm run --cpus <NumOfCPUs> --bios bios --rwdisk imageName.img`
 
 Currently, you will need to forcefully close CrosVM after the test has run (as there is no output).
 At some point it may be possible to trigger a shutdown from the EFI application and (hopefully) this will automatically close CrosVM.
 
 Although there is no output, files written by the application will be available within the rwdisk image after completion.
 One must ensure that the file buffers within the application are flushed after every write, especially in the case of logging.
+
+# Bootstrapper
+The VmPerfEval library contains an assembly bootstrapper in the ApBoot sub-directory. This bootstrapper is responsible for initializing other CPU's on the system and directing them to an entry point of your choice. It is embedded into the library as a raw series of bytes.
+
+Part of the initialization involves copying this binary into the lower 1MiB of the physical address space so it can be accessed by the target CPU in all operating modes (along with some of the other core data structures).
+
+The files in this directory are:
+* `ApBoot.h`: Defines the interface between the C code and the bootstrapper (auto generated)
+* `ApBoot.inc`: Defines the above interface from the assembly level
+* `ApBootCode.h`: The bootstrapper binary converted to a series of bytes
+
+For this reason it is a built a little differently than the rest of the project.
+
+## Bootstrapper Build
+Below are instructions to build the bootstrapper if one wants to do so:
+
+### Bootstapper Package Requirements
+The following packages are required in addition to the ones mentioned in earlier sections:
+
+1. `a56`
+
+The a56 package contains the bin2h tool that is used to convert the binary to an array.
+
+### Bootstrapper Build Steps
+
+### Assemble:
+`nasm ApBoot.nasm`
+
+This should produce a file by the name of `ApBoot`. This is the resulting binary file.
+
+### Convert to C array
+`bin2h 8 < ApBoot > ApBootCode.h`
+
+This will convert this binary into a sequence of bytes suitable for embedding in the library.
+Be sure to put the appropriate header in place when you wish to submit changes to this file.
+
+### INC file conversion
+If the interface between the C code and the binary has changed. The ApBoot.h header file MUST be regenerated.
+This can be accomplished with...
+
+`<ToolsDirectory>/NasmIncToH.py --incfile ApBoot.inc`
+
+Once all these steps have been completed, simply perform a rebuild as normal. The next build will pick up the updated files.

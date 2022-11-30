@@ -1,0 +1,455 @@
+/** @file
+*
+* Copyright 2022 The ChromiumOS Authors
+* Use of this source code is governed by a BSD-style license that can be
+* found in the LICENSE file.
+*/
+
+#ifndef __VM_PERF_EVAL_LIB_H__
+#define __VM_PERF_EVAL_LIB_H__
+
+#include <Uefi.h>
+#include <IdentityPtLib.h>
+
+/*
+* Defines the maximum number of 'remote' cores. Cores which
+* are not the boot core.
+*/
+#define VM_PERF_MAX_CORES   64
+
+typedef enum {
+    /*
+    * Immediate Trigger Mode
+    * In this mode, the target CPU will immediately enter
+    * the entry point as soon as initialization is complete.
+    * */
+    CoreTriggerImmediate = 0,
+
+    /*
+    * Wait for Trigger Mode
+    *
+    * In this mode, the target CPU will complete initialization
+    * and then spin on a trigger value.
+    *
+    * Once this trigger value has been set, it will then
+    * enter the specified entry point.
+    *
+    * Can be useful in some cases, to start all cores at a
+    * certain point in time (or as closely as possible).
+    * */
+    CoreTriggerWait
+}   VM_PERF_CORE_TRIGGER;
+
+typedef enum {
+    /*
+    * Real Mode Entry Point
+    * No paging
+    * Only one core can be (safely) in this mode at a time.
+    * In this mode the CPU only has access to the lower 1MiB of
+    * physical address space.
+    * Entry Point = Lower 16-bits (IP), Upper 16-bits CS
+    *
+    * */
+    CoreEntryRealMode = 0,
+
+    /*
+    * Protected Mode
+    * This mode operates the core in protected mode (32-bit).
+    * The benefit here is that there is a 1:1 relationship between a
+    * virtual or "linear" address and a physical address without the use of
+    * page tables. May be beneficial for some tests provided
+    * the hurdle of adding 32-bit code in a 64-bit binary is dealt with
+    * in a clean way.
+    *
+    * Since the CPU is operating in a 32-bit mode, it only has access
+    * to the lower 4GiB of physical address space. It also has full
+    * unrestricted access to this space in this mode.
+    *
+    * An errant program on the CPU is almost guaranteed to crash the
+    * system as there are critical data structures there. Becareful..
+    *
+    * Entry = Lower 32-bits into EIP
+    **/
+    CoreEntryProtectedModeNoPaging,
+
+    /*
+    * Protected Mode w/ Paging
+    * Normal x86 32-bit mode with paging.
+    *
+    * Same restrictions as base Protected Mode apply. However, there is
+    * some protection offered by the use of page tables.
+    *
+    * Entry = Lower 32-bits into EIP
+    * */
+    CoreEntryProtectedModeNormalPaging,
+
+    /*
+    * Protected Mode w/ PAE Paging
+    * Normal x86 32-bit mode with PAE paging.
+    *
+    * Same restrictions as base Protected Mode with paging apply.
+    * While the PAE paging allows a larger physical address space to be used,
+    * you are still limited to accessing 32-bits worth at a time.
+    *
+    * Entry = Lower 32-bits into EIP
+    **/
+    CoreEntryProtectedModePAEPaging,
+
+    /*
+    * Long Mode (64-bit, x86-64)
+    * It is expected that most tests will operate the AP's in this mode.
+    * Paging is required in this mode.
+    *
+    * Entry = Full 64-bits into RIP
+    */
+    CoreEntryLongMode
+
+}   VM_PERF_CORE_ENTRY_TYPE;
+
+typedef enum {
+    /* Individual Core */
+    CoreTypeIndividual = 0,
+
+    /* All cores on the sytem (Index is ignored) */
+    CoreTypeAll,
+} VM_PERF_CORE_TYPE;
+
+typedef enum {
+    /* Idle Core (Doing nothing, not in service) */
+    CoreStatusIdle = 0,
+
+    /* Core has initialized, but is waiting on trigger */
+    CoreStatusNotTriggered,
+
+    /* Core is currently running */
+    CoreStatusRunning,
+
+    /* Core has hit an exception */
+    CoreStatusException,
+
+    /*
+    * Core has successfully returned from the entry point.
+    * This does not mean that the test completed successfully.
+    * The value returned from the entry point code is used to indicate this.
+    */
+    CoreStatusFinished
+} VM_PERF_CORE_STATUS;
+
+/*
+* Structure used to specify entry information when starting
+* a particular processor.
+*/
+typedef struct {
+    /* The entry point type (RealMode, LongMode, etc...) */
+    VM_PERF_CORE_ENTRY_TYPE EntryType;
+
+    /* Trigger Mode (Immediate, TriggerWait, etc...) */
+    VM_PERF_CORE_TRIGGER    TriggerMode;
+
+    /* The entry point of the desired code to run on the target CPU */
+    EFI_PHYSICAL_ADDRESS    EntryPoint;
+
+    /*
+    * The page table builder to use for entry point types that require it.
+    * Before attempting to start the core, any memory referenced by the code
+    * pointed at by the entry point MUST be mapped in.
+    *
+    * StartCore will write the page tables to memory and pass them onto the
+    * target CPU for use. Core data structures like stacks and other memory
+    * will be mapped automatically by StartCore before writing out the final
+    * set of page tables.
+    */
+    IDENTITY_PT_BUILDER     *PtBuilder;
+}   CORE_ENTRY_INFO;
+
+typedef struct {
+    /* The APIC ID of this core */
+    UINT32                  ApicId;
+
+    /* ACPI UID given to us for this core */
+    UINT32                  AcpiUid;
+
+    /*
+    * CoreTypeIndividual
+    * Do not set to CoreTypeAll...
+    */
+    VM_PERF_CORE_TYPE       CoreType;
+
+    /*
+    * Pointer to the Core PCIB
+    * This is the block of memory used to communicate with the main
+    * processor. This will not be used (directly) by the code running
+    * on the AP.
+    * Some variables can be referenced by certain API calls.
+    */
+    EFI_PHYSICAL_ADDRESS    CorePcibPage;
+
+    /*
+    * Pointer to a private block of memory for this core to use
+    * to set up essential data structures.
+    * Generally of 32 ->  64KiB of size.
+    */
+    EFI_PHYSICAL_ADDRESS    CorePrivBlock;
+
+    /*
+    * Size of the private block for this core in pages.
+    */
+    UINT32                  CorePrivBlockPages;
+
+    /*
+    * Pointer to the Core AP page
+    * This is a block of memory intended to be used by the client
+    * to communicate with code running on the AP.
+    */
+    EFI_PHYSICAL_ADDRESS    CoreApPage;
+
+    /*
+    * Pointer to the Core Page Table Buffer
+    * This is used to hold the page tables for this core.
+    * This will be the target for these writes.
+    * */
+    EFI_PHYSICAL_ADDRESS    CorePageTable;
+
+    /*
+    * The size of the buffer that is assigned to this core
+    * for its page tables. In EFI_PAGE_SIZE units.
+    */
+    UINT32                  PageTablePages;
+
+    /*
+    * The block of memory allocated for this cores stack
+    * < 4GiB
+    * As stated in the EFI standard, at least 128KiB of stack space
+    * will be available
+    */
+    EFI_PHYSICAL_ADDRESS    CoreStack;
+
+    /*
+    * The number of pages allocated for core stack usage
+    */
+    UINT32                  CoreStackPages;
+
+    /*
+    * A stack space dedicated solely for interrupt processing
+    * in long mode.
+    * Will be much smaller than the core stack
+    * All < 4GiB
+    */
+    EFI_PHYSICAL_ADDRESS    CoreInterruptStack;
+
+    /*
+    * Same as the interrupt stack but for exceptions.
+    */
+    EFI_PHYSICAL_ADDRESS    CoreExceptionStack;
+
+    /*
+    * Same as the interrupt stack but for NMI.
+    */
+    EFI_PHYSICAL_ADDRESS    CoreNMIStack;
+
+    /* The NMI/Exception and interrupt stack will share the same block */
+    UINT32                  CoreInterruptStackPages;
+
+    /*
+    * A flag indicating whether this particular core is in service
+    */
+    BOOLEAN                 InService;
+
+    /*
+    * A flag indicating whether this particular core is running
+    */
+    BOOLEAN                 CoreIsRunning;
+}   VM_PERF_EVAL_ENUM_CPU;
+
+typedef struct {
+    /* Number of cores from ACPI table (we skip the one running the UEFI) */
+    UINT32                  NumAcpiCores;
+
+    /* Local APIC address (common for each core) */
+    EFI_PHYSICAL_ADDRESS    LapicAddress;
+
+    /* The physical address of the boot strapper code (< 1 MiB) */
+    EFI_PHYSICAL_ADDRESS    ApBootCodePage;
+
+    /* The physical address of the trigger page (< 1 MiB) */
+    EFI_PHYSICAL_ADDRESS    ApTriggerPage;
+
+    /*
+    * The physical address of a work page for the real mode part of
+    * the code bootstrapper. < 1MiB
+    */
+    EFI_PHYSICAL_ADDRESS    ApRealModeWorkPage;
+
+    /* The array containing basic info about each enumerated core */
+    VM_PERF_EVAL_ENUM_CPU   AcpiCores[VM_PERF_MAX_CORES];
+}   VM_PERF_EVAL_CTX;
+
+/**
+* Initializes the VmPerfEval context for later use
+* It currently will scan the ACPI tables for the available
+* cores on the system. It will also allocate memory for the
+* AP bootstrapper code and associated data structures.
+*
+* @param  Ctx     Pointer to the Vm Perf Eval context
+*
+* @return BOOLEAN   Indicates whether initialization completed successfully
+*/
+BOOLEAN EFIAPI VmPerfInitialize(
+    IN VM_PERF_EVAL_CTX *Ctx
+);
+
+/**
+ * Shuts down the VmPerfEval context. It will release all allocated memory
+ * currently being held by this context. It will also park all active cores.
+*/
+VOID EFIAPI VmPerfShutdown(
+    IN VM_PERF_EVAL_CTX *Ctx
+);
+
+/**
+* Puts one or more cores in "service".
+* Adding a core(s) into service prepares it for start-up.
+*
+* Setting CoreType to CoreTypeIndividual will put a single core
+* in service by the EnumIndex.
+*
+* Other CoreType's will add multiple cores in "service".
+*
+* Returns the mask of cores in-service
+*
+* @param    Ctx         Pointer to the Vm Perf Eval context
+* @param    CoreType    The type of core to put in service
+* @param    Index       The core index
+*
+* @return UINT64        Bitmask of cores put in-service
+*/
+UINT64 EFIAPI VmPerfPutInService(
+    IN VM_PERF_EVAL_CTX  *Ctx,
+    IN VM_PERF_CORE_TYPE CoreType,
+    IN UINT32 Index
+);
+
+/**
+ * @brief Starts a core that has been previously put in service
+ *
+ * This function will start a core that was put in service.
+ * EntryInfo contains the details that will be used to start the core.
+ *
+ * @param   Ctx             Pointer to the Vm Perf Eval context
+ * @param   Index           The core index to start
+ * @param   EntryInfo       The entry information for this core
+ * @return  BOOLEAN         TRUE if core has been kicked off, FALSE otherwise
+ */
+BOOLEAN EFIAPI VmPerfStartCore(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN UINT32 Index,
+    IN CORE_ENTRY_INFO *EntryInfo
+);
+
+/**
+ * @brief A function to modify the trigger state
+ *
+ * Manipulate the trigger word that cores will be waiting on
+ * if they are entered with the TriggerWait trigger mode.
+ *
+ * @param   Ctx         Pointer to the Vm Perf Eval context
+ * @param   TriggerSet  TRUE = Set Trigger, FALSE = Reset Trigger
+ */
+VOID EFIAPI VmPerfTrigger(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN BOOLEAN  TriggerSet
+);
+
+/**
+ * @brief   Removes a core(s) from service
+ *
+ * Removing a core from service involves "parking" the core(s).
+ * The memory associated with a core will be lazily allocated and will
+ * be held onto until the library is shutdown.
+ *
+ * @param   Ctx         Pointer to the Vm Perf Eval context
+ * @param   CoreType    The core(s) type to remove
+ * @param   Index       For CoreTypeIndividual, the specific core to remove
+ *
+ * @return  UINT64      Bitmask of cores removed from service
+ */
+UINT64 EFIAPI VmPerfRemoveFromService(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN VM_PERF_CORE_TYPE CoreType,
+    IN UINT32 Index
+);
+
+/**
+ * @brief Retrieves a pointer to the main CPU -> target CPU comms page
+ *
+ * This function allows the client to retrieve a pointer to the buffer
+ * used to communicate with the target processor.
+ * The particular core at 'Index' MUST be in service.
+ *
+ * @param   Ctx         Pointer to the Vm Perf Eval context
+ * @param   Index       The core index
+ *
+ * @return  A pointer that can be used to access this page.
+*/
+VOID* EFIAPI VmPerfGetApPage(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN UINT32 Index
+);
+
+/**
+ * @brief Probes a core in service
+ *
+ * @param   Ctx                 Pointer to Vm Perf Eval context
+ * @param   Index               The core to probe
+ * @return  VM_PERF_CORE_STATUS The status of the core that is to be probed
+ */
+VM_PERF_CORE_STATUS EFIAPI VmPerfProbeInService(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN UINT32 Index
+);
+
+/**
+ * @brief Retrieves the current return value from a core
+ *
+ * This function returns the current return value that is present
+ * in a cores control block. It is up to the client to ensure
+ * there is valid data here.
+ *
+ * @param   Ctx                 Pointer to Vm Perf Eval context
+ * @param   Index               Core Index
+ * @return  The return value of the core
+*/
+UINT64 EFIAPI VmPerfGetReturnValue(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN UINT32 Index
+);
+
+/**
+ * @brief Retrieves a mask representing the cores that were enumerated
+ * during the library initialization.
+ *
+ * @param   Ctx                 Pointer to Vm Perf Eval context
+ * @return  A bitmask indicating the number of cores enumerated
+*/
+UINT64 EFIAPI VmPerfGetEnumeratedCoreMask(
+    IN VM_PERF_EVAL_CTX *Ctx
+);
+
+/**
+ * @brief Makes a real mode entry point value from a physical address
+ *
+ * This function will take a flat address in the lower 1MiB region
+ * of physical address space and create a partitioned CS:IP starting point.
+ * For use with real mode only.
+ *
+ * Assumes that the entry point is 4K aligned.
+ *
+ * @param   RealModeAddress     The address to start execution at (flat)
+ * @return  The value to be used in CORE_ENTRY_INFO
+ *
+*/
+EFI_PHYSICAL_ADDRESS EFIAPI VmPerfMakeRealModeEntryPoint(
+    IN UINT64 RealModeAddress
+);
+
+#endif      /* __VM_PERF_EVAL_LIB_H__ */

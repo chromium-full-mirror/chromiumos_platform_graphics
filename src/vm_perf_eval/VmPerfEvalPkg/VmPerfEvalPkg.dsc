@@ -33,6 +33,13 @@
  DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
  IdentityPtLib|VmPerfEvalPkg/Library/IdentityPtLib/IdentityPtLib.inf
  VmPerfEvalLib|VmPerfEvalPkg/Library/VmPerfEvalLib/VmPerfEvalLib.inf
+ LocalApicLib|UefiCpuPkg/Library/BaseXApicLib/BaseXApicLib.inf
+ TimerLib|UefiPayloadPkg/Library/AcpiTimerLib/AcpiTimerLib.inf
+ IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
+ CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
+ UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
+ HobLib|UefiPayloadPkg/Library/DxeHobLib/DxeHobLib.inf
+ DxeHobListLib|UefiPayloadPkg/Library/DxeHobListLib/DxeHobListLib.inf
  UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
 
 [LibraryClasses.X64]
@@ -41,3 +48,5 @@
 
 [Components]
  VmPerfEvalPkg/Application/VmPerfHelloWorld/VmPerfHelloWorld.inf
+ VmPerfEvalPkg/Application/VmPerfFullLoad/VmPerfFullLoad.inf
+ VmPerfEvalPkg/Application/VmPerfLibTest/VmPerfLibTest.inf

@@ -1,0 +1,33 @@
+## @file
+# Copyright 2022 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+##
+
+[Defines]
+   INF_VERSION              = 0x00010005
+   BASE_NAME                = VmPerfEvalLib
+   FILE_GUID                = 7D5FBC8C-58A6-4973-9837-91CC56039A8D
+   MODULE_TYPE              = BASE
+   VERSION_STRING           = 1.0
+   LIBRARY_CLASS            = VmPerfEvalLib
+
+
+[Sources]
+   VmPerfEvalLib.c
+   VmPerfEvalScanCpus.c
+   VmPerfEvalCpuService.c
+   VmPerfEvalApBoot.c
+   VmPerfEvalApicLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  VmPerfEvalPkg/VmPerfEvalPkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[LibraryClasses]
+ BaseLib
+ LocalApicLib
+ UefiBootServicesTableLib
+ IdentityPtLib
