@@ -1,6 +1,0 @@
-video.PlatformDecoding.ffmpeg_vaapi_hevc_main:
-  expectation: FAIL
-  tickets:
-  - b/251225839
-  comments: AMD is looking into the issue. The test will fail until they have a fix.
-  since_build: R108-15175.0.0
