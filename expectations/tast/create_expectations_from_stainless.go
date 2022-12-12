@@ -202,8 +202,8 @@ func createTestResultsQueryString() (string, error) {
 			"  \"*\" AS `col`,\n"+
 			"  SUM(IF(status IN (\"GOOD\"), 1, 0)) AS pass,\n"+
 			"  SUM(IF(status IN (\"WARN\"), 1, 0)) AS warn,\n"+
-			"  SUM(IF(status IN (\"FAIL\", \"ERROR\", \"ABORT\") AND NOT REGEXP_CONTAINS(reason, \"^(Test passed! Consider removing FAIL expectation)\"), 1, 0)) AS `fail`,\n"+
-			"  SUM(IF(status IN (\"FAIL\", \"ERROR\", \"ABORT\") AND REGEXP_CONTAINS(reason, \"^(Test passed! Consider removing FAIL expectation)\"), 1, 0)) AS `unexpected_pass`,\n"+
+			"  SUM(IF(status IN (\"FAIL\", \"ERROR\", \"ABORT\") AND NOT REGEXP_CONTAINS(reason, \"Test passed! Consider removing FAIL expectation\"), 1, 0)) AS `fail`,\n"+
+			"  SUM(IF(status IN (\"FAIL\", \"ERROR\", \"ABORT\") AND REGEXP_CONTAINS(reason, \"Test passed! Consider removing FAIL expectation\"), 1, 0)) AS `unexpected_pass`,\n"+
 			"  SUM(IF(status NOT IN (\"GOOD\", \"WARN\", \"FAIL\", \"ERROR\", \"ABORT\", \"NOT_RUN\"),\n"+
 			"         1, 0)) AS other,\n"+
 			"  SUM(IF(status IN (\"NOT_RUN\"), 1, 0)) AS notrun,\n"+
