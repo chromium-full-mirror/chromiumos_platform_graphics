@@ -28,9 +28,11 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"syscall"
 	"time"
 
 	"cloud.google.com/go/bigquery"
+	"golang.org/x/crypto/ssh/terminal"
 	"google.golang.org/api/iterator"
 	"gopkg.in/yaml.v2"
 
@@ -93,6 +95,17 @@ var testRegex string
 var fromDate string
 var toDate string
 
+var colorEnabled bool
+var colorDisabled bool
+var colorReset string
+var colorRed string
+var colorRedBold string
+var colorGreen string
+var colorGreenBold string
+var colorYellow string
+var colorYellowBold string
+var colorMagentaBold string
+
 // These regular expressions can be used for parameters validation
 const modelValidationRegex = `^[a-z]+$`
 const buildValidationRegex = `^R[1-9][0-9]*-[1-9][0-9]*\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$`
@@ -137,7 +150,9 @@ func init() {
 				"\t--test: Test name to query for expectations. Not a regular expression. For multiple tests, use multiple arguments. Optional\n"+
 				"\t--test_regex: Regular expression for tests to match. The user must provide either --test or --test_regex.\n"+
 				"\t--from_date: the start of the date range. Format: YYYYMMDD. Optional. Default date range is the last 7 days.\n"+
-				"\t--to_date: the end of the date range. Format: YYYYMMDD. Optional\n", excludeReasonRegexDefault)
+				"\t--to_date: the end of the date range. Format: YYYYMMDD. Optional\n"+
+				"\t--color: Colorize output log\n"+
+				"\t--no_color: Do not colorize output log\n", excludeReasonRegexDefault)
 	}
 
 	flag.StringVar(&input, "input", "", "Path to YAML file to load. If \"-\", read from standard input.")
@@ -167,6 +182,8 @@ func init() {
 	flag.StringVar(&excludeReasonRegex, "exclude_reason_regex", "", "regular expression for failure reasons to exclude")
 	flag.StringVar(&fromDate, "from_date", "", "the start of the date range. Format: YYYYMMDD")
 	flag.StringVar(&toDate, "to_date", "", "the end of the date range. Format: YYYYMMDD")
+	flag.BoolVar(&colorEnabled, "color", colorEnabled, "Colorize the output log")
+	flag.BoolVar(&colorDisabled, "no_color", colorDisabled, "Do not colorize the output log")
 }
 
 // escapeBigqueryStrings was ported from the stainless frontend code. It
@@ -509,6 +526,20 @@ func processArguments() error {
 		excludeReasonRegex = excludeReasonRegexDefault
 	}
 
+	if colorEnabled && colorDisabled {
+		return errors.New("cannot specify --color && --no_color")
+	}
+	if colorEnabled || (!colorDisabled && terminal.IsTerminal(syscall.Stderr)) {
+		colorReset = "\033[0;0m"
+		colorRed = "\033[0;31m"
+		colorRedBold = "\033[1;31m"
+		colorGreen = "\033[0;32m"
+		colorGreenBold = "\033[1;32m"
+		colorYellow = "\033[0;33m"
+		colorYellowBold = "\033[1;33m"
+		colorMagentaBold = "\033[1;35m"
+	}
+
 	return err
 }
 
@@ -518,7 +549,7 @@ func deleteTestExpectations(exp map[string]expectations.Expectation, re *regexp.
 		if !re.MatchString("tast." + testName) {
 			continue
 		}
-		fmt.Fprintf(os.Stderr, "Deleting expectation for %s.\n", testName)
+		fmt.Fprintf(os.Stderr, colorGreen+"Deleting expectation for "+colorGreenBold+"%s"+colorGreen+".\n"+colorReset, testName)
 		delete(exp, testName)
 	}
 }
@@ -579,7 +610,7 @@ func editExpectationsFromStainless(exp map[string]expectations.Expectation) erro
 
 			if countTrueArgs(pass, fail, unexpectedPass) == 0 {
 				// This ignore tests that didn't run.
-				fmt.Fprintf(os.Stderr, "Test %s had no passing or failing results. Skipping.", testName)
+				fmt.Fprintf(os.Stderr, colorYellow+"Test "+colorYellowBold+"%s"+colorYellow+" had no passing or failing results. Skipping."+colorReset, testName)
 				return nil
 			}
 
@@ -591,7 +622,19 @@ func editExpectationsFromStainless(exp map[string]expectations.Expectation) erro
 
 				// There is no clear determination for what to do with the expectations file.
 				// This skips updating the file.
-				fmt.Fprintf(os.Stderr, "Test %s had %d pass, %d fail, and %d unexpected pass results. Skipping.\n",
+				colorPass := colorYellow
+				colorFail := colorYellow
+				colorUnexpectedPass := colorYellow
+				if pass {
+					colorPass = colorGreenBold
+				}
+				if fail {
+					colorFail = colorRedBold
+				}
+				if unexpectedPass {
+					colorUnexpectedPass = colorMagentaBold
+				}
+				fmt.Fprintf(os.Stderr, colorYellow+"Test "+colorYellowBold+"%s"+colorYellow+" had "+colorPass+"%d pass, "+colorFail+"%d fail, "+colorUnexpectedPass+"and %d unexpected pass"+colorYellow+" results. Skipping.\n"+colorReset,
 					testName, r["pass"], r["fail"], r["unexpected_pass"])
 				return nil
 			}
@@ -607,12 +650,12 @@ func editExpectationsFromStainless(exp map[string]expectations.Expectation) erro
 					// but the test passes.
 					//
 					// For this case, the FAIL expectation should be deleted.
-					fmt.Fprintf(os.Stderr, "Deleting expectation for %s since the test passes.\n", testName)
+					fmt.Fprintf(os.Stderr, colorGreen+"Deleting expectation for "+colorGreenBold+"%s"+colorGreen+" since the test passes.\n"+colorReset, testName)
 					delete(exp, yamlTestName)
 				}
 			} else if fail {
 				// The test only has failures - create an expectation and update exp
-				fmt.Fprintf(os.Stderr, "Building %s expectation for %s\n", expectations.ExpectFailure, testName)
+				fmt.Fprintf(os.Stderr, colorRed+"Building "+colorRedBold+"%s"+colorRed+" expectation for "+colorRedBold+"%s"+colorRed+"\n"+colorReset, expectations.ExpectFailure, testName)
 				exp[yamlTestName] = expectations.Expectation{
 					Expectation: expectations.ExpectFailure,
 					Tickets:     tickets,
