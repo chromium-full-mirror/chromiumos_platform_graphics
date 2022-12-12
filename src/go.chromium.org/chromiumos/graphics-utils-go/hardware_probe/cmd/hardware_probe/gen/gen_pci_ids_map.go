@@ -39,6 +39,7 @@ func mapGPUName(mesaName string) (string, error) {
 		"JSL":      "jasperlake",
 		"IVB":      "ivybridge",
 		"KBL":      "kabylake",
+		"MTL":      "meteorlake",
 		"Pineview": "pinetrail",
 		"RPL":      "raptorlake",
 		"SKL":      "skylake",
