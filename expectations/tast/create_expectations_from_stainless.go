@@ -608,7 +608,7 @@ func editExpectationsFromStainless(exp map[string]expectations.Expectation) erro
 					//
 					// For this case, the FAIL expectation should be deleted.
 					fmt.Fprintf(os.Stderr, "Deleting expectation for %s since the test passes.\n", testName)
-					delete(exp, testName)
+					delete(exp, yamlTestName)
 				}
 			} else if fail {
 				// The test only has failures - create an expectation and update exp
