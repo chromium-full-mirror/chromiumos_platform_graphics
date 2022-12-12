@@ -26,6 +26,8 @@ graphics.OpenclCts.api_min_max_local_mem_size:
   since_build: R110-15241.0.0
 graphics.OpenclCts.api_min_max_read_image_args:
   expectation: FAIL
+  tickets:
+  - b/262344361
   since_build: R110-15241.0.0
 graphics.OpenclCts.api_min_max_write_image_args:
   expectation: FAIL
@@ -78,14 +80,6 @@ graphics.OpenclCts.basic_kernel_memory_alignment_private:
   expectation: FAIL
   tickets:
   - b/227134903
-graphics.OpenclCts.basic_local_arg_def:
-  expectation: FAIL
-  tickets:
-  - b/227133185
-graphics.OpenclCts.basic_local_kernel_def:
-  expectation: FAIL
-  tickets:
-  - b/227133185
 graphics.OpenclCts.basic_parameter_types:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -183,6 +177,9 @@ graphics.OpenclCts.bruteforce_half_log10:
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_half_recip:
+  expectation: FAIL
+  since_build: R110-15273.0.0
 graphics.OpenclCts.bruteforce_half_sin:
   expectation: FAIL
   tickets:
@@ -197,15 +194,11 @@ graphics.OpenclCts.bruteforce_hypot:
 graphics.OpenclCts.bruteforce_islessgreater:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_lgamma:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_lgamma_r:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_log:
+  expectation: FAIL
+  tickets:
+  - b/227133190
+graphics.OpenclCts.bruteforce_log1p:
   expectation: FAIL
   tickets:
   - b/227133190
@@ -214,10 +207,6 @@ graphics.OpenclCts.bruteforce_log2:
   tickets:
   - b/227133190
 graphics.OpenclCts.bruteforce_log10:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_log1p:
   expectation: FAIL
   tickets:
   - b/227133190
@@ -285,54 +274,6 @@ graphics.OpenclCts.cl_fill_images_2darray_cl_half_float:
 graphics.OpenclCts.cl_fill_images_3d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.compiler_compile_and_link_status_options_log:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_embedded_header_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_included_header_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_serialize_reload_library:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_serialize_reload_object:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_simple_library_with_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_two_file_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_multi_file_libraries:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_multiple_embedded_headers:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_multiple_files:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_multiple_files_multiple_libraries:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_multiple_libraries:
-  expectation: FAIL
-  tickets:
-  - b/227136133
 graphics.OpenclCts.compiler_options_include_directory:
   expectation: FAIL
   tickets:
@@ -341,43 +282,7 @@ graphics.OpenclCts.compiler_preprocessor_include:
   expectation: FAIL
   tickets:
   - b/227136133
-graphics.OpenclCts.compiler_program_binary_type:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_simple_embedded_header_compile:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_simple_embedded_header_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_simple_library_with_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_two_file_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
 graphics.OpenclCts.compiler_unload_build_threaded:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_unload_build_unload_create_kernel:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_unload_compile_unload_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_unload_link_different:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_unload_repeated:
   expectation: FAIL
   tickets:
   - b/227136133
@@ -434,10 +339,6 @@ graphics.OpenclCts.half_vstore_half_rtp:
   expectation: FAIL
   tickets:
   - b/227136713
-graphics.OpenclCts.half_vstore_half_rtz:
-  expectation: FAIL
-  tickets:
-  - b/227136713
 graphics.OpenclCts.half_vstorea_half:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -452,16 +353,24 @@ graphics.OpenclCts.half_vstorea_half_rtp:
   expectation: FAIL
   tickets:
   - b/227136713
-graphics.OpenclCts.half_vstorea_half_rtz:
-  expectation: FAIL
-  tickets:
-  - b/227136713
 graphics.OpenclCts.image_streams_1d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.image_streams_2darray_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.integer_ops_char_compare:
+  expectation: FAIL
+  since_build: R110-15273.0.0
+graphics.OpenclCts.integer_ops_char_logic:
+  expectation: FAIL
+  since_build: R110-15273.0.0
+graphics.OpenclCts.integer_ops_char_math:
+  expectation: FAIL
+  since_build: R110-15273.0.0
+graphics.OpenclCts.integer_ops_char_shift:
+  expectation: FAIL
+  since_build: R110-15273.0.0
 graphics.OpenclCts.integer_ops_integer_add_sat:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -489,6 +398,27 @@ graphics.OpenclCts.integer_ops_long_math:
 graphics.OpenclCts.integer_ops_popcount:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.integer_ops_short_compare:
+  expectation: FAIL
+  since_build: R110-15273.0.0
+graphics.OpenclCts.integer_ops_short_math:
+  expectation: FAIL
+  since_build: R110-15273.0.0
+graphics.OpenclCts.integer_ops_short_shift:
+  expectation: FAIL
+  since_build: R110-15273.0.0
+graphics.OpenclCts.integer_ops_uchar_compare:
+  expectation: FAIL
+  since_build: R110-15273.0.0
+graphics.OpenclCts.integer_ops_uchar_logic:
+  expectation: FAIL
+  since_build: R110-15273.0.0
+graphics.OpenclCts.integer_ops_uchar_math:
+  expectation: FAIL
+  since_build: R110-15273.0.0
+graphics.OpenclCts.integer_ops_uchar_shift:
+  expectation: FAIL
+  since_build: R110-15273.0.0
 graphics.OpenclCts.integer_ops_ulong_compare:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -498,6 +428,15 @@ graphics.OpenclCts.integer_ops_ulong_logic:
 graphics.OpenclCts.integer_ops_ulong_math:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.integer_ops_ushort_compare:
+  expectation: FAIL
+  since_build: R110-15273.0.0
+graphics.OpenclCts.integer_ops_ushort_logic:
+  expectation: FAIL
+  since_build: R110-15273.0.0
+graphics.OpenclCts.integer_ops_ushort_math:
+  expectation: FAIL
+  since_build: R110-15273.0.0
 graphics.OpenclCts.profiling_copy_image:
   expectation: FAIL
   since_build: R110-15241.0.0

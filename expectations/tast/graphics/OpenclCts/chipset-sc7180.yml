@@ -217,10 +217,6 @@ graphics.OpenclCts.bruteforce_expm1:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.bruteforce_fdim:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_half_cos:
   expectation: FAIL
   tickets:
@@ -241,19 +237,11 @@ graphics.OpenclCts.bruteforce_lgamma_r:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.bruteforce_log:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_log10:
   expectation: FAIL
   tickets:
   - b/227133190
 graphics.OpenclCts.bruteforce_log1p:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_log2:
   expectation: FAIL
   tickets:
   - b/227133190
@@ -462,54 +450,6 @@ graphics.OpenclCts.cl_copy_images_2dto3d_cl_half_float:
 graphics.OpenclCts.cl_copy_images_3dto2darray_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.compiler_compile_and_link_status_options_log:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_embedded_header_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_included_header_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_serialize_reload_library:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_serialize_reload_object:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_simple_library_with_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_execute_after_two_file_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_multi_file_libraries:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_multiple_embedded_headers:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_multiple_files:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_multiple_files_multiple_libraries:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_multiple_libraries:
-  expectation: FAIL
-  tickets:
-  - b/227136133
 graphics.OpenclCts.compiler_options_include_directory:
   expectation: FAIL
   tickets:
@@ -518,43 +458,7 @@ graphics.OpenclCts.compiler_preprocessor_include:
   expectation: FAIL
   tickets:
   - b/227136133
-graphics.OpenclCts.compiler_program_binary_type:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_simple_embedded_header_compile:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_simple_embedded_header_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_simple_library_with_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_two_file_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
 graphics.OpenclCts.compiler_unload_build_threaded:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_unload_build_unload_create_kernel:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_unload_compile_unload_link:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_unload_link_different:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_unload_repeated:
   expectation: FAIL
   tickets:
   - b/227136133
@@ -939,9 +843,6 @@ graphics.OpenclCts.integer_ops_quick_char_math:
 graphics.OpenclCts.integer_ops_quick_char_shift:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.integer_ops_quick_int_compare:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.integer_ops_quick_long_compare:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -976,9 +877,6 @@ graphics.OpenclCts.integer_ops_quick_uchar_math:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.integer_ops_quick_uchar_shift:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.integer_ops_quick_uint_compare:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.integer_ops_quick_ulong_compare:
