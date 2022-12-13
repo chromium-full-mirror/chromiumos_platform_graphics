@@ -1143,7 +1143,7 @@ lm_no_trigger:
 mov dword fs:[statuscode], STATUSCODE_IN_ENTRY_POINT
 mov rax, fs:[entry_point]
 
-lea rsp, [rsp - 16]                     ;Allocate shadow storage space
+lea rsp, [rsp - 32]                     ;Allocate shadow storage space
 mov ecx, fs:[ap_buffer]                 ;Pointer to the AP buffer
 call rax                                ;Call the long mode entry point
 
