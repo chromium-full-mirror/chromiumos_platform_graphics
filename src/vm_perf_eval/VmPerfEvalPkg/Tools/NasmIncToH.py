@@ -60,7 +60,7 @@ def conv_file(file):
                     c_struct = 'typedef struct {\n'
                     output.writelines([c_struct])
                 elif stripped_line.startswith('endstruc'):
-                    c_struct = f'}} {struct_name};'
+                    c_struct = f'}} {struct_name};\n'
                     output.writelines([c_struct])
                     struct_name = None
                 else:
@@ -88,6 +88,8 @@ def conv_file(file):
                                 c_line = f'{data_type} {name}[{arrcount}];\n'
 
                             output.writelines([c_line])
+
+            output.writelines(['#pragma pack( pop )\n'])
 
 def main():
     """Main entry point for the script"""
