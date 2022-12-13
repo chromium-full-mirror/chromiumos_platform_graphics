@@ -10,6 +10,8 @@
 
 #include <Uefi.h>
 #include <IdentityPtLib.h>
+#include <Protocol/LoadedImage.h>
+#include <Protocol/SimpleFileSystem.h>
 
 /*
 * Defines the maximum number of 'remote' cores. Cores which
@@ -263,26 +265,55 @@ typedef struct {
 
 typedef struct {
     /* Number of cores from ACPI table (we skip the one running the UEFI) */
-    UINT32                  NumAcpiCores;
+    UINT32                      NumAcpiCores;
 
     /* Local APIC address (common for each core) */
-    EFI_PHYSICAL_ADDRESS    LapicAddress;
+    EFI_PHYSICAL_ADDRESS        LapicAddress;
 
     /* The physical address of the boot strapper code (< 1 MiB) */
-    EFI_PHYSICAL_ADDRESS    ApBootCodePage;
+    EFI_PHYSICAL_ADDRESS        ApBootCodePage;
 
     /* The physical address of the trigger page (< 1 MiB) */
-    EFI_PHYSICAL_ADDRESS    ApTriggerPage;
+    EFI_PHYSICAL_ADDRESS        ApTriggerPage;
 
     /*
     * The physical address of a work page for the real mode part of
     * the code bootstrapper. < 1MiB
     */
-    EFI_PHYSICAL_ADDRESS    ApRealModeWorkPage;
+    EFI_PHYSICAL_ADDRESS        ApRealModeWorkPage;
+
+    /* The esimtated TSC frequency */
+    UINT64                      EstimatedTscFrequency;
+
+    /* Some details about the hosting application */
+    EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
+
+    /* Set if file access is available */
+    BOOLEAN                     FileAccessOK;
+
+    /* The root device of the device from which this program was loaded */
+    EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *RootDevice;
+
+    /* The root directory of the device from which this program was loaded */
+    EFI_FILE_PROTOCOL           *RootDirectory;
+
+    /* The directory created to house the artifacts from the test */
+    EFI_FILE_PROTOCOL           *TestDirectory;
+
+    /* The log file handle */
+    EFI_FILE_PROTOCOL           *LogFile;
 
     /* The array containing basic info about each enumerated core */
     VM_PERF_EVAL_ENUM_CPU   AcpiCores[VM_PERF_MAX_CORES];
 }   VM_PERF_EVAL_CTX;
+
+/**
+ * Simple structure to hold the reference to the
+ * FILE_PROTOCOL instance used to access a file.
+*/
+typedef struct {
+    EFI_FILE_PROTOCOL   *File;
+}   VM_PERF_FILE;
 
 /**
 * Initializes the VmPerfEval context for later use
@@ -290,9 +321,9 @@ typedef struct {
 * cores on the system. It will also allocate memory for the
 * AP bootstrapper code and associated data structures.
 *
-* @param  Ctx     Pointer to the Vm Perf Eval context
+* @param  Ctx           Pointer to the Vm Perf Eval context
 *
-* @return BOOLEAN   Indicates whether initialization completed successfully
+* @return BOOLEAN       Indicates whether initialization completed successfully
 */
 BOOLEAN EFIAPI VmPerfInitialize(
     IN VM_PERF_EVAL_CTX *Ctx
@@ -450,6 +481,157 @@ UINT64 EFIAPI VmPerfGetEnumeratedCoreMask(
 */
 EFI_PHYSICAL_ADDRESS EFIAPI VmPerfMakeRealModeEntryPoint(
     IN UINT64 RealModeAddress
+);
+
+/* VERY basic file access to dump test result data to the volume */
+
+/**
+ * @brief Opens a new file for writing within the testing directory
+ *
+ * This function will take numerous parameters to form a unique and
+ * identifiable filename to house test result data.
+ *
+ * The core information can be omitted by setting CoreIndex to
+ * VM_PERF_MAX_CORES.
+ *
+ * The suffix portion (Suffix and Suffix number) can be omitted by
+ * setting TestSuffix to NULL.
+ *
+ * Example (filename):
+ * <testName>_c<CoreIndex>_apic<ApicID>_<suffix><Number>
+ *
+ * @param   Ctx         Pointer to the Vm Perf Eval context
+ * @param   File        Pointer to a file handle structure
+ * @param   CoreIndex   The core index the data comes from
+ * @param   TestName    A test name (included in the file name)
+ * @param   TestSuffix  A small suffix for this particular file
+ * @param   SuffixIndex A number to append right after the suffix
+ * @param   Extension   3 letter extension to use for the file
+ *
+ * @returns BOOLEAN     TRUE if file has been opened OK, FALSE otherwise
+ *
+*/
+BOOLEAN EFIAPI VmPerfOpenFileForWrite(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN VM_PERF_FILE *File,
+    IN UINT32 CoreIndex,
+    IN CHAR16 *TestName,
+    IN CHAR16 *TestSuffix,
+    IN UINT32 SuffixIndex,
+    IN CHAR16 *Extension
+);
+
+/**
+ * @brief Opens a new file for read access
+ *
+ * This will be open relative to the base directory of the device
+ * from which the program has been loaded from. This is different
+ * from the behaviour exhibited by the OpenForWrite function.
+ *
+ * @param   Ctx         Pointer to the Vm Perf Eval context
+ * @param   File        Pointer to a file handle structure
+ * @param   FilePath    File path to open
+ *
+ * @returns TRUE if the file was opened OK, FALSE otherwise
+*/
+BOOLEAN EFIAPI VmPerfOpenFileForRead(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN VM_PERF_FILE *File,
+    IN CHAR16 *FilePath
+);
+
+/**
+ * @brief Closes a previously open file
+ *
+ * @param   Ctx         Pointer to the Vm Perf Eval context
+ * @param   File        Pointer to a file handle
+ *
+ * @returns BOOLEAN     TRUE if file has been closed OK, FALSE otherwise
+*/
+BOOLEAN EFIAPI VmPerfCloseFile(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN VM_PERF_FILE *File
+);
+
+/**
+ * @brief Write data to a file previously opened for write access
+ *
+ * @param   Ctx             Pointer to the Vm Perf Eval context
+ * @param   File            Pointer to a file handle to write to
+ * @param   Buffer          Pointer to the buffer
+ * @param   BytesToWrite    Number of bytes to write
+ *
+ * @returns UINTN           The number of bytes actually written to the file
+*/
+UINTN EFIAPI VmPerfWriteFile(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN VM_PERF_FILE *File,
+    IN VOID *Buffer,
+    IN UINT32 BytesToWrite
+);
+
+/**
+ * @brief Read data from a file
+ *
+ * @param   Ctx             Pointer to the Vm Perf Eval context
+ * @param   File            Pointer to a file handle to read from
+ * @param   Buffer          Pointer to the buffer
+ * @param   BytesToRead     Number of bytes to read (size of buffer)
+ *
+ * @returns UINTN           The number of bytes actually read into the buffer
+*/
+UINTN EFIAPI VmPerfReadFile(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN VM_PERF_FILE *File,
+    IN VOID *Buffer,
+    IN UINT32 BytesToRead
+);
+
+/**
+ * @brief Write a formatted string to a file
+ *
+ * @param   Ctx             Pointer to the Vm Perf Eval context
+ * @param   File            Pointer to the file handle to write to
+ * @param   Format          Format string
+ * @param   ...             Remaining arguments
+ *
+ * @returns UINTN           The number of bytes actually written to the file
+*/
+UINTN EFIAPI VmPerfWriteFileF(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN VM_PERF_FILE *File,
+    IN CHAR16 *Format,
+    ...
+);
+
+/**
+ * @brief Flush file buffers (for files opened for write access)
+ *
+ * Flushes the file buffers associated with File.
+ *
+ * @param   Ctx             Pointer to the Vm Perf Eval context
+ * @param   File            Pointer to the file handle to flush
+*/
+VOID EFIAPI VmPerfFlushFile(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN VM_PERF_FILE *File
+);
+
+/**
+ * @brief Flush file buffers (for files opened for write access)
+ *
+ * Flushes the file buffers associated with File.
+ *
+ * @param   Ctx             Pointer to the Vm Perf Eval context
+ * @param   LogLevel        The log level associated with this message
+ * @param   Msg             The message (and format)
+ * @param   ...             The (optional and variable number) format arguments
+*/
+VOID EFIAPI VmPerfLog(
+    IN VM_PERF_EVAL_CTX *Ctx,
+    IN UINT32 LogLevel,
+    IN CHAR16 *Msg,
+    ...
 );
 
 #endif      /* __VM_PERF_EVAL_LIB_H__ */

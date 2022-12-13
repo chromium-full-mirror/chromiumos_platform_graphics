@@ -8,6 +8,7 @@
 #include <Uefi.h>
 #include <VmPerfEvalLib.h>
 
+#define         VMPERF_LOG_FILE_NAME                    L"Log.txt"
 /*
 * Total number of stack pages (including guard memory)
 * Half will go to guard pages and half will be used
@@ -79,4 +80,12 @@ VM_PERF_CORE_STATUS VmPerfEvalProbeStatus(
 UINT64 VmPerfEvalGetReturnFromPCIB(
     IN VM_PERF_EVAL_CTX *Ctx,
     IN UINT32 Index
+);
+
+BOOLEAN VmPerfLoggingInit(
+    IN VM_PERF_EVAL_CTX *Ctx
+);
+
+VOID VmPerfLoggingShutdown(
+    IN VM_PERF_EVAL_CTX *Ctx
 );

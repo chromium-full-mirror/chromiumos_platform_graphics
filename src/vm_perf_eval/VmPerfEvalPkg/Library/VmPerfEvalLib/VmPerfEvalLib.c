@@ -11,6 +11,8 @@
 #include <Library/UefiLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/PrintLib.h>
 #include "VmPerfEvalInternal.h"
 
 /* Boot strapper code for the AP's on the system */
@@ -18,11 +20,142 @@ static const UINT8 ApBootCode[] = {
 #include "ApBoot/ApBootCode.h"
 };
 
+static
+VOID
+ReplaceInstanceInString(
+    CHAR16 *String,
+    CHAR16 *MatchCharacter,
+    CHAR16 *NewCharacter
+)
+{
+    CHAR16 *CurrentStringPtr = String;
+
+    while ((CurrentStringPtr = StrStr(CurrentStringPtr, MatchCharacter))) {
+        *CurrentStringPtr = *NewCharacter;
+        /* Replace the character */
+    }
+}
+
+static
+VOID
+VmPerfSetupGetTestDirectoryName(
+    CHAR16 *OutputBuffer,
+    UINTN   OutputBufferLength
+)
+{
+    EFI_STATUS Status;
+    EFI_TIME CurrentTime;
+
+    Status = gRT->GetTime(&CurrentTime, NULL);
+    if (Status != EFI_SUCCESS) {
+        /*
+        * TODO: Use an alternate directory name, like TESTnnnn
+        */
+        StrCpyS(OutputBuffer, OutputBufferLength, L"UNNAMED");
+        return;
+    }
+
+    UnicodeSPrint(OutputBuffer, OutputBufferLength, L"%t", &CurrentTime);
+
+    ReplaceInstanceInString(OutputBuffer, L" ", L"_");
+    ReplaceInstanceInString(OutputBuffer, L":", L"_");
+    ReplaceInstanceInString(OutputBuffer, L"/", L"_");
+    ReplaceInstanceInString(OutputBuffer, L"\\", L"_");
+}
+
+static
+BOOLEAN VmPerfSetupFilesystemAcess(
+    IN VM_PERF_EVAL_CTX *Ctx
+)
+{
+    EFI_STATUS Status;
+    CHAR16 DirectoryName[128];
+    EFI_GUID SimpleFileSystemGuid = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID;
+
+    Ctx->RootDevice = NULL;
+    Ctx->RootDirectory = NULL;
+    Ctx->TestDirectory = NULL;
+    Ctx->FileAccessOK = FALSE;
+
+    /*
+    * Open up the Simple file system protocol for the device
+    * on which this program image has been loaded from.
+    */
+    Status = gBS->OpenProtocol(
+        Ctx->LoadedImage->DeviceHandle,
+        &SimpleFileSystemGuid,
+        (VOID **)&Ctx->RootDevice,
+        gImageHandle, NULL,
+        EFI_OPEN_PROTOCOL_GET_PROTOCOL
+    );
+
+    if (Status != EFI_SUCCESS) {
+        return FALSE;
+    }
+
+    /* Open the root volume here */
+    Status = Ctx->RootDevice->OpenVolume(Ctx->RootDevice, &Ctx->RootDirectory);
+    if (Status != EFI_SUCCESS) {
+        /* We need this to perform any file system access */
+        return FALSE;
+    }
+
+    VmPerfSetupGetTestDirectoryName(
+        DirectoryName,
+        sizeof(DirectoryName)
+    );
+
+    /* Now create the directory for all test output files */
+    Status = Ctx->RootDirectory->Open(
+        Ctx->RootDirectory,
+        &Ctx->TestDirectory,
+        DirectoryName,
+        EFI_FILE_MODE_CREATE | EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
+        EFI_FILE_DIRECTORY
+    );
+
+    if (Status != EFI_SUCCESS) {
+        /* We also need a directory (to keep things organized) */
+        return FALSE;
+    }
+
+    Ctx->TestDirectory->Flush(Ctx->TestDirectory);
+
+    Ctx->FileAccessOK = TRUE;
+    return TRUE;
+}
+
 BOOLEAN EFIAPI VmPerfInitialize(
     IN VM_PERF_EVAL_CTX *Ctx
 )
 {
     EFI_STATUS status;
+    EFI_GUID LoadedImageGuid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
+
+    status = gBS->OpenProtocol(
+        gImageHandle,
+        &LoadedImageGuid,
+        (VOID **)&Ctx->LoadedImage,
+        gImageHandle,
+        NULL,
+        EFI_OPEN_PROTOCOL_GET_PROTOCOL
+    );
+
+    if (status != EFI_SUCCESS) {
+        Print(L"WARNING: Could not retrieve LoadedImageProtocol!\n");
+        return FALSE;
+    }
+
+    /* Must be setup first */
+    if (!VmPerfSetupFilesystemAcess(Ctx)) {
+        Print(L"WARNING: Could not retrieve simple file system protocol!\n");
+        Print(L"WARNING: File logging and output will be disabled!.\n");
+    }
+
+    if (!VmPerfLoggingInit(Ctx)) {
+        Print(L"WARNING: Logging initialization failed.\n");
+        Print(L"WARNING: Log output will not be available.\n");
+    }
 
     Ctx->ApBootCodePage = BASE_1MB - 1;
     Ctx->ApTriggerPage = BASE_1MB - 1;
@@ -155,6 +288,8 @@ VOID EFIAPI VmPerfShutdown(
     */
     UINT32 i;
 
+    VmPerfLoggingShutdown(Ctx);
+
     for (i = 0; i < Ctx->NumAcpiCores; i++) {
         VmPerfEvalShutdownCpu(Ctx, i);
     }
@@ -163,6 +298,16 @@ VOID EFIAPI VmPerfShutdown(
     gBS->FreePages(Ctx->ApBootCodePage, 1);
     gBS->FreePages(Ctx->ApTriggerPage, 1);
     gBS->FreePages(Ctx->ApRealModeWorkPage, 1);
+
+    /* Release our directory handles */
+    if (Ctx->TestDirectory)
+        Ctx->TestDirectory->Close(Ctx->TestDirectory);
+
+    if (Ctx->RootDirectory)
+        Ctx->RootDirectory->Close(Ctx->RootDirectory);
+
+    Ctx->TestDirectory = NULL;
+    Ctx->RootDirectory = NULL;
 }
 
 VOID* EFIAPI VmPerfGetApPage(

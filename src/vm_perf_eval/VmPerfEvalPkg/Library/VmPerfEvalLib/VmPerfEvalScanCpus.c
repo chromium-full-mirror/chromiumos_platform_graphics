@@ -9,6 +9,7 @@
 #include <VmPerfEvalLib.h>
 #include <Library/BaseLib.h>
 #include <Library/UefiLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 #include <IndustryStandard/Acpi10.h>
 #include <VmPerfEvalApicLib.h>
 
@@ -173,11 +174,17 @@ static UINT32 ScanCpus(
     return CpuCount;
 }
 
+#define TSC_SAMPLE_FREQ_COUNT 4
+
 UINT32 VmPerfEvalScanCpus(
     IN VM_PERF_EVAL_CTX *Ctx
 )
 {
     EFI_ACPI_COMMON_HEADER *ApicTable;
+    UINT64 Tsc0, Tsc1;
+    UINT64 Freqs[TSC_SAMPLE_FREQ_COUNT];
+    UINT64 SumFreqs = 0;
+    UINT32 i;
 
     /*
     * If we can't find an APIC table, we cannot make use
@@ -187,5 +194,16 @@ UINT32 VmPerfEvalScanCpus(
     if (!ApicTable)
         return 0;
 
+    /* Estimate the TSC frequency */
+    for (i = 0 ; i < TSC_SAMPLE_FREQ_COUNT; i++) {
+        Tsc0 = AsmReadTsc();
+        gBS->Stall(200000);
+        Tsc1 = AsmReadTsc();
+
+        Freqs[i] = (Tsc1 - Tsc0) * 5;
+        SumFreqs += Freqs[i];
+    }
+
+    Ctx->EstimatedTscFrequency = (SumFreqs / TSC_SAMPLE_FREQ_COUNT);
     return ScanCpus(Ctx, ApicTable);
 }
