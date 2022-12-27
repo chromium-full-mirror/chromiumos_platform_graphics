@@ -550,9 +550,6 @@ graphics.OpenclCts.integer_ops_unary_ops_full:
 graphics.OpenclCts.integer_ops_unary_ops_increment:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.integer_ops_ushort_compare:
-  expectation: FAIL
-  since_build: R109-15232.0.0
 graphics.OpenclCts.integer_ops_ushort_logic:
   expectation: FAIL
   since_build: R109-15232.0.0
@@ -604,15 +601,6 @@ graphics.OpenclCts.samplerless_reads_1d_cl_float:
 graphics.OpenclCts.samplerless_reads_1d_cl_half_float:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_signed_int8:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_signed_int16:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_signed_int32:
-  expectation: FAIL
-  since_build: R109-15232.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int8:
   expectation: FAIL
   since_build: R109-15232.0.0
@@ -628,15 +616,9 @@ graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int16:
 graphics.OpenclCts.samplerless_reads_1d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unsigned_int8:
+graphics.OpenclCts.samplerless_reads_3d_cl_half_float:
   expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unsigned_int16:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unsigned_int32:
-  expectation: FAIL
-  since_build: R109-15232.0.0
+  since_build: R111-15291.0.0
 graphics.OpenclCts.select_select_long_long:
   expectation: FAIL
   since_build: R109-15232.0.0

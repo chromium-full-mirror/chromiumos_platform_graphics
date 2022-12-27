@@ -17,6 +17,9 @@ graphics.OpenclCts.api_get_kernel_arg_info:
 graphics.OpenclCts.api_kernel_arg_multi_setup_random:
   expectation: FAIL
   since_build: R109-15232.0.0
+graphics.OpenclCts.api_min_image_formats:
+  expectation: FAIL
+  since_build: R111-15291.0.0
 graphics.OpenclCts.api_min_max_image_buffer_size:
   expectation: FAIL
   tickets:
@@ -62,9 +65,6 @@ graphics.OpenclCts.basic_explicit_s2v_ulong:
   expectation: FAIL
   since_build: R109-15232.0.0
 graphics.OpenclCts.basic_hiloeo:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.basic_image_r8:
   expectation: FAIL
   since_build: R109-15232.0.0
 graphics.OpenclCts.basic_imagearraycopy:
@@ -387,14 +387,6 @@ graphics.OpenclCts.cl_copy_images_2dto3d_cl_half_float:
 graphics.OpenclCts.cl_copy_images_3dto2darray_cl_half_float:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.compiler_options_include_directory:
-  expectation: FAIL
-  tickets:
-  - b/227136133
-graphics.OpenclCts.compiler_preprocessor_include:
-  expectation: FAIL
-  tickets:
-  - b/227136133
 graphics.OpenclCts.compiler_unload_build_threaded:
   expectation: FAIL
   tickets:
@@ -875,15 +867,6 @@ graphics.OpenclCts.samplerless_reads_1d_cl_float:
 graphics.OpenclCts.samplerless_reads_1d_cl_half_float:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_signed_int8:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_signed_int16:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_signed_int32:
-  expectation: FAIL
-  since_build: R109-15232.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int8:
   expectation: FAIL
   since_build: R109-15232.0.0
@@ -896,15 +879,9 @@ graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int8:
 graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int16:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unsigned_int8:
+graphics.OpenclCts.samplerless_reads_1d_cl_unorm_short_565:
   expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unsigned_int16:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unsigned_int32:
-  expectation: FAIL
-  since_build: R109-15232.0.0
+  since_build: R111-15291.0.0
 graphics.OpenclCts.select_select_char_char:
   expectation: FAIL
   since_build: R109-15232.0.0
