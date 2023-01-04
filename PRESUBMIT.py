@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Copyright 2020 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 """Hook to stop people from running `git cl`."""
 
-from __future__ import print_function
-
 import sys
 
 
+USE_PYTHON3 = True
+
 def CheckChangeOnUpload(_input_api, _output_api):
-  print('ERROR: CrOS repos use `repo upload`, not `git cl upload`.',
-        file=sys.stderr)
-  sys.exit(1)
+    """Ensure 'repo upload' is used in lieu of 'git cl upload'"""
+    print('ERROR: CrOS repos use `repo upload`, not `git cl upload`.',
+          file=sys.stderr)
+    sys.exit(1)
