@@ -121,15 +121,15 @@ graphics.OpenclCts.bruteforce_log:
   expectation: FAIL
   tickets:
   - b/227133190
+graphics.OpenclCts.bruteforce_log10:
+  expectation: FAIL
+  tickets:
+  - b/227133190
 graphics.OpenclCts.bruteforce_log1p:
   expectation: FAIL
   tickets:
   - b/227133190
 graphics.OpenclCts.bruteforce_log2:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_log10:
   expectation: FAIL
   tickets:
   - b/227133190

@@ -248,11 +248,6 @@ graphics.OpenclCts.samplerless_reads_1d_cl_half_float:
   tickets:
   - b/253999427
   since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_signed_int8:
-  expectation: FAIL
-  tickets:
-  - b/253999427
-  since_build: R109-15229.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_signed_int16:
   expectation: FAIL
   tickets:
@@ -263,7 +258,7 @@ graphics.OpenclCts.samplerless_reads_1d_cl_signed_int32:
   tickets:
   - b/253999427
   since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int8:
+graphics.OpenclCts.samplerless_reads_1d_cl_signed_int8:
   expectation: FAIL
   tickets:
   - b/253999427
@@ -273,7 +268,7 @@ graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int16:
   tickets:
   - b/253999427
   since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int8:
+graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int8:
   expectation: FAIL
   tickets:
   - b/253999427
@@ -283,12 +278,12 @@ graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int16:
   tickets:
   - b/253999427
   since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_short_565:
+graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int8:
   expectation: FAIL
   tickets:
   - b/253999427
   since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unsigned_int8:
+graphics.OpenclCts.samplerless_reads_1d_cl_unorm_short_565:
   expectation: FAIL
   tickets:
   - b/253999427
@@ -299,6 +294,11 @@ graphics.OpenclCts.samplerless_reads_1d_cl_unsigned_int16:
   - b/253999427
   since_build: R109-15229.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_unsigned_int32:
+  expectation: FAIL
+  tickets:
+  - b/253999427
+  since_build: R109-15229.0.0
+graphics.OpenclCts.samplerless_reads_1d_cl_unsigned_int8:
   expectation: FAIL
   tickets:
   - b/253999427

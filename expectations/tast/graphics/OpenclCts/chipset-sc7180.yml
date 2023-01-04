@@ -134,10 +134,10 @@ graphics.OpenclCts.basic_prefetch:
 graphics.OpenclCts.basic_readimage:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_readimage_int16:
+graphics.OpenclCts.basic_readimage3d_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_readimage3d_int16:
+graphics.OpenclCts.basic_readimage_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.basic_vector_creation:
@@ -1049,16 +1049,16 @@ graphics.OpenclCts.samplerless_reads_1d_cl_float:
 graphics.OpenclCts.samplerless_reads_1d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int8:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int8:
+graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int8:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R110-15241.0.0
+graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int8:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_unorm_short_565:

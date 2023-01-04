@@ -726,8 +726,17 @@ func main() {
 		}
 	}
 
+	// Copy expectations to MapSlice and sort them
+	mapSliceExp := yaml.MapSlice{}
+	for testName, expectation := range yamlExpectations {
+		mapSliceExp = append(mapSliceExp, yaml.MapItem{testName, expectation})
+	}
+	sort.Slice(mapSliceExp, func(i, j int) bool {
+		return mapSliceExp[i].Key.(string) < mapSliceExp[j].Key.(string)
+	})
+
 	// Writes the updated YAML
-	contents, err := yaml.Marshal(yamlExpectations)
+	contents, err := yaml.Marshal(mapSliceExp)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)

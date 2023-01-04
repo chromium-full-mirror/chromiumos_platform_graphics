@@ -259,16 +259,16 @@ graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_float:
 graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_snorm_int8:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_snorm_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_unorm_int8:
+graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_snorm_int8:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R110-15241.0.0
+graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_unorm_int8:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.cl_copy_images_2dto2darray_cl_float:
@@ -286,16 +286,16 @@ graphics.OpenclCts.cl_copy_images_2dto3d_cl_float:
 graphics.OpenclCts.cl_copy_images_2dto3d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.cl_copy_images_2dto3d_cl_snorm_int8:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.cl_copy_images_2dto3d_cl_snorm_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.cl_copy_images_2dto3d_cl_unorm_int8:
+graphics.OpenclCts.cl_copy_images_2dto3d_cl_snorm_int8:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.cl_copy_images_2dto3d_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R110-15241.0.0
+graphics.OpenclCts.cl_copy_images_2dto3d_cl_unorm_int8:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.cl_copy_images_3dto2darray_cl_float:
@@ -458,10 +458,10 @@ graphics.OpenclCts.image_streams_3d_cl_float:
 graphics.OpenclCts.image_streams_3d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.image_streams_3d_cl_unorm_int8:
+graphics.OpenclCts.image_streams_3d_cl_unorm_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.image_streams_3d_cl_unorm_int16:
+graphics.OpenclCts.image_streams_3d_cl_unorm_int8:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
@@ -647,16 +647,16 @@ graphics.OpenclCts.samplerless_reads_1d_cl_float:
 graphics.OpenclCts.samplerless_reads_1d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int8:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int8:
+graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int8:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R110-15241.0.0
+graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int8:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_unorm_short_565:
