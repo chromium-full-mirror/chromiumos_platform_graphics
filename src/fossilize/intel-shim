@@ -19,11 +19,16 @@ base="$(dirname "$0")/${base}"
 basedir="${base%/*}"
 
 gpu="tgl"
+device_id=""
 
 while true; do
   case "$1" in
     --gpu)
       gpu="$2"
+      shift 2
+      ;;
+    --device-id)
+      device_id="$2"
       shift 2
       ;;
     --cache)
@@ -49,7 +54,14 @@ while true; do
   esac
 done
 
-export INTEL_STUB_GPU_PLATFORM="${gpu}"
+if [ -n "${device_id}" ]; then
+  export INTEL_STUB_GPU_DEVICE_ID="${device_id}"
+  if [ -n "${gpu}" ]; then
+    echo "WARNING: --gpu flag is ignored because --device-id is set"
+  fi
+else
+  export INTEL_STUB_GPU_PLATFORM="${gpu}"
+fi
 export LDDTREE_PRELOAD="${basedir}/lib/libintel_noop_drm_shim.so"
 export VK_ICD_FILENAMES="${basedir}/share/vulkan/icd.d/intel_icd.x86_64.json"
 export MESA_SHADER_CACHE_DISABLE=false
