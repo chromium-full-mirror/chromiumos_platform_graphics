@@ -1,0 +1,29 @@
+## @file
+# Copyright 2023 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+##
+
+[Defines]
+   INF_VERSION              = 0x00010005
+   BASE_NAME                = VmPerfEvalFullLoad
+   FILE_GUID                = BBDB6827-764A-4646-8C46-899BCD1B1604
+   MODULE_TYPE              = UEFI_APPLICATION
+   VERSION_STRING           = 1.0
+   ENTRY_POINT              = UefiMain
+
+
+[Sources]
+   VmPerfFullLoad.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ShellPkg/ShellPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  VmPerfEvalPkg/VmPerfEvalPkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[LibraryClasses]
+ UefiApplicationEntryPoint
+ UefiLib
+ VmPerfEvalLib
