@@ -21,6 +21,7 @@
    VmPerfEvalApicLib.c
    VmPerfFileStream.c
    VmPerfLogging.c
+   VmPerfOptionsParse.c
 
 [Packages]
   MdePkg/MdePkg.dec

@@ -634,4 +634,30 @@ VOID EFIAPI VmPerfLog(
     ...
 );
 
+/**
+ * @brief Load an options file (can be used to configure test parameters)
+ *
+ * @param   Ctx             Pointer to the Vm Perf Eval context
+ * @param   Name            The name of the options file (<Name>.opt in root)
+ *
+ * @returns BOOLEAN         TRUE if the file loaded OK, false otherwise
+*/
+BOOLEAN EFIAPI VmPerfLoadOptions(
+    VM_PERF_EVAL_CTX *Ctx,
+    CHAR16 *Name
+);
+
+BOOLEAN EFIAPI VmPerfGetOptionUintn(
+    VM_PERF_EVAL_CTX *Ctx,
+    CHAR8 *OptionName,
+    UINTN *OptionValue
+);
+
+BOOLEAN EFIAPI VmPerfGetOptionString(
+    VM_PERF_EVAL_CTX *Ctx,
+    CHAR8 *OptionName,
+    CHAR8 *OptionStringValue,
+    UINT32 OptionStringLength
+);
+
 #endif      /* __VM_PERF_EVAL_LIB_H__ */
