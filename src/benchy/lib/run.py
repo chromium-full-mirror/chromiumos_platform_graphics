@@ -70,6 +70,10 @@ def add_subparser(subparsers):
                            help='input plan filename')
     subparser.add_argument('--noparallel', dest='parallel', action='store_false',
                            help='do not test in parallel')
+    subparser.add_argument('--retry',
+                           type=int,
+                           default=3,
+                           help='retry a failed workload up to `retry` times')
     subparser.set_defaults(func=run)
 
 def perform_call(execution_mode, command_line, cmd_args, stdout=False):
@@ -218,6 +222,7 @@ class JobInfo:
     WORKLOAD = 'workload'
     PARAMETER = 'parameter'
     EXECUTION = 'execution'
+    ITERATION = 'iteration'
 
     def __init__(self, job):
         self.fields = []
@@ -288,13 +293,12 @@ class JobOutput:
         """Creates a new handle into the JobOutput for tracking iteration."""
         return JobInfo(self)
 
-    def get_filename(self, job_info, tag):
+    def get_filename(self, job_info, tag, run_index=None):
         """Determines filename for tag given job_info."""
         identifier = '-'.join(job_info.make_file_parts())
-        if identifier:
-            file = f'{tag[0]}-{identifier}{tag[1]}'
-        else:
-            file = f'{tag[0]}{tag[1]}'
+        identifier_tag = f'-{identifier}' if identifier else ''
+        run_index_tag = f'-repeat_{run_index}' if run_index is not None else ''
+        file =  f'{tag[0]}{identifier_tag}{run_index_tag}{tag[1]}'
         return os.path.join(self.output_dir, file)
 
     def exists(self, job_info, tag):
@@ -308,9 +312,9 @@ class JobOutput:
             logging.info('reading %s%s from %s', tag[0], tag[1], filename)
             return f.read()
 
-    def write_file(self, job_info, tag, data):
+    def write_file(self, job_info, tag, data, run_index=None):
         """Writes the file specified by job_info and tag."""
-        filename = self.get_filename(job_info, tag)
+        filename = self.get_filename(job_info, tag, run_index)
         with open(filename, 'w') as f:
             logging.info('writing %s%s to %s', tag[0], tag[1], filename)
             f.write(data)
@@ -346,7 +350,7 @@ class TastRunner:
         self.test = test
         self.tast_parameter = tast_parameter
 
-    def run(self, force=False, dry_run=False):
+    def run(self, force=False, dry_run=False, run_index=None):
         """Runs the tast test."""
         tast_dir = None
         if not force and self.job.exists(self.job_info, TAST_LOG_TAG):
@@ -359,7 +363,6 @@ class TastRunner:
                    '-buildbundle=crosint '
                    '-var=borealis.keepState=true '
                    '-var=borealis.noShutDown=1 '
-                   '-var=borealis.Benchmark.repeatCount=5 '
                    f'{tast_parameter} '
                    f'{self.hostname} {self.test}')
             logging.info('running test: %s', cmd)
@@ -367,7 +370,7 @@ class TastRunner:
                 tast_log = ''
             else:
                 tast_log = local_call(cmd, stdout=True)
-            self.job.write_file(self.job_info, TAST_LOG_TAG, tast_log)
+            self.job.write_file(self.job_info, TAST_LOG_TAG, tast_log, run_index)
             tast_dir = find_tast_results_dir(tast_log)
 
         return TastResult(self.test, tast_log, tast_dir)
@@ -460,12 +463,14 @@ class Workload:
         job_info.add_name(JobInfo.WORKLOAD, self.pb.name)
         self.tast_parameter = tast_parameter
 
-    def run(self, job, job_info):
+    def run(self, job, job_info, run_index=None):
         """Run a workload."""
+        if run_index is not None:
+            job_info.add_name(JobInfo.ITERATION, str(run_index), path_component=False)
         cmd_args = job_info.make_args()
         runner = TastRunner(job, job_info, cmd_args['device_hostname'],
                             self.pb.name, self.tast_parameter)
-        return runner.run(dry_run=False)
+        return runner.run(dry_run=False, run_index=run_index)
 
     def generate_result(self,
                         r,
@@ -507,30 +512,20 @@ class Workload:
             r.trace.value = trace
             for metric, values in metrics.items():
                 larger_is_better = values['improvement_direction'] == 'up'
-                # For benchmark mode games run in tuning mode, we repeat each game multiple
-                # times, the metrics in results-chart.json will be an array containing results
-                # for each run. And we generate the average of values from multiple runs as the
-                # final metric.
-                if r.benchmark == "benchmark_mode_game":
-                    vs = values['values']
-                    if len(vs) == 0:
-                        continue
-                    value = sum(vs) / len(vs)
-                    metric = f'mean_{metric}'
-                else:
-                    value = values['value']
-
+                vs = values['values'][0] if r.benchmark == "benchmark_mode_game" \
+                                         else values['value']
                 r.metrics.add(name=metric,
-                            index=0,
-                            value=value,
-                            units=values['units'],
-                            larger_is_better=larger_is_better,
-                            externally_gathered=False)
+                        index=0,
+                        value=vs,
+                        units=values['units'],
+                        larger_is_better=larger_is_better,
+                        externally_gathered=False)
+                metric = f'{metric}'
 
         if r.benchmark == "benchmark_mode_game":
             # For benchmark mode games, the in-game metrics are of diverse formats,
             # some of the format (min_fps, avg_fps, max_fps), some can be (avg_fps, fps_variability)
-            r.primary_metric_name = 'mean_avg_fps'
+            r.primary_metric_name = 'avg_fps'
         else:
             # For traces, the metrics are of uniform format.
             r.primary_metric_name = 'fps'
@@ -538,7 +533,6 @@ class Workload:
         # Add the labels.
         for (grouping, name), value in labels.items():
             r.labels.add(name=name, value=value, grouping=grouping)
-        return json_format.MessageToJson(r)
 
 def run(args):
     """Run a plan."""
@@ -546,9 +540,9 @@ def run(args):
     logging.info('read plan')
     logging.info(plan)
 
-    execute(plan, args.output, args.parallel)
+    execute(plan, args.output, args.parallel, args.retry)
 
-def execute(plan, output_dir, parallel=False):
+def execute(plan, output_dir, parallel=False, retry=1):
     """Execute a plan."""
     logging.info('executing plan, writing job results to %s', output_dir)
 
@@ -590,7 +584,7 @@ def execute(plan, output_dir, parallel=False):
         else:
             mapfunc = map
         results = mapfunc(lambda x: execute_device(plan, param_combinations,
-                                                   x, job, job_info.copy()),
+                                                   x, job, job_info.copy(), retry),
                           plan.devices)
 
     # Flatten results from list of lists into a  flat list.
@@ -598,7 +592,7 @@ def execute(plan, output_dir, parallel=False):
 
     logging.info('%d total runs -> run label: %s', len(results), run_label)
 
-def execute_device(plan, param_combinations, device_pb, job, job_info):
+def execute_device(plan, param_combinations, device_pb, job, job_info, retry):
     """Execute the plan for a given device."""
     _ = Device(device_pb, job_info)
     logging.debug('> device %s', job_info.make_id())
@@ -608,7 +602,7 @@ def execute_device(plan, param_combinations, device_pb, job, job_info):
     results = []
     for build_pb in plan.builds:
         results.extend(execute_build(plan, param_combinations,
-                                     build_pb, job, job_info.copy(), machine))
+                                     build_pb, job, job_info.copy(), machine, retry))
 
     # Gather all the results in a format suitable for uploading.
     result_list = result_pb2.ResultList()
@@ -619,7 +613,7 @@ def execute_device(plan, param_combinations, device_pb, job, job_info):
     logging.debug('< device %s', job_info.make_id())
     return results
 
-def execute_build(plan, param_combinations, build_pb, job, job_info, machine):
+def execute_build(plan, param_combinations, build_pb, job, job_info, machine, retry):
     """Execute the plan for a given build."""
     build = Build(build_pb, job_info)
     logging.debug('>> build %s', job_info.make_id())
@@ -635,15 +629,15 @@ def execute_build(plan, param_combinations, build_pb, job, job_info, machine):
         for workload_pb in plan.workloads:
             result = execute_workload_with_params(workload_pb, parameter_set,
                                                   job, job_info.copy(),
-                                                  machine, software_config)
+                                                  machine, software_config, retry)
             if result:
-                results.append(result)
+                results.extend(result)
 
     logging.debug('<< build %s', job_info.make_id())
     return results
 
 def execute_workload_with_params(workload_pb, parameter_set,
-                                 job, job_info, machine, software_config):
+                                 job, job_info, machine, software_config, retry):
     """Execute the plan for a given workload and set of parameters."""
 
     # Set each parameter on the device (and fill in the job_info).
@@ -660,34 +654,32 @@ def execute_workload_with_params(workload_pb, parameter_set,
 
     # TODO(davidriley): This should handle when old results are used
     # (and end_time).
-    start_time = datetime.datetime.now()
 
-    # Run the test (or used the cached results).
-    # TODO(davidriley): This should support retrying of failed tests.
-    tast_result = workload.run(job, job_info)
-
-    # TODO(davidriley): The results chart shouldn't need to be gathered
-    # and saved each time.  In particular if the tast results directory
-    # disappears (eg when moving to temporary results dir), then this will
-    # start failing.
-    results_chart = tast_result.get_file(RESULTS_CHART_JSON)
-    if results_chart:
-        job.write_file(job_info, TAST_RESULTS_TAG, results_chart)
-    else:
-        return None
-
-    end_time = datetime.datetime.now()
-
-    # Generate an entry for the results database.
-    result = result_pb2.Result()
-    result_json = workload.generate_result(result,
-                                           start_time,
-                                           end_time,
-                                           machine,
-                                           software_config,
-                                           results_chart,
-                                           job_info.make_result_labels())
-    job.write_file(job_info, RESULTS_DB_RESULT_TAG, result_json)
+    results = []
+    for repeat_idx in range(workload_pb.repeat_count):
+        for retry_index in range(retry):
+            start_time = datetime.datetime.now()
+            tast_result = workload.run(job, job_info, repeat_idx)
+            # TODO(davidriley): The results chart shouldn't need to be gathered
+            # and saved each time.  In particular if the tast results directory
+            # disappears (eg when moving to temporary results dir), then this will
+            # start failing.
+            results_chart = tast_result.get_file(RESULTS_CHART_JSON)
+            if results_chart:
+                job.write_file(job_info, TAST_RESULTS_TAG, results_chart, repeat_idx)
+                result = result_pb2.Result()
+                end_time = datetime.datetime.now()
+                workload.generate_result(result,
+                                        start_time,
+                                        end_time,
+                                        machine,
+                                        software_config,
+                                        results_chart,
+                                        job_info.make_result_labels())
+                results.append(result)
+                break
+            else:
+                logging.warn('retrying %s, retry idx: %d', workload_pb.name, retry_index)
 
     logging.debug('<<< workload %s', job_info.make_id())
-    return result
+    return results

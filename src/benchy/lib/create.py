@@ -18,6 +18,8 @@ def add_subparser(subparsers):
                            help='output plan filename')
     subparser.add_argument('--sample', action='store_true',
                            help='create a sample plan')
+    subparser.add_argument('--tuning', action='store_true',
+                           help='create a sample tuning plan')
     subparser.set_defaults(func=create)
 
 def create(args):
@@ -26,7 +28,7 @@ def create(args):
     plan = plan_pb2.Plan()
     plan.name = 'Test'
 
-    if args.sample:
+    if args.sample or args.tuning:
         plan.devices.add(name='copano-evt-sku2-C123456',
                          host_name='192.168.1.100',
                          board='volteer')
@@ -35,9 +37,10 @@ def create(args):
                          board='guybrush')
         plan.builds.add(name='R109-15185.0.0',
                         version='R109-15185.0.0')
-        plan.workloads.add(name='borealis.TraceReplay.dota_2')
-        plan.workloads.add(name='borealis.TraceReplay.portal_2')
-        plan.workloads.add(name='borealis.TraceReplayProton.dota_2')
+        repeat_count = 5 if args.tuning else 1
+        plan.workloads.add(name='borealis.TraceReplay.dota_2', repeat_count=repeat_count)
+        plan.workloads.add(name='borealis.TraceReplay.portal_2', repeat_count=repeat_count)
+        plan.workloads.add(name='borealis.TraceReplayProton.dota_2', repeat_count=repeat_count)
         plan.parameters.add(
             name='host_swappiness',
             values=['10', '15'],

@@ -24,6 +24,10 @@ def add_subparser(subparsers):
                                               help='Add a workload')
     add_parser.add_argument('name',
                             help='name of workload')
+    add_parser.add_argument('--repeat',
+                            type=int,
+                            default=1,
+                            help='repeat count for this workload')
     add_parser.add_argument('--clear', action='store_true',
                             help='clear existing before adding')
     add_parser.set_defaults(func=add_func)
@@ -53,7 +57,7 @@ def add_func(args):
     plan = common.read_plan(args.input)
     if args.clear:
         del plan.workloads[:]
-    plan.workloads.add(name=args.name)
+    plan.workloads.add(name=args.name, repeat_count=args.repeat)
     common.write_plan(plan, args.output)
 
 def remove_func(args):
