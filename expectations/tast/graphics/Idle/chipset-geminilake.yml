@@ -1,0 +1,8 @@
+graphics.Idle.fbc:
+  expectation: FAIL
+  tickets:
+    - "b/267182452"
+graphics.Idle.fbc_arc:
+  expectation: FAIL
+  tickets:
+    - "b/267182452"
