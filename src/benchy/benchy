@@ -9,6 +9,7 @@
 import argparse
 import logging
 
+from lib import aggregate
 from lib import build
 from lib import create
 from lib import device
@@ -33,6 +34,7 @@ def create_parser():
     device.add_subparser(subparsers)
     run.add_subparser(subparsers)
     workload.add_subparser(subparsers)
+    aggregate.add_subparser(subparsers)
 
     return parser
 
