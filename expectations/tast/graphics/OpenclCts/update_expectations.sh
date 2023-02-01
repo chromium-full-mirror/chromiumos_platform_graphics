@@ -31,6 +31,7 @@ all_chipsets[sc7280]="herobrine"
 all_chipsets[picasso]="zork"
 all_chipsets[stoney]="grunt"
 all_chipsets[cezanne]="guybrush"
+all_chipsets[gc_10_3_7]="skyrim"
 # Imagination
 all_chipsets[rogue]="elm|hana"
 

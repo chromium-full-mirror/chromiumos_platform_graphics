@@ -180,9 +180,6 @@ graphics.OpenclCts.bruteforce_half_log2:
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_half_recip:
-  expectation: FAIL
-  since_build: R110-15273.0.0
 graphics.OpenclCts.bruteforce_half_sin:
   expectation: FAIL
   tickets:
@@ -399,6 +396,9 @@ graphics.OpenclCts.integer_ops_long_logic:
 graphics.OpenclCts.integer_ops_long_math:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.integer_ops_long_shift:
+  expectation: FAIL
+  since_build: R112-15332.0.0
 graphics.OpenclCts.integer_ops_popcount:
   expectation: FAIL
   since_build: R110-15241.0.0
