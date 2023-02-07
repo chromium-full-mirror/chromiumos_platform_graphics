@@ -14,6 +14,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 # pylint: disable=import-error
 from chromiumos.config.api.test.benchy.v1 import plan_pb2
@@ -223,6 +224,7 @@ class JobInfo:
     PARAMETER = 'parameter'
     EXECUTION = 'execution'
     ITERATION = 'iteration'
+    COOLDOWN = 'cooldown'
 
     def __init__(self, job):
         self.fields = []
@@ -570,6 +572,7 @@ def execute(plan, output_dir, parallel=False, retry=1):
     # Create a unique identifier for the run.
     run_label = make_run_label(os.path.basename(os.path.abspath(output_dir)))
     job_info.add_name(JobInfo.RUN, run_label, path_component=False)
+    job_info.add_name(JobInfo.COOLDOWN, str(plan.cooldown_seconds), path_component=False)
     plan_json = json_format.MessageToJson(plan)
     job.write_file(job_info, EXECUTED_PLAN_TAG, plan_json)
 
@@ -629,7 +632,8 @@ def execute_build(plan, param_combinations, build_pb, job, job_info, machine, re
         for workload_pb in plan.workloads:
             result = execute_workload_with_params(workload_pb, parameter_set,
                                                   job, job_info.copy(),
-                                                  machine, software_config, retry)
+                                                  machine, software_config,
+                                                  retry, plan.cooldown_seconds)
             if result:
                 results.extend(result)
 
@@ -637,7 +641,7 @@ def execute_build(plan, param_combinations, build_pb, job, job_info, machine, re
     return results
 
 def execute_workload_with_params(workload_pb, parameter_set,
-                                 job, job_info, machine, software_config, retry):
+                                 job, job_info, machine, software_config, retry, cooldown_seconds):
     """Execute the plan for a given workload and set of parameters."""
 
     # Set each parameter on the device (and fill in the job_info).
@@ -657,7 +661,7 @@ def execute_workload_with_params(workload_pb, parameter_set,
 
     results = []
     for repeat_idx in range(workload_pb.repeat_count):
-        for retry_index in range(retry):
+        for retry_idx in range(retry):
             start_time = datetime.datetime.now()
             tast_result = workload.run(job, job_info, repeat_idx)
             # TODO(davidriley): The results chart shouldn't need to be gathered
@@ -678,8 +682,10 @@ def execute_workload_with_params(workload_pb, parameter_set,
                                         job_info.make_result_labels())
                 results.append(result)
                 break
-            else:
-                logging.warn('retrying %s, retry idx: %d', workload_pb.name, retry_index)
+            logging.warning('retrying %s, retry idx: %d', workload_pb.name, retry_idx)
+            # Add a cooldown time.
+            time.sleep(cooldown_seconds)
+        time.sleep(cooldown_seconds)
 
     logging.debug('<<< workload %s', job_info.make_id())
     return results
