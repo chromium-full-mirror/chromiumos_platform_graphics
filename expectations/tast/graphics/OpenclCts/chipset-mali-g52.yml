@@ -546,9 +546,6 @@ graphics.OpenclCts.integer_ops_unary_ops_full:
 graphics.OpenclCts.integer_ops_unary_ops_increment:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.integer_ops_ushort_logic:
-  expectation: FAIL
-  since_build: R109-15232.0.0
 graphics.OpenclCts.profiling_read_array_long:
   expectation: FAIL
   since_build: R109-15232.0.0

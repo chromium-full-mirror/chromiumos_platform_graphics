@@ -121,9 +121,6 @@ graphics.OpenclCts.bruteforce_asinpi:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.bruteforce_atanh:
-  expectation: FAIL
-  since_build: R111-15291.0.0
 graphics.OpenclCts.bruteforce_cos:
   expectation: FAIL
   tickets:
@@ -225,9 +222,6 @@ graphics.OpenclCts.bruteforce_powr:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.bruteforce_round:
-  expectation: FAIL
-  since_build: R111-15291.0.0
 graphics.OpenclCts.bruteforce_rsqrt:
   expectation: FAIL
   tickets:
@@ -435,6 +429,9 @@ graphics.OpenclCts.integer_ops_ulong_logic:
 graphics.OpenclCts.integer_ops_ulong_math:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.integer_ops_ulong_shift:
+  expectation: FAIL
+  since_build: R112-15343.0.0
 graphics.OpenclCts.integer_ops_ushort_compare:
   expectation: FAIL
   since_build: R110-15273.0.0

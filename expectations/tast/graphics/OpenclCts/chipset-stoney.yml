@@ -257,6 +257,9 @@ graphics.OpenclCts.profiling_read_image_char:
 graphics.OpenclCts.profiling_read_image_float:
   expectation: FAIL
   since_build: R110-15273.0.0
+graphics.OpenclCts.profiling_read_image_uchar:
+  expectation: FAIL
+  since_build: R112-15343.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_float:
   expectation: FAIL
   since_build: R110-15241.0.0

@@ -149,10 +149,6 @@ graphics.OpenclCts.bruteforce_tanpi:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.compiler_options_include_directory:
-  expectation: FAIL
-  tickets:
-  - b/227136133
 graphics.OpenclCts.compiler_unload_build_threaded:
   expectation: FAIL
   tickets:
