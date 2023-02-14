@@ -1,4 +1,4 @@
-// Copyright 2020 The Chromium OS Authors. All rights reserved.
+// Copyright 2020 The ChromiumOS Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -607,19 +607,16 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Preparing to run %v", *traceEntry))
 	requiredSpace := calcRequiredSpace(traceEntry)
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Required space: %s bytes", utils.FormatSize(requiredSpace)))
-	// First, try to use tmpfs to store the data files
-	storageDir, availableSpace, err := getTempDataStorageDir(tmpfsDir, requiredSpace)
+
+	// Save traces to storage rather than tmpfs because use of tmpfs appears to worsen trace replay performance consistency (low memory leading to higher swap rate?)
+	// Use user's home directory to save downloaded traces. Tast recreates the user account on each run so no need to clean up files afterward.
+	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
-		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Unable to use tmpfs to store the data files: %s", err.Error()))
-		// Try to use user's home directory
-		userHomeDir, err := os.UserHomeDir()
-		if err != nil {
-			return nil, errors.Wrap(err, "Unable to get User's home directory")
-		}
-		storageDir, availableSpace, err = getTempDataStorageDir(userHomeDir, requiredSpace)
-		if err != nil {
-			return nil, err
-		}
+		return nil, errors.Wrap(err, "Unable to get User's home directory")
+	}
+	storageDir, availableSpace, err := getTempDataStorageDir(userHomeDir, requiredSpace)
+	if err != nil {
+		return nil, err
 	}
 
 	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Using %s to store the data files. Available space: %s bytes", storageDir, utils.FormatSize(availableSpace)))
