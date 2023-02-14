@@ -147,7 +147,7 @@ bq_insert_pb.py --deduplicate --message SoftwareConfig softwareconfig.json
 bq_insert_pb.py --deduplicate resultlist*json
 ```
 
-### Anaylze results via plx.
+### Anaylze results via plx
 
 Once uploaded the results are regularly imported into plx tables:
 - chromeos_gfx_resource.results
@@ -161,3 +161,14 @@ Furthermore, two views faciliate viewing results:
 Finally, two dashboards exist:
 - http://go/benchy-summary
 - http://go/benchy-summary-parameter
+
+### Generate a local report
+```sh
+./benchy aggregate results
+```
+will generate a summary of the performance `performance_summary` inside the directory results.
+
+For more setup details, refer to
+```
+go/borealis-benchy
+```

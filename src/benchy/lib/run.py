@@ -603,6 +603,10 @@ def execute_device(plan, param_combinations, device_pb, job, job_info, retry):
     machine = job.get_machine_info(job_info)
 
     results = []
+    if not plan.builds:
+        logging.error(
+            "Please specify the build in the plan to trigger workload."
+        )
     for build_pb in plan.builds:
         results.extend(execute_build(plan, param_combinations,
                                      build_pb, job, job_info.copy(), machine, retry))
