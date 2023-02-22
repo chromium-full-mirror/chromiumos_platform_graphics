@@ -71,7 +71,7 @@ def aggregate(args):
 
     # Keep record of results from multiple devices.
     # when input is specified, only read the input json file;
-    # when input is not specifeid, read all resultlist*.json file
+    # when input is not specified, read all resultlist*.json file
     # in the result folder.
     result_lists = []
     perf_filenames = []
@@ -85,7 +85,10 @@ def aggregate(args):
                 result_lists.append(
                     load_resultlist(os.path.join(args.result_dir, file)))
 
-    for result_list in result_lists:
+    for i, result_list in enumerate(result_lists):
+        if not result_list:
+            logging.warning("%s is empty", perf_filenames[i])
+            continue
         for perf_entry in result_list['value']:
             device, build, workload, parameter = parse_labels(
                 perf_entry['labels'])
@@ -99,16 +102,22 @@ def aggregate(args):
         for k, v in perfdict.items():
             if not already_has_header:
                 writer.writerow(
-                    ['Device', 'Build', 'Workload', 'Parameter', 'Metric'] +
-                    ['RepeatCount', 'Average', 'Min', 'Max', 'Sum'] +
-                    [f'Repeat{i}_val' for i in range(len(v))])
+                    ['Device', 'Build', 'Workload', 'Parameter', 'Metric'] + [
+                        'RepeatCount', 'Average_except_1st', 'Average', 'Min',
+                        'Max', 'Sum'
+                    ] + [f'Repeat{i}_val' for i in range(len(v))])
                 already_has_header = True
-
+            # Add metric average except the 1st run as the 1st run is usually
+            # a warm-up of the machine, which can affect the measure of performance.
+            average_except_1st = 'NaN' if len(v) < 2 else (sum(v) -
+                                                           v[0]) / (len(v) - 1)
+            average = 'NaN' if len(v) < 1 else sum(v) / len(v)
             writer.writerow(
                 list(k) +
-                [len(v), sum(v) /
-                 len(v), min(v),
-                 max(v), sum(v)] + v)
+                [len(v), average_except_1st, average,
+                 min(v),
+                 max(v),
+                 sum(v)] + v)
 
     logging.info('Report generated based on %s is %s', perf_filenames,
                  output_file)
