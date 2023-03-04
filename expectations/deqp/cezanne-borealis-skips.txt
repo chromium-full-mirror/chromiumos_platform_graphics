@@ -2,7 +2,3 @@
 
 # aligns with upstream mesa ci expectations
 dEQP-VK.dynamic_rendering.basic.*
-
-# timeout due to potential venus issue b/271359324
-dEQP-VK.synchronization.timeline_semaphore.device_host.misc.max_difference_value
-dEQP-VK.synchronization2.timeline_semaphore.device_host.misc.max_difference_value
