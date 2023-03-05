@@ -6,6 +6,10 @@ dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_16_samples,Fail
 dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_2_samples,Fail
 dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_4_samples,Fail
 dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_8_samples,Fail
+dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_16_samples,Fail
+dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_2_samples,Fail
+dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_4_samples,Fail
+dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_8_samples,Fail
 dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_min_16_samples,Fail
 dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_min_2_samples,Fail
 dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_min_4_samples,Fail

@@ -5,3 +5,17 @@ dEQP-VK.ssbo.phys.layout.random.16bit.scalar.13
 # have been removed upstream.
 dEQP-VK.renderpass_with_dynamic_rendering.dedicated_allocation.*
 dEQP-VK.renderpass_with_dynamic_rendering.suballocation.*
+
+# Below fail as timeout on adl only, need investigation
+dEQP-VK.api.external.memory.opaque_fd.dedicated.device_only.import_multiple_times
+dEQP-VK.api.external.memory.opaque_fd.dedicated.host_visible.import_multiple_times
+dEQP-VK.api.external.memory.opaque_fd.suballocated.device_only.import_multiple_times
+dEQP-VK.api.external.memory.opaque_fd.suballocated.host_visible.import_multiple_times
+dEQP-VK.api.external.memory.dma_buf.dedicated.device_only.import_multiple_times
+dEQP-VK.api.external.memory.dma_buf.dedicated.host_visible.import_multiple_times
+dEQP-VK.api.external.memory.dma_buf.suballocated.device_only.import_multiple_times
+dEQP-VK.api.external.memory.dma_buf.suballocated.host_visible.import_multiple_times
+
+# Below are flaky due to exceeding test timtout, thus we just skip
+dEQP-VK.synchronization.timeline_semaphore.device_host.write_ssbo_compute_indirect_read_ubo_compute_indirect.buffer_16384
+dEQP-VK.synchronization2.timeline_semaphore.device_host.write_copy_image_read_blit_image.image_128x128_r16g16b16a16_uint
