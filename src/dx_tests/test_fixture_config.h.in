@@ -1,0 +1,10 @@
+#pragma once
+
+// This file is generated from dx_tests/test_fixture_config.h.in
+
+namespace dx_test_config {
+const char* const kTestImagePath = "@TEST_IMAGE_PATH@";
+const char* const kTestImageWritePath = "@TEST_IMAGE_WRITE_PATH@";
+const char* const kPrebuiltShaderPath = "@TEST_SHADER_PATH@";
+const char* const kPrebuiltShaderWritePath = "@TEST_SHADER_PATH@";
+}  // namespace dx_test_config

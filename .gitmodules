@@ -1,0 +1,9 @@
+[submodule "src/dx_tests/third_party/stb"]
+	path = src/dx_tests/third_party/stb
+	url = https://github.com/nothings/stb.git
+[submodule "src/dx_tests/third_party/googletest"]
+	path = src/dx_tests/third_party/googletest
+	url = https://github.com/google/googletest
+[submodule "src/dx_tests/third_party/dxvk"]
+	path = src/dx_tests/third_party/dxvk
+	url = https://github.com/doitsujin/dxvk.git
