@@ -22,7 +22,7 @@ template <DXGI_FORMAT FORMAT, size_t WIDTH, size_t HEIGHT,
 struct fuzzy_image_comparator;
 
 using copy = texel_test<DXGI_FORMAT_R32_FLOAT, 30, 30,
-                        fuzzy_image_comparator<DXGI_FORMAT_R32_FLOAT, 30, 30, 95, 1>>;
+                        fuzzy_image_comparator<DXGI_FORMAT_R32_FLOAT, 30, 30, 105, 1>>;
 
 const std::string g_vsCode =
     R"(
