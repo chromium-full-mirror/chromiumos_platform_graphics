@@ -60,7 +60,7 @@ const std::string g_psCodePipelineStatistics = R"(
        return uint4(query_data);
     })";
 
-TEST_F(query, DISABLED_occlusion) {
+TEST_F(query, occlusion) {
   RunTest([](ID3D11Device* device, ID3D11DeviceContext* context,
              ID3D11RenderTargetView* view) {
     // Render stuff using device, and context to get it into texture2d.
@@ -127,7 +127,7 @@ TEST_F(query, DISABLED_occlusion) {
   });
 }
 
-TEST_F(query, DISABLED_pipelineStatistics) {
+TEST_F(query, pipelineStatistics) {
   RunTest([](ID3D11Device* device, ID3D11DeviceContext* context,
              ID3D11RenderTargetView* view) {
     // Render stuff using device, and context to get it into texture2d.

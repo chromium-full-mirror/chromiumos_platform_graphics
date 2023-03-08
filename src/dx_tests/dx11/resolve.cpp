@@ -117,7 +117,7 @@ TEST_F(resolve, simpleRect) {
   });
 }
 
-TEST_F(resolve, DISABLED_differentFormat) {
+TEST_F(resolve, differentFormat) {
   RunTest([](ID3D11Device* device, ID3D11DeviceContext* context,
              ID3D11Texture2D* texture) {
     DXPointer<ID3D11Texture2D> resolve_texture;
