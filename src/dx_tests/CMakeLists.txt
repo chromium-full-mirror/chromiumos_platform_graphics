@@ -32,9 +32,9 @@ configure_file(test_fixture_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/test_fixture
 set(additional_sources)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(LIBPATH "$ENV{WindowsSdkDir}Lib/$ENV{WindowsSDKLibVersion}um/x64")
+  set(LIBPATH "C:/Program Files (x86)/Windows Kits/10/Lib/${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}/um/x64")
 else(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(LIBPATH "$ENV{WindowsSdkDir}Lib/$ENV{WindowsSDKLibVersion}um/x86")
+  set(LIBPATH "C:/Program Files (x86)/Windows Kits/10/Lib/${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}/um/x86")
 endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
 
 find_library(D3D9LIBRARY d3d9.lib NO_DEFAULT_PATHS NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_SYSTEM_PATH PATHS ${LIBPATH})
