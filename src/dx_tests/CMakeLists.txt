@@ -23,9 +23,9 @@ add_compile_options(
   "-D_CRT_SECURE_NO_WARNINGS"
 )
 
-set(TEST_IMAGE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/golden_images)
-set(TEST_IMAGE_WRITE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/golden_images)
-set(TEST_SHADER_PATH ${CMAKE_CURRENT_SOURCE_DIR}/assets/prebuilt_shaders)
+set(TEST_IMAGE_PATH dx_tests/golden_images)
+set(TEST_IMAGE_WRITE_PATH dx_tests/golden_images)
+set(TEST_SHADER_PATH dx_tests/assets/prebuilt_shaders)
 
 configure_file(test_fixture_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/test_fixture_config.h @ONLY)
 
