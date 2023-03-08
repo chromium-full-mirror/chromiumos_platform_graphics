@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 {
 
   // loop through argv, and find arguments -regenerate-images.
-  for (size_t i = 0; i < argc; ++i)
+  for (int i = 0; i < argc; ++i)
   {
     if (!strcmp(argv[i], "-regenerate-images"))
     {
