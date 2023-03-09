@@ -122,6 +122,7 @@ float4 main(DS_OUT ps_in) : SV_TARGET {
 }
 )";
 
+// TODO(b/272548788): Lower the error tolerance of the tesselationshader fixture
 TEST_F(tessellationshader, basictessshader) {
   RunTest([](ID3D11Device* device, ID3D11DeviceContext* context,
              ID3D11Texture2D* texture) {
