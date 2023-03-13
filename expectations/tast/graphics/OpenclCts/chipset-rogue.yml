@@ -121,6 +121,9 @@ graphics.OpenclCts.bruteforce_asinpi:
   expectation: FAIL
   tickets:
   - b/227133190
+graphics.OpenclCts.bruteforce_ceil:
+  expectation: FAIL
+  since_build: R113-15374.0.0
 graphics.OpenclCts.bruteforce_cos:
   expectation: FAIL
   tickets:
