@@ -17,6 +17,7 @@ include /OWNERS.mesa_freedreno
 include /OWNERS.mesa_iris
 include /OWNERS.mesa_panfrost
 include /OWNERS.minigbm
+include /OWNERS.v4l2
 include /OWNERS.vadumpcaps
 include /OWNERS.virglrenderer
 include /OWNERS.vulkan_layers
