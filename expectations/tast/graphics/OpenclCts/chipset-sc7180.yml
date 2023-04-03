@@ -88,10 +88,6 @@ graphics.OpenclCts.basic_intmath_long2:
 graphics.OpenclCts.basic_intmath_long4:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_kernel_call_kernel_function:
-  expectation: FAIL
-  tickets:
-  - b/227134178
 graphics.OpenclCts.basic_kernel_memory_alignment_constant:
   expectation: FAIL
   tickets:
@@ -114,14 +110,6 @@ graphics.OpenclCts.basic_kernel_numeric_constants:
 graphics.OpenclCts.basic_kernel_preprocessor_macros:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_local_arg_def:
-  expectation: FAIL
-  tickets:
-  - b/227133185
-graphics.OpenclCts.basic_local_kernel_def:
-  expectation: FAIL
-  tickets:
-  - b/227133185
 graphics.OpenclCts.basic_parameter_types:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -173,91 +161,7 @@ graphics.OpenclCts.basic_writeimage:
 graphics.OpenclCts.basic_writeimage_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_acos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_acosh:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_acospi:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_asin:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_asinpi:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_cos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_cosh:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_cospi:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_exp:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_exp10:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_expm1:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_half_cos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_half_sin:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_half_tan:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_lgamma:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_lgamma_r:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_log10:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_log1p:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_pow:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_pown:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_powr:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_rsqrt:
   expectation: FAIL
   tickets:
   - b/227133190
@@ -269,19 +173,7 @@ graphics.OpenclCts.bruteforce_sincos:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.bruteforce_sinh:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_sinpi:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_tan:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_tanpi:
   expectation: FAIL
   tickets:
   - b/227133190
@@ -958,10 +850,6 @@ graphics.OpenclCts.integer_ops_vector_scalar:
 graphics.OpenclCts.profiling_copy_image:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.profiling_execute:
-  expectation: FAIL
-  tickets:
-  - b/227133185
 graphics.OpenclCts.profiling_read_array_char:
   expectation: FAIL
   since_build: R110-15241.0.0
