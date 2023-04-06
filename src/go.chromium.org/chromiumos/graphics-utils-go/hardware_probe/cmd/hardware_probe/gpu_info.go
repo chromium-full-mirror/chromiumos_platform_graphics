@@ -22,9 +22,10 @@ const (
 	vendorUnknown gpuVendor = iota
 	vendorAMD
 	vendorIntel
-	vendorQualcomm
 	vendorMediatek
 	vendorNvidia
+	vendorQualcomm
+	vendorRockchip
 	vendorVirtio
 	vendorVmware
 )
@@ -34,14 +35,16 @@ func (s gpuVendor) String() string {
 	switch s {
 	case vendorAMD:
 		return "amd"
-	case vendorQualcomm:
-		return "qualcomm"
-	case vendorMediatek:
-		return "mediatek"
 	case vendorIntel:
 		return "intel"
+	case vendorMediatek:
+		return "mediatek"
 	case vendorNvidia:
 		return "nvidia"
+	case vendorQualcomm:
+		return "qualcomm"
+	case vendorRockchip:
+		return "rockchip"
 	case vendorVirtio:
 		return "virtio"
 	case vendorVmware:
@@ -134,7 +137,21 @@ func getGPUInfos() ([]GPUInfo, error) {
 		if matches == nil {
 			return nil, errors.Errorf("failed to find mali version: %v", wflinfo)
 		}
-		return []GPUInfo{{Family: strings.ToLower(matches[1]), GPUVendor: vendorUnknown}}, nil
+		gpuFamily := strings.ToLower(matches[1])
+		// Fill in GPU_Vendor for qualcomm and mediatek.
+		socFamily, err := getCPUSOCFamily()
+		if err == nil {
+			if socFamily == socQualcomm {
+				return []GPUInfo{{Family: gpuFamily, GPUVendor: vendorQualcomm}}, nil
+			}
+			if socFamily == socMediaTek {
+				return []GPUInfo{{Family: gpuFamily, GPUVendor: vendorMediatek}}, nil
+			}
+			if socFamily == socRockchip {
+				return []GPUInfo{{Family: gpuFamily, GPUVendor: vendorRockchip}}, nil
+			}
+		}
+		return []GPUInfo{{Family: gpuFamily, GPUVendor: vendorUnknown}}, nil
 	}
 
 	// Check for qualcomm, rogue
