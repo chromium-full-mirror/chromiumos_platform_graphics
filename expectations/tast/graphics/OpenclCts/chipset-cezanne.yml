@@ -16,13 +16,6 @@ graphics.OpenclCts.api_null_buffer_arg:
   expectation: FAIL
   tickets:
   - b/227134903
-graphics.OpenclCts.basic_enqueue_map_image:
-  expectation: FAIL
-  since_build: R114-15407.0.0
-graphics.OpenclCts.basic_kernel_call_kernel_function:
-  expectation: FAIL
-  tickets:
-  - b/227134178
 graphics.OpenclCts.basic_kernel_memory_alignment_constant:
   expectation: FAIL
   tickets:
@@ -39,67 +32,7 @@ graphics.OpenclCts.basic_kernel_memory_alignment_private:
   expectation: FAIL
   tickets:
   - b/227134903
-graphics.OpenclCts.basic_local_arg_def:
-  expectation: FAIL
-  tickets:
-  - b/227133185
-graphics.OpenclCts.basic_local_kernel_def:
-  expectation: FAIL
-  tickets:
-  - b/227133185
-graphics.OpenclCts.bruteforce_acos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_acosh:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_acospi:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_asin:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_asinpi:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_cos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_cosh:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_cospi:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_exp:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_exp10:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_expm1:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_half_cos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_half_sin:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_half_tan:
   expectation: FAIL
   tickets:
   - b/227133190
@@ -193,10 +126,6 @@ graphics.OpenclCts.integer_ops_integer_sub_sat:
   tickets:
   - b/253996513
   since_build: R109-15229.0.0
-graphics.OpenclCts.profiling_execute:
-  expectation: FAIL
-  tickets:
-  - b/227133185
 graphics.OpenclCts.samplerless_reads_1d_cl_float:
   expectation: FAIL
   tickets:

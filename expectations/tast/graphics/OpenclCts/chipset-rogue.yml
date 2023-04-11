@@ -117,13 +117,12 @@ graphics.OpenclCts.bruteforce_cosh:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.bruteforce_cospi:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_divide:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_fabs:
+  expectation: FAIL
+  since_build: R114-15414.0.0
 graphics.OpenclCts.bruteforce_fdim:
   expectation: FAIL
   tickets:
@@ -164,13 +163,12 @@ graphics.OpenclCts.bruteforce_half_tan:
 graphics.OpenclCts.bruteforce_hypot:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_isequal:
+  expectation: FAIL
+  since_build: R114-15414.0.0
 graphics.OpenclCts.bruteforce_islessgreater:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_log10:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_multiply:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -198,18 +196,10 @@ graphics.OpenclCts.bruteforce_sinh:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.bruteforce_sinpi:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_subtract:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.bruteforce_tan:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_tanpi:
   expectation: FAIL
   tickets:
   - b/227133190

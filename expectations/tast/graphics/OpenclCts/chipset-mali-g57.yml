@@ -112,9 +112,6 @@ graphics.OpenclCts.half_vstorea_half_rtz:
 graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.multiples_context_multiple_contexts_same_device:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_float:
   expectation: FAIL
   since_build: R110-15241.0.0

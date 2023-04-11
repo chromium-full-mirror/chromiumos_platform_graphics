@@ -100,34 +100,6 @@ graphics.OpenclCts.bruteforce_half_tan:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.bruteforce_lgamma:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_lgamma_r:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_log1p:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_pow:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_pown:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_powr:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_rsqrt:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_sin:
   expectation: FAIL
   tickets:
@@ -136,19 +108,7 @@ graphics.OpenclCts.bruteforce_sincos:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.bruteforce_sinh:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_sinpi:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_tan:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_tanpi:
   expectation: FAIL
   tickets:
   - b/227133190
