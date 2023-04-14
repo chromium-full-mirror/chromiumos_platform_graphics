@@ -159,11 +159,14 @@ def get_device_version(cmd_args):
     """Gets the current version from a device."""
     cmd = 'cat /etc/lsb-release'
     lsb_release = remote_call(cmd_args['device_hostname'], cmd, stdout=True)
-    version = ''
+    milestone, release_version = '', ''
+
     for line in lsb_release.splitlines():
-        if line.startswith('CHROMEOS_RELEASE_BUILDER_PATH'):
-            version = line.rstrip().split('/', 2)[1]
-    return version
+        if line.startswith('CHROMEOS_RELEASE_CHROME_MILESTONE'):
+            milestone = line.rstrip().split('=', 2)[1]
+        elif line.startswith('CHROMEOS_RELEASE_VERSION'):
+            release_version = line.rstrip().split('=', 2)[1]
+    return f'R{milestone}-{release_version}'
 
 def get_owner():
     """Get the owner for results database entries."""
@@ -310,14 +313,14 @@ class JobOutput:
     def read_file(self, job_info, tag):
         """Reads the file specified by job_info and tag."""
         filename = self.get_filename(job_info, tag)
-        with open(filename) as f:
+        with open(filename, encoding='utf-8') as f:
             logging.info('reading %s%s from %s', tag[0], tag[1], filename)
             return f.read()
 
     def write_file(self, job_info, tag, data, run_index=None):
         """Writes the file specified by job_info and tag."""
         filename = self.get_filename(job_info, tag, run_index)
-        with open(filename, 'w') as f:
+        with open(filename, 'w', encoding='utf-8') as f:
             logging.info('writing %s%s to %s', tag[0], tag[1], filename)
             f.write(data)
 
