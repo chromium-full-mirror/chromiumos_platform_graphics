@@ -1539,11 +1539,23 @@ spec@arb_transform_feedback_overflow_query@arb_transform_feedback_overflow_query
 spec@arb_transform_feedback_overflow_query@arb_transform_feedback_overflow_query-basic@arb_transform_feedback_overflow_query-buffer_object_2
 spec@arb_transform_feedback_overflow_query@arb_transform_feedback_overflow_query-basic@arb_transform_feedback_overflow_query-buffer_object_any
 spec@arb_transform_feedback_overflow_query@arb_transform_feedback_overflow_query-basic@arb_transform_feedback_overflow_query-buffer_object_single
+spec@egl 1.4@eglcreatepbuffersurface and then glclear
+spec@egl 1.4@largest possible eglcreatepbuffersurface and then glclear
+spec@egl_android_native_fence_sync@egl_khr_fence_sync android_native
 spec@egl_chromium_sync_control@conformance
 spec@egl_chromium_sync_control@conformance@eglGetSyncValuesCHROMIUM_msc_and_sbc_test
+spec@egl_khr_create_context@default major version gles
+spec@egl_khr_create_context@default minor version gles
+spec@egl_khr_create_context@null valid attribute gles
+spec@egl_khr_create_context@valid attribute empty gles
+spec@egl_khr_create_context@valid debug flag gles1
+spec@egl_khr_create_context@verify gl flavor
+spec@egl_khr_fence_sync@conformance
+spec@egl_khr_gl_colorspace@linear
 spec@egl_khr_gl_colorspace@srgb
 spec@egl_khr_gl_image@egl_khr_gl_renderbuffer_image-clear-shared-image gl_depth_component24
 spec@egl_mesa_configless_context@basic
+spec@egl_nok_texture_from_pixmap@basic
 spec@ext_direct_state_access@compressedmultiteximage gl_compressed_rgb_bptc_signed_float
 spec@ext_direct_state_access@compressedmultiteximage gl_compressed_rgb_bptc_signed_float@CompressedTextureImage2DEXT
 spec@ext_direct_state_access@compressedmultiteximage gl_compressed_rgb_bptc_signed_float@CompressedTextureImage2DEXT + display list GL_COMPILE
@@ -1613,6 +1625,11 @@ spec@ext_gpu_shader4@execution@texelfetchoffset@vs-texelfetch-usampler1darray
 spec@ext_gpu_shader4@execution@texelfetch@vs-texelfetch-isampler1darray
 spec@ext_gpu_shader4@execution@texelfetch@vs-texelfetch-sampler1darray
 spec@ext_gpu_shader4@execution@texelfetch@vs-texelfetch-usampler1darray
+spec@ext_image_dma_buf_import@ext_image_dma_buf_import-intel_external_sampler_only
+spec@ext_image_dma_buf_import@ext_image_dma_buf_import-invalid_attributes
+spec@ext_image_dma_buf_import@ext_image_dma_buf_import-invalid_hints
+spec@ext_image_dma_buf_import@ext_image_dma_buf_import-missing_attributes
+spec@ext_image_dma_buf_import@ext_image_dma_buf_import-ownership_transfer
 spec@ext_image_dma_buf_import@ext_image_dma_buf_import-sample_nv12
 spec@ext_image_dma_buf_import@ext_image_dma_buf_import-sample_p010
 spec@ext_image_dma_buf_import@ext_image_dma_buf_import-sample_p012
@@ -1626,6 +1643,7 @@ spec@ext_image_dma_buf_import@ext_image_dma_buf_import-sample_y416
 spec@ext_image_dma_buf_import@ext_image_dma_buf_import-sample_yuv420
 spec@ext_image_dma_buf_import@ext_image_dma_buf_import-sample_yuyv
 spec@ext_image_dma_buf_import@ext_image_dma_buf_import-sample_yvu420
+spec@ext_image_dma_buf_import@ext_image_dma_buf_import-unsupported_format
 spec@ext_packed_depth_stencil@fbo-clear-formats
 spec@ext_packed_depth_stencil@fbo-depthstencil-gl_depth24_stencil8-copypixels
 spec@ext_packed_depth_stencil@fbo-depthstencil-gl_depth24_stencil8-drawpixels-24_8
@@ -2697,6 +2715,13 @@ spec@nv_copy_image@nv_copy_image-formats@Source: GL_DEPTH_COMPONENT24/Destinatio
 spec@nv_fog_distance@gl_fog_coordinate interaction
 spec@nv_primitive_restart@primitive-restart-vbo_separate_vertex_and_index
 spec@nv_read_depth@read_depth_gles3
+spec@oes_compressed_etc1_rgb8_texture@basic
+spec@oes_compressed_paletted_texture@basic api
+spec@oes_draw_texture@oes_draw_texture
+spec@oes_fixed_point@attribute-arrays
+spec@oes_matrix_get@all queries
+spec@oes_packed_depth_stencil@depth_stencil texture gles1
+spec@oes_point_sprite@arb_point_sprite-checkerboard_gles1
 spec@!opengl 1.0@gl-1.0-edgeflag
 spec@!opengl 1.0@gl-1.0-edgeflag-quads
 spec@!opengl 1.0@gl-1.0-read-cache-stress-test
