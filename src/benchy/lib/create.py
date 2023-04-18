@@ -37,14 +37,22 @@ def create(args):
                          board='guybrush')
         plan.builds.add(name='R109-15185.0.0',
                         version='R109-15185.0.0')
+
         repeat_count = 5 if args.tuning else 1
         plan.workloads.add(name='borealis.TraceReplay.dota_2', repeat_count=repeat_count)
         plan.workloads.add(name='borealis.TraceReplay.portal_2', repeat_count=repeat_count)
         plan.workloads.add(name='borealis.TraceReplayProton.dota_2', repeat_count=repeat_count)
+        plan.workloads.add(name='borealis.Benchmark.dota_2_gl', repeat_count=repeat_count)
+        plan.workloads.add(name='borealis.Benchmark.dota_2_vulkan', repeat_count=repeat_count)
+        plan.workloads.add(name='borealis.Benchmark.batman_knight', repeat_count=repeat_count)
+        plan.workloads.add(name='borealis.Benchmark.csgo_gl', repeat_count=repeat_count)
+        plan.workloads.add(name='borealis.Benchmark.csgo_vulkan', repeat_count=repeat_count)
+        plan.workloads.add(name='borealis.Benchmark.civilization_vi', repeat_count=repeat_count)
+        plan.workloads.add(name='borealis.Benchmark.cstrike_gl', repeat_count=repeat_count)
         plan.parameters.add(
             name='host_swappiness',
             values=['10', '15'],
-            command_line='echo setting %(parameter_name)s %(parameter_value)s',
+            command_line='echo %(parameter_value)s > /proc/sys/vm/swappiness',
             execution_mode=plan_pb2.Parameter.ExecutionMode.EXECUTION_DUT)
         # Currently, we support a single parameter change for guest,
         # can extend it when necessary.

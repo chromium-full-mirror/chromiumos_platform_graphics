@@ -106,7 +106,7 @@ def remote_call(dut, cmd, stdout=False):
     # If the modification of the parameter failed, directly exit.
     try:
         logging.info("remote call: %s", " ".join(ssh_cmd))
-        subprocess.check_call([" ".join(ssh_cmd)], shell=True)
+        subprocess.check_call(ssh_cmd)
     except subprocess.CalledProcessError as e:
         logging.debug("modify parameter failed with error: %s", e)
         sys.exit()
@@ -538,6 +538,7 @@ class Workload:
         # Add the labels.
         for (grouping, name), value in labels.items():
             r.labels.add(name=name, value=value, grouping=grouping)
+        return json_format.MessageToJson(r)
 
 def run(args):
     """Run a plan."""
@@ -680,7 +681,7 @@ def execute_workload_with_params(workload_pb, parameter_set,
                 job.write_file(job_info, TAST_RESULTS_TAG, results_chart, repeat_idx)
                 result = result_pb2.Result()
                 end_time = datetime.datetime.now()
-                workload.generate_result(result,
+                result_json = workload.generate_result(result,
                                         start_time,
                                         end_time,
                                         machine,
@@ -688,6 +689,7 @@ def execute_workload_with_params(workload_pb, parameter_set,
                                         results_chart,
                                         job_info.make_result_labels())
                 results.append(result)
+                job.write_file(job_info, RESULTS_DB_RESULT_TAG, result_json, repeat_idx)
                 break
             logging.warning('retrying %s, retry idx: %d', workload_pb.name, retry_idx)
             # Add a cooldown time.
