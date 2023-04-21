@@ -1,4 +1,4 @@
-// Copyright 2022 The ChromiumOS Authors.
+// Copyright 2022 The ChromiumOS Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -124,7 +124,7 @@ func getGuestType() (guestType, error) {
 		defer lsbFile.Close()
 		scanner := bufio.NewScanner(lsbFile)
 		for scanner.Scan() {
-			if strings.Contains(scanner.Text(), "BOREALIS_STAGE=") {
+			if strings.Contains(scanner.Text(), "CHROMEOS_RELEASE_BOARD=borealis") {
 				return guestTypeBorealis, nil
 			}
 		}
