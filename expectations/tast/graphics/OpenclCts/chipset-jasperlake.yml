@@ -34,22 +34,9 @@ graphics.OpenclCts.basic_kernel_memory_alignment_private:
   expectation: FAIL
   tickets:
   - b/227134903
-graphics.OpenclCts.bruteforce_cos:
+graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_sin:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_sincos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_tan:
-  expectation: FAIL
-  tickets:
-  - b/227133190
+  since_build: R114-15432.0.0
 graphics.OpenclCts.compiler_unload_build_threaded:
   expectation: FAIL
   tickets:

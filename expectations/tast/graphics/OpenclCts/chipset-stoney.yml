@@ -32,10 +32,6 @@ graphics.OpenclCts.basic_kernel_memory_alignment_private:
   expectation: FAIL
   tickets:
   - b/227134903
-graphics.OpenclCts.bruteforce_cos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_fmax:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -48,18 +44,6 @@ graphics.OpenclCts.bruteforce_maxmag:
 graphics.OpenclCts.bruteforce_minmag:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_sin:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_sincos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_tan:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.compiler_options_include_directory:
   expectation: FAIL
   tickets:
@@ -95,20 +79,6 @@ graphics.OpenclCts.half_vstore_half_rtp:
   tickets:
   - b/227136713
 graphics.OpenclCts.half_vstore_half_rtz:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstorea_half:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.half_vstorea_half_rte:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.half_vstorea_half_rtn:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstorea_half_rtp:
   expectation: FAIL
   tickets:
   - b/227136713

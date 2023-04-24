@@ -108,9 +108,6 @@ graphics.OpenclCts.bruteforce_cosh:
 graphics.OpenclCts.bruteforce_divide:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_fabs:
-  expectation: FAIL
-  since_build: R114-15414.0.0
 graphics.OpenclCts.bruteforce_fdim:
   expectation: FAIL
   tickets:
@@ -121,29 +118,18 @@ graphics.OpenclCts.bruteforce_fma:
 graphics.OpenclCts.bruteforce_fract:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_half_cos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_half_divide:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_half_log:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_half_log10:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_half_log2:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_half_sin:
+graphics.OpenclCts.bruteforce_half_recip:
   expectation: FAIL
-  tickets:
-  - b/227133190
+  since_build: R114-15432.0.0
+graphics.OpenclCts.bruteforce_half_sqrt:
+  expectation: FAIL
+  since_build: R114-15432.0.0
 graphics.OpenclCts.bruteforce_half_tan:
   expectation: FAIL
   tickets:
@@ -261,37 +247,6 @@ graphics.OpenclCts.conversions_float_ulong:
 graphics.OpenclCts.geometrics_geom_normalize:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.half_vstore_half:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.half_vstore_half_rte:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.half_vstore_half_rtn:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstore_half_rtp:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstore_half_rtz:
-  expectation: FAIL
-  since_build: R114-15407.0.0
-graphics.OpenclCts.half_vstorea_half:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.half_vstorea_half_rte:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.half_vstorea_half_rtn:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstorea_half_rtp:
-  expectation: FAIL
-  tickets:
-  - b/227136713
 graphics.OpenclCts.image_streams_1d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0

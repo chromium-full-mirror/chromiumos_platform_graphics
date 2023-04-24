@@ -32,22 +32,6 @@ graphics.OpenclCts.basic_kernel_memory_alignment_private:
   expectation: FAIL
   tickets:
   - b/227134903
-graphics.OpenclCts.bruteforce_cos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_sin:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_sincos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
-graphics.OpenclCts.bruteforce_tan:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.compiler_unload_build_threaded:
   expectation: FAIL
   tickets:
@@ -64,37 +48,6 @@ graphics.OpenclCts.conversions_long_float:
 graphics.OpenclCts.conversions_ulong_float:
   expectation: FAIL
   since_build: R111-15326.0.0
-graphics.OpenclCts.half_vstore_half:
-  expectation: FAIL
-  since_build: R111-15326.0.0
-graphics.OpenclCts.half_vstore_half_rte:
-  expectation: FAIL
-  since_build: R111-15326.0.0
-graphics.OpenclCts.half_vstore_half_rtn:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstore_half_rtp:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstore_half_rtz:
-  expectation: FAIL
-  since_build: R114-15424.0.0
-graphics.OpenclCts.half_vstorea_half:
-  expectation: FAIL
-  since_build: R111-15326.0.0
-graphics.OpenclCts.half_vstorea_half_rte:
-  expectation: FAIL
-  since_build: R111-15326.0.0
-graphics.OpenclCts.half_vstorea_half_rtn:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstorea_half_rtp:
-  expectation: FAIL
-  tickets:
-  - b/227136713
 graphics.OpenclCts.integer_ops_integer_add_sat:
   expectation: FAIL
   since_build: R111-15326.0.0
