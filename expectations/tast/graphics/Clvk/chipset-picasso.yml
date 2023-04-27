@@ -1,0 +1,6 @@
+graphics.Clvk.api_tests:
+  expectation: FAIL
+  since_build: R114-15432.0.0
+  tickets:
+  - b/279634638
+  comments: Passed 40 tests, failed 2 tests ([WithProfiledCommandQueue.QueueProfilingTimestampOrderingAndSanity WithProfiledCommandQueue.QueueProfilingVsDeviceTimer])
