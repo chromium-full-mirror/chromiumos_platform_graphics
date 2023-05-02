@@ -97,6 +97,12 @@ graphics.OpenclCts.basic_writeimage_int16:
 graphics.OpenclCts.bruteforce_add:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_atan2:
+  expectation: FAIL
+  since_build: R114-15436.0.0
+graphics.OpenclCts.bruteforce_atanh:
+  expectation: FAIL
+  since_build: R114-15436.0.0
 graphics.OpenclCts.bruteforce_cos:
   expectation: FAIL
   tickets:
@@ -146,6 +152,9 @@ graphics.OpenclCts.bruteforce_islessgreater:
 graphics.OpenclCts.bruteforce_log1p:
   expectation: FAIL
   since_build: R114-15424.0.0
+graphics.OpenclCts.bruteforce_maxmag:
+  expectation: FAIL
+  since_build: R114-15436.0.0
 graphics.OpenclCts.bruteforce_multiply:
   expectation: FAIL
   since_build: R110-15241.0.0

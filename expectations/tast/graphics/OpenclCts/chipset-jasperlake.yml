@@ -41,36 +41,6 @@ graphics.OpenclCts.compiler_unload_build_threaded:
   expectation: FAIL
   tickets:
   - b/227136133
-graphics.OpenclCts.half_vstore_half:
-  expectation: FAIL
-  since_build: R114-15407.0.0
-graphics.OpenclCts.half_vstore_half_rte:
-  expectation: FAIL
-  since_build: R114-15407.0.0
-graphics.OpenclCts.half_vstore_half_rtn:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstore_half_rtp:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstore_half_rtz:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstorea_half_rtn:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstorea_half_rtp:
-  expectation: FAIL
-  tickets:
-  - b/227136713
-graphics.OpenclCts.half_vstorea_half_rtz:
-  expectation: FAIL
-  tickets:
-  - b/227136713
 graphics.OpenclCts.vectors_vec_align_array:
   expectation: FAIL
   tickets:

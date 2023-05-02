@@ -138,9 +138,6 @@ graphics.OpenclCts.integer_ops_long_compare:
 graphics.OpenclCts.integer_ops_long_logic:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.integer_ops_long_shift:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.integer_ops_quick_long_compare:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -160,9 +157,6 @@ graphics.OpenclCts.integer_ops_ulong_compare:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.integer_ops_ulong_math:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.integer_ops_ulong_shift:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.integer_ops_ushort_compare:
