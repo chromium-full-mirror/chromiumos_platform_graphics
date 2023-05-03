@@ -70,16 +70,4 @@ video.PlatformDecoding.vaapi_hevc_main_bug_242708185:
   - b/242708185
   comments: "For the test vector RPS_C_ericsson_5.hevc the decoder fails because the SPS with id 0 does not exist in the stream."
   since_build: R108-15183.70.0
-video.PlatformDecoding.v4l2_stateless_h264_baseline:
-  expectation: FAIL
-  tickets:
-  - b/234752983
-  comments: "Fails as the H264 Decoder's implementation is still in progress."
-  since_build: R113-15369.0.0
-video.PlatformDecoding.v4l2_stateless_h264_main:
-  expectation: FAIL
-  tickets:
-  - b/234752983
-  comments: "Fails as the H264 Decoder's implementation is still in progress."
-  since_build: R113-15369.0.0
 
