@@ -27,7 +27,7 @@ type VGADevice struct {
 var pciRegex = regexp.MustCompile(`(\S+) (.*): (.*)`)
 
 func readPCIDevice(bdf string, file string) (string, error) {
-	filePath := fmt.Sprintf("/sys/bus/pci/devices/0000:%s/%s", bdf, file)
+	filePath := fmt.Sprintf("/sys/bus/pci/devices/%s/%s", bdf, file)
 	out, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to read %v", filePath)
@@ -37,7 +37,8 @@ func readPCIDevice(bdf string, file string) (string, error) {
 
 // GetVGADevices returns the list of vga devices shown when running lspci
 func GetVGADevices() ([]VGADevice, error) {
-	out, err := exec.Command("lspci").Output()
+	// With -D, lspci will be force to omit the domain numbers.
+	out, err := exec.Command("lspci", "-D").Output()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to run lspci")
 	}
