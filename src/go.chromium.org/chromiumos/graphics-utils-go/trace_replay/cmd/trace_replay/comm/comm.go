@@ -18,6 +18,10 @@ const (
 	TestFlagDefault = "default"
 	// TestFlagSurfaceless is used to select the surfaceless replay mode
 	TestFlagSurfaceless = "surfaceless"
+	// TestFlagZink is used to select the zink replay mode
+	TestFlagZink = "zink"
+	// TestFlagZinkSurfaceless  is used to select the zink surfaceless replay mode
+	TestFlagZinkSurfaceless = "zink_surfaceless"
 	// TestFlagD3DW32 is used to run D3D traces under proton with win32 binaries.
 	TestFlagD3DW32 = "ProtonD3D_win32"
 	// TestFlagD3DW64 is used to run D3D traces under proton with win64 binaries.

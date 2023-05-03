@@ -56,6 +56,20 @@ var configs = map[guestType]map[string]ReplayAppConfig{
 			EnvVars: []string{"WAFFLE_PLATFORM=sl", "LD_PRELOAD=libEGL.so.1"},
 			Postfix: "_surfaceless",
 		},
+		comm.TestFlagZink: {
+			AppName: "glretrace",
+			Args:    []string{"--benchmark", "--watchdog"},
+			EnvVars: []string{"DISPLAY=:0", "MESA_LOADER_DRIVER_OVERRIDE=zink",
+					  "GALLIUM_DRIVER=zink"},
+			Postfix: "_zink",
+		},
+		comm.TestFlagZinkSurfaceless: {
+			AppName: "eglretrace",
+			Args:    []string{"--benchmark", "--watchdog"},
+			EnvVars: []string{"WAFFLE_PLATFORM=sl", "LD_PRELOAD=libEGL.so.1",
+					  "MESA_LOADER_DRIVER_OVERRIDE=zink","GALLIUM_DRIVER=zink"},
+			Postfix: "_zink_surfaceless",
+		},
 		comm.TestFlagD3DW32: {
 			AppName: "/opt/win_tools/bin/exerun.py",
 			Args:    []string{"--slr", slr, "--proton", proton, ApitraceW32},
