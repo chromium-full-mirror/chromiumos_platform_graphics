@@ -1,0 +1,16 @@
+# MeteorLake-U boards: rex
+# Test Config CPFE OS: 15445.0.0 and Mesa 23.1.0-rc3 (git-d04b95b27e)
+
+dEQP-VK.glsl.builtin.precision.fract.highp.vec3,Fail
+dEQP-VK.glsl.builtin.precision_double.add.compute.scalar,Fail
+dEQP-VK.glsl.builtin.precision_double.fma.compute.scalar,Fail
+dEQP-VK.glsl.builtin.precision_double.inverse.compute.mat2,Fail
+dEQP-VK.glsl.builtin.precision_double.matrixcompmult.compute.mat2x3,Fail
+dEQP-VK.glsl.builtin.precision_double.matrixcompmult.compute.mat3x4,Fail
+dEQP-VK.glsl.builtin.precision_double.mix.compute.scalar,Fail
+dEQP-VK.glsl.builtin.precision_double.mod.compute.scalar,Fail
+dEQP-VK.glsl.builtin.precision_double.reflect.compute.vec4,Fail
+dEQP-VK.glsl.builtin.precision_double.refract.compute.vec4,Fail
+dEQP-VK.glsl.builtin.precision_double.sub.compute.vec4,Fail
+
+dEQP-VK.graphicsfuzz.spv-stable-pillars-volatile-nontemporal-store,Timeout
