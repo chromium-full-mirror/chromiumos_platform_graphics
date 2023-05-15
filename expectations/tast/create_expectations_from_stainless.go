@@ -36,8 +36,8 @@ import (
 	"google.golang.org/api/iterator"
 	"gopkg.in/yaml.v2"
 
-	"chromiumos/tast/errors"
 	"chromiumos/tast/local/graphics/expectations"
+	"go.chromium.org/tast/core/errors"
 )
 
 // stringSlice can be used as the local storage for storing list style

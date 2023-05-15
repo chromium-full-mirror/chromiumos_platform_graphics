@@ -156,9 +156,6 @@ graphics.OpenclCts.integer_ops_uint_compare:
 graphics.OpenclCts.integer_ops_ulong_compare:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.integer_ops_ulong_math:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.integer_ops_ushort_compare:
   expectation: FAIL
   since_build: R113-15390.0.0
