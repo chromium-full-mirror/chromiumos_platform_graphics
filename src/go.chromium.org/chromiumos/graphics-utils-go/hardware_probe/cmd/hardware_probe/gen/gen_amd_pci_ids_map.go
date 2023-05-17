@@ -34,10 +34,24 @@ func mapGPUName(name string) (string, error) {
 		// kernel repository uses format such as CHIP_CARRIZO while mesa uses CARRIZO.
 		// We use strings.Contains in this function so that both can be categories as carrizo.
 		// Also it helps us to categories similar chips such as sumo and sumo2 into a single sumo.
+		"ARUBA":   "aruba",
 		"CARRIZO": "carrizo",
+		"KABINI":  "kabini",
+		"KAVERI":  "kaveri",
+		"MULLINS": "mullins",
+		"OLAND":   "oland",
+		"PALM":    "palm",
+		"POLARIS": "polaris",
 		"RAVEN":   "picasso",
+		"REDWOOD": "redwood",
 		"RENOIR":  "cezanne",
+		"RS780":   "rs780",
+		"RS880":   "rs880",
+		"RV710":   "rv710",
 		"STONEY":  "stoney",
+		"SUMO":    "sumo",
+		"TURKS":   "turks",
+		"VERDE":   "verde",
 	}
 	for _, value := range ignoreNames {
 		if value == name {
@@ -54,6 +68,9 @@ func mapGPUName(name string) (string, error) {
 
 // resolveMesaKernelConflict resolve the name conflict of the name reported from mesa and name reported from kernel.
 func resolveMesaKernelConflict(kernelName, mesaName string) (string, error) {
+	if kernelName == "mullins" && mesaName == "kabini" {
+		return "kabini", nil
+	}
 	return "", fmt.Errorf("failed to resolve %v and %v", kernelName, mesaName)
 }
 
