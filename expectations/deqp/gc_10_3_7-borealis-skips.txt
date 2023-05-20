@@ -1,0 +1,7 @@
+# gc_10_3_7 boards: skyrim
+
+# timeout
+dEQP-VK.memory.pipeline_barrier.transfer_src_transfer_dst.1048576
+
+# crash
+dEQP-VK.pipeline.monolithic.creation_cache_control.*

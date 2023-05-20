@@ -1,0 +1,15 @@
+# gc_10_3_7 boards: skyrim
+
+# The test fix was done in 1.2.6 branch and missed 1.3.4.1 but will be in 1.3.5.0
+dEQP-VK.pipeline.monolithic.creation_feedback.graphics_tests.vertex_stage_fragment_stage,Fail
+dEQP-VK.pipeline.monolithic.creation_feedback.graphics_tests.vertex_stage_fragment_stage_delayed_destroy,Fail
+dEQP-VK.pipeline.monolithic.creation_feedback.graphics_tests.vertex_stage_fragment_stage_no_cache,Fail
+dEQP-VK.pipeline.monolithic.creation_feedback.graphics_tests.vertex_stage_geometry_stage_fragment_stage,Fail
+dEQP-VK.pipeline.monolithic.creation_feedback.graphics_tests.vertex_stage_geometry_stage_fragment_stage_delayed_destroy,Fail
+dEQP-VK.pipeline.monolithic.creation_feedback.graphics_tests.vertex_stage_geometry_stage_fragment_stage_no_cache,Fail
+dEQP-VK.pipeline.monolithic.creation_feedback.graphics_tests.vertex_stage_tessellation_control_stage_tessellation_evaluation_stage_fragment_stage,Fail
+dEQP-VK.pipeline.monolithic.creation_feedback.graphics_tests.vertex_stage_tessellation_control_stage_tessellation_evaluation_stage_fragment_stage_delayed_destroy,Fail
+dEQP-VK.pipeline.monolithic.creation_feedback.graphics_tests.vertex_stage_tessellation_control_stage_tessellation_evaluation_stage_fragment_stage_no_cache,Fail
+dEQP-VK.pipeline.monolithic.creation_feedback.compute_tests.compute_stage,Fail
+dEQP-VK.pipeline.monolithic.creation_feedback.compute_tests.compute_stage_no_cache,Fail
+dEQP-VK.pipeline.monolithic.creation_feedback.compute_tests.compute_stage_delayed_destroy,Fail
