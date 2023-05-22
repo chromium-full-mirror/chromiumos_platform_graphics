@@ -1,34 +1,6 @@
 # alderlake-P boards: brask, brya, draco, skolas
 # alderlake-N boards: nissa
 
-# aligns with upstream mesa ci expectations
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_16_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_2_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_4_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_8_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_16_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_2_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_4_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_8_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_min_16_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_min_2_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_min_4_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_min_8_samples,Fail
-
-# aligns with upstream mesa ci expectations
-dEQP-VK.draw.renderpass.linear_interpolation.no_offset_16_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.no_offset_2_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.no_offset_4_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.no_offset_8_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_max_16_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_max_2_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_max_4_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_max_8_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_min_16_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_min_2_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_min_4_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_min_8_samples,Fail
-
 # The test fix was done in 1.2.6 branch and missed 1.3.4.1 but will be in 1.3.5.0
 dEQP-VK.pipeline.monolithic.creation_feedback.graphics_tests.vertex_stage_fragment_stage,Fail
 dEQP-VK.pipeline.monolithic.creation_feedback.graphics_tests.vertex_stage_fragment_stage_delayed_destroy,Fail

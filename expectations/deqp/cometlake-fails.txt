@@ -45,3 +45,8 @@ dEQP-VK.glsl.builtin.precision_double.sub.compute.scalar,Fail
 dEQP-VK.glsl.builtin.precision_double.sub.compute.vec2,Fail
 dEQP-VK.glsl.builtin.precision_double.sub.compute.vec3,Fail
 dEQP-VK.glsl.builtin.precision_double.sub.compute.vec4,Fail
+
+# https://gitlab.freedesktop.org/mesa/mesa/-/issues/8263
+dEQP-VK.api.info.format_properties.g8_b8r8_2plane_420_unorm,Fail
+
+dEQP-VK.info.device_extensions,Fail

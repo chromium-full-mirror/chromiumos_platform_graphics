@@ -1,34 +1,11 @@
 # tigerlake boards: volteer
 
-# Fixed upstream in https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/19647
-# but needs https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/21094
-# which is a bit too much to cherry-pick
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_16_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_2_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_4_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.no_offset_8_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_16_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_2_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_4_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_max_8_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_min_16_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_min_2_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_min_4_samples,Fail
-dEQP-VK.draw.dynamic_rendering.linear_interpolation.offset_min_8_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.no_offset_16_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.no_offset_2_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.no_offset_4_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.no_offset_8_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_max_16_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_max_2_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_max_4_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_max_8_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_min_16_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_min_2_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_min_4_samples,Fail
-dEQP-VK.draw.renderpass.linear_interpolation.offset_min_8_samples,Fail
-
 dEQP-VK.glsl.builtin.precision.fract.highp.scalar,Fail
 dEQP-VK.glsl.builtin.precision.fract.highp.vec2,Fail
 dEQP-VK.glsl.builtin.precision.fract.highp.vec3,Fail
 dEQP-VK.glsl.builtin.precision.fract.highp.vec4,Fail
+
+# https://gitlab.freedesktop.org/mesa/mesa/-/issues/8263
+dEQP-VK.api.info.format_properties.g8_b8r8_2plane_420_unorm,Fail
+
+dEQP-VK.info.device_extensions,Fail
