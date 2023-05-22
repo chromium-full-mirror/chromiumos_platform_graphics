@@ -48,6 +48,9 @@ graphics.OpenclCts.conversions_long_float:
 graphics.OpenclCts.conversions_ulong_float:
   expectation: FAIL
   since_build: R111-15326.0.0
+graphics.OpenclCts.integer_ops_integer_abs_diff:
+  expectation: FAIL
+  since_build: R115-15465.0.0
 graphics.OpenclCts.samplerless_reads_1d_cl_float:
   expectation: FAIL
   since_build: R111-15326.0.0
