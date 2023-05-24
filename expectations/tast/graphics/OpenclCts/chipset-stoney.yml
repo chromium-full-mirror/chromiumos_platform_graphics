@@ -82,9 +82,6 @@ graphics.OpenclCts.half_vstore_half_rtz:
   expectation: FAIL
   tickets:
   - b/227136713
-graphics.OpenclCts.integer_ops_integer_abs_diff:
-  expectation: FAIL
-  since_build: R115-15465.0.0
 graphics.OpenclCts.integer_ops_long_compare:
   expectation: FAIL
   since_build: R110-15241.0.0

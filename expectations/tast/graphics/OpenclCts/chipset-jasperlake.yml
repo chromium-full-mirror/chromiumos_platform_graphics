@@ -41,9 +41,6 @@ graphics.OpenclCts.compiler_unload_build_threaded:
   expectation: FAIL
   tickets:
   - b/227136133
-graphics.OpenclCts.integer_ops_integer_abs_diff:
-  expectation: FAIL
-  since_build: R115-15465.0.0
 graphics.OpenclCts.vectors_vec_align_array:
   expectation: FAIL
   tickets:

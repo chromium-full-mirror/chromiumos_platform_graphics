@@ -273,9 +273,6 @@ graphics.OpenclCts.integer_ops_char_math:
 graphics.OpenclCts.integer_ops_char_shift:
   expectation: FAIL
   since_build: R110-15273.0.0
-graphics.OpenclCts.integer_ops_integer_abs_diff:
-  expectation: FAIL
-  since_build: R115-15465.0.0
 graphics.OpenclCts.integer_ops_integer_add_sat:
   expectation: FAIL
   since_build: R110-15241.0.0
