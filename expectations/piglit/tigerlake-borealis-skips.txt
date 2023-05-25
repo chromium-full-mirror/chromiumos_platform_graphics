@@ -1200,6 +1200,7 @@ spec@arb_tessellation_shader@execution@variable-indexing@tes-patch-input-array-v
 spec@arb_tessellation_shader@execution@variable-indexing@vs-output-array-vec4-index-wr-before-tcs
 spec@arb_texture_barrier@arb_texture_barrier-blending-in-shader 512 1 1 128 1
 spec@arb_texture_buffer_object@formats (fs- arb)
+spec@arb_texture_buffer_object@formats (fs- arb)
 spec@arb_texture_buffer_object@formats (fs- arb)@GL_ALPHA16
 spec@arb_texture_buffer_object@formats (fs- arb)@GL_ALPHA8
 spec@arb_texture_compression_bptc@compressedteximage gl_compressed_rgb_bptc_signed_float
@@ -1246,6 +1247,7 @@ spec@arb_texture_compression@texwrap formats bordercolor-swizzled@GL_COMPRESSED_
 spec@arb_texture_compression@texwrap formats@GL_COMPRESSED_ALPHA
 spec@arb_texture_compression@texwrap formats@GL_COMPRESSED_ALPHA- NPOT
 spec@arb_texture_compression@texwrap formats@GL_COMPRESSED_ALPHA- swizzled
+spec@arb_texture_cube_map_array@arb_texture_cube_map_array-cubemap
 spec@arb_texture_cube_map_array@fbo-generatemipmap-cubemap array s3tc_dxt1
 spec@arb_texture_float@fbo-blending-formats
 spec@arb_texture_float@fbo-blending-formats@GL_ALPHA16F_ARB
@@ -2065,6 +2067,7 @@ spec@ext_texture_srgb@texwrap formats-s3tc@GL_COMPRESSED_SRGB_S3TC_DXT1_EXT- NPO
 spec@ext_texture_srgb@texwrap formats-s3tc@GL_COMPRESSED_SRGB_S3TC_DXT1_EXT- swizzled
 spec@ext_texture_srgb@texwrap formats-s3tc@GL_COMPRESSED_SRGB- swizzled
 spec@ext_timer_query@time-elapsed
+spec@ext_transform_feedback@overflow-edge-cases use_gs
 spec@ext_transform_feedback@position-readback-bufferrange-discard
 spec@ext_transform_feedback@tessellation triangle_fan flat_first
 spec@glsl-1.10@execution@algebraic@glsl-algebraic-logicand-false

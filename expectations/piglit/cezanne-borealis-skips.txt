@@ -635,6 +635,7 @@ spec@egl_khr_create_context@null valid attribute gles
 spec@egl_khr_create_context@valid attribute empty gles
 spec@egl_khr_create_context@valid debug flag gles1
 spec@egl_khr_create_context@verify gl flavor
+spec@egl_khr_fence_sync@conformance
 spec@egl_khr_gl_colorspace@linear
 spec@egl_khr_gl_colorspace@srgb
 spec@egl_khr_gl_image@egl_khr_gl_renderbuffer_image-clear-shared-image
@@ -650,7 +651,9 @@ spec@ext_framebuffer_multisample@no-color 6 depth single
 spec@ext_framebuffer_multisample@no-color 8 depth-computed single
 spec@ext_framebuffer_multisample@no-color 8 depth single
 spec@ext_framebuffer_object@fbo-blending-format-quirks
+spec@ext_framebuffer_object@fbo-fragcoord
 spec@ext_framebuffer_object@fbo-fragcoord,Timeout
+spec@ext_framebuffer_object@fbo-scissor-bitmap
 spec@ext_framebuffer_object@getteximage-formats init-by-clear-and-render
 spec@ext_framebuffer_object@getteximage-formats init-by-rendering
 spec@ext_gpu_shader4@execution@texelfetch@fs-texelfetch-isampler1darray
@@ -705,6 +708,8 @@ spec@ext_texture_array@copyteximage 2d_array samples=2
 spec@ext_texture_array@copyteximage 2d_array samples=4
 spec@ext_texture_array@copyteximage 2d_array samples=6
 spec@ext_texture_array@copyteximage 2d_array samples=8
+spec@ext_texture_array@fbo-depth-array depth-layered-clear
+spec@ext_texture_array@fbo-depth-array fs-writes-depth
 spec@ext_texture_array@fbo-generatemipmap-array s3tc_dxt1
 spec@ext_texture_array@gen-mipmap
 spec@ext_texture_array@getteximage-targets 1d_array
@@ -733,6 +738,7 @@ spec@ext_texture_integer@texwrap formats bordercolor-swizzled@GL_ALPHA32I_EXT-
 spec@ext_texture_integer@texwrap formats bordercolor-swizzled@GL_ALPHA32UI_EXT-
 spec@ext_texture_integer@texwrap formats bordercolor-swizzled@GL_ALPHA8I_EXT-
 spec@ext_texture_integer@texwrap formats bordercolor-swizzled@GL_ALPHA8UI_EXT-
+spec@ext_texture_lod_bias@lodbias
 spec@ext_texture_lod_bias@lodbias,Timeout
 spec@ext_texture_shared_exponent@texwrap formats
 spec@ext_texture_shared_exponent@texwrap formats bordercolor
@@ -892,6 +898,7 @@ spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=2
 spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=4
 spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=6
 spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=8
+spec@!opengl 1.1@draw-sync
 spec@!opengl 1.1@draw-sync,Timeout
 spec@!opengl 1.1@linestipple
 spec@!opengl 1.1@linestipple@Factor 2x
@@ -994,6 +1001,7 @@ spec@!opengl 1.5@depth-tex-compare
 spec@!opengl 1.5@draw-elements-user
 spec@!opengl 2.0@gl-2.0-edgeflag
 spec@!opengl 2.0@gl-2.0-edgeflag-immediate
+spec@!opengl 2.0@tex3d-npot
 spec@!opengl 2.0@tex3d-npot,Timeout
 spec@!opengl 2.0@vs-point_size-zero
 spec@!opengl 3.2@gl-3.2-adj-prims cull-back pv-first

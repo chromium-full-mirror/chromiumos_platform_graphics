@@ -1,4 +1,4 @@
-# boards: brya
+# boards: hatch
 fast_color_clear@fcc-read-after-clear copy tex
 fast_color_clear@non-redundant-clear
 glx@extension string sanity

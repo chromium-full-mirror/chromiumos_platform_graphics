@@ -2065,6 +2065,7 @@ spec@ext_texture_srgb@texwrap formats-s3tc@GL_COMPRESSED_SRGB_S3TC_DXT1_EXT- NPO
 spec@ext_texture_srgb@texwrap formats-s3tc@GL_COMPRESSED_SRGB_S3TC_DXT1_EXT- swizzled
 spec@ext_texture_srgb@texwrap formats-s3tc@GL_COMPRESSED_SRGB- swizzled
 spec@ext_timer_query@time-elapsed
+spec@ext_transform_feedback@overflow-edge-cases use_gs
 spec@ext_transform_feedback@position-readback-bufferrange-discard
 spec@ext_transform_feedback@tessellation triangle_fan flat_first
 spec@glsl-1.10@execution@algebraic@glsl-algebraic-logicand-false
