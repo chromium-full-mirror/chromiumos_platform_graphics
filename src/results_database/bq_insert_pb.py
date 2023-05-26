@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# Copyright 2020 The Chromium OS Authors. All rights reserved.
+# Copyright 2020 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -11,6 +10,7 @@ from __future__ import print_function
 import argparse
 import importlib
 
+# pylint: disable=import-error
 from google.cloud import bigquery
 from google.protobuf import json_format
 
@@ -76,8 +76,8 @@ def main():
                                     else MESSAGES[args.message][0])
     (module_path, class_name) = class_path.rsplit('.', 1)
     if args.verbose:
-        print('module: %s' % module_path)
-        print('class: %s' % class_name)
+        print(f'module: {module_path}')
+        print(f'class: {class_name}')
 
     # Load the appropriate python protobuf module based on the specified
     # class path.
@@ -106,7 +106,7 @@ def main():
                 id_key = 'name.value'
             else:
                 row_ids.append(None)
-                print('WARNING: message missing id/name: %s' % p)
+                print(f'WARNING: message missing id/name: {p}')
 
     # BigQuery connection to the specified table.
     client = bigquery.Client(args.project)
@@ -114,24 +114,24 @@ def main():
                            args.table if args.table
                                       else MESSAGES[args.message][1]])
     if args.verbose:
-        print('table: %s' % table_name)
+        print(f'table: {table_name}')
     client.get_table(table_name)
 
     # If de-duplication is enabled, query for all ids and only insert new ones.
     if id_key and args.deduplicate:
-        query = ('SELECT %s FROM `%s` WHERE %s IN (%s)' %
-                 (id_key, table_name, id_key,
-                  ','.join(["'%s'" % id for id in row_ids])))
+        # pylint: disable=import-error
+        ids = ','.join([f"'{id}'" for id in row_ids])
+        query = (f'SELECT {id_key} FROM `{table_name}` WHERE {id_key} IN ({ids})')
         if args.verbose:
-            print('dedup query: %s' % query)
+            print(f'dedup query: {query}')
         query_job = client.query(query)  # API request
         results = query_job.result()  # Waits for query to finish
         duplicates = []
         if results:
             duplicates = {row.value for row in results}
-            print('skipping %d duplicates:' % len(duplicates))
+            print(f'skipping {len(duplicates)} duplicates:')
             for d in duplicates:
-                print(' %s' % d)
+                print(f' {d}')
 
         # Filter duplicates if any where found.
         if duplicates:
@@ -147,11 +147,11 @@ def main():
     # Actually insert the results.
     if rows:
         # TODO(davidriley): Split this into chunks if necessary.
-        print('inserting %d rows to %s' % (len(rows), table_name))
+        print(f'inserting {len(rows)} rows to {table_name}')
         if not args.dryrun:
             insert = client.insert_rows_json(table_name, rows)
             if insert:
-                print('ERROR: could not insert rows: %s' % insert)
+                print(f'ERROR: could not insert rows: {insert}')
         else:
             print('dryrun: skipping inserts')
     else:
