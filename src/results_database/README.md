@@ -12,7 +12,7 @@ gcloud auth application-default login
 
 Set project for BQ uploads:
 ```sh
-gcloud config set project google.com:stainless-dev
+gcloud config set project chromeos-graphics
 ```
 
 ## Python setup
@@ -141,4 +141,72 @@ bq_insert_pb.py results.json
 bq_insert_pb.py --message TraceList trace-info.json
 bq_insert_pb.py --message Machine machine.json
 bq_insert_pb.py --message SoftwareConfig software.json
+```
+
+## BigQuery initial setup
+
+This only should need to be done once if the project changes from
+chromeos-graphics.
+
+### Dataset setup
+
+Follow the public
+[instructions](https://cloud.google.com/bigquery/docs/datasets) to create
+a new 'graphics' dataset.
+
+The options to use are:
+- Multi-region
+- US region
+- Table expiration disabled
+- Case insensitive table names disabled
+- Default collation disabled
+
+Alternatively, the following should work from command-line but has not been
+recently verified:
+```
+bq --project_id chromeos-graphics mk graphics
+```
+
+### Table setup
+
+The BigQuery tables need to be created with schemas based off of the
+protobufs.
+
+From a [Chrome infra checkout](https://sites.google.com/a/google.com/chrome-infrastructure/getting-started) build the [bqschemaupdater](https://chromium.googlesource.com/infra/luci/luci-go/+/main/tools/cmd/bqschemaupdater/README.md) tool.
+
+Abbreviated version to get bqschemaupdater
+```
+mkdir -p ~/cr && cd ~/cr
+fetch infra
+cd infra
+eval `go/env.py`
+bqschemaupdater --help
+```
+
+Modify the protobufs to match the format expected by bqschemaupdater and
+actually create the tables:
+```
+cd ~/chromiumos
+cd infra/proto/src/test/custom_results/graphics
+sed -i -e 's,import "test/custom_results/graphics/,import ",' *.proto
+PROJECT=chromeos-graphics
+bqschemaupdater -I . -table "${PROJECT}".graphics.results -message test.custom_results.graphics.Result
+bqschemaupdater -I . -table "${PROJECT}".graphics.traces -message test.custom_results.graphics.Trace
+bqschemaupdater -I . -table "${PROJECT}".graphics.machines -message test.custom_results.graphics.Machine
+bqschemaupdater -I . -table "${PROJECT}".graphics.software_configs -message test.custom_results.graphics.SoftwareConfig
+```
+
+Use bq_insert_pb.py to verify that the tables can be uploaded to.
+
+### Table migration
+
+Alternatively instead of starting with the tables from scratch, data can be
+optionally migrated over from another project or dataset.  Be careful as
+these commands can wipe out the destination tables.
+```
+PROJECT=chromeos-graphics
+bq cp 936557322845:graphics.results "${PROJECT}":graphics.results
+bq cp 936557322845:graphics.traces "${PROJECT}":graphics.traces
+bq cp 936557322845:graphics.machines "${PROJECT}":graphics.machines
+bq cp 936557322845:graphics.software_configs "${PROJECT}":graphics.software_configs
 ```

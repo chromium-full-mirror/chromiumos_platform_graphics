@@ -57,7 +57,7 @@ def init_argparse():
                         choices=[*MESSAGES],
                         help='Protobuf message to instantiate')
     parser.add_argument('--project',
-                        default='google.com:stainless-dev',
+                        default='chromeos-graphics',
                         help='Google Cloud project')
     parser.add_argument('--table',
                         help='Override table to insert results into')

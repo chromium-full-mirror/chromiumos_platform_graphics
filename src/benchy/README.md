@@ -22,7 +22,7 @@ is used to upload results.
 ## Google Cloud setup
 
 Contact someone in OWNERS for access to the appropriate BigQuery database.
-Request the following permissions from google.com:stainless-dev:
+Request the following permissions from chromeos-graphics:
 - BigQuery Data Editor
 - BigQuery Data Viewer
 - BigQuery Job User
@@ -37,13 +37,13 @@ gcloud auth application-default login
 
 Set project for BQ uploads:
 ```sh
-gcloud config set project google.com:stainless-dev
+gcloud config set project chromeos-graphics
 ```
 
 The following might be necessary:
 ```
 export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.config/gcloud/application_default_credentials.json
-gcloud auth application-default set-quota-project google.com:stainless-dev
+gcloud auth application-default set-quota-project chromeos-graphics
 ```
 
 ## Python setup
