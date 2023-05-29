@@ -66,27 +66,6 @@ graphics.OpenclCts.contractions_contractions_float_7:
 graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_float:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_half_float:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int16:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int8:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int16:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int8:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_short_565:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.thread_dimensions_full_3d_explicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0

@@ -10,10 +10,6 @@ graphics.OpenclCts.allocations_single_1_image2d_write:
 graphics.OpenclCts.allocations_single_1_image2d_write_non_blocking:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.api_get_kernel_arg_info:
-  expectation: FAIL
-  tickets:
-  - b/227134903
 graphics.OpenclCts.api_min_image_formats:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -97,9 +93,18 @@ graphics.OpenclCts.basic_writeimage_fp32:
 graphics.OpenclCts.basic_writeimage_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_acos:
+  expectation: FAIL
+  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_add:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_atanpi:
+  expectation: FAIL
+  since_build: R116-15479.0.0
+graphics.OpenclCts.bruteforce_ceil:
+  expectation: FAIL
+  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_cos:
   expectation: FAIL
   tickets:
@@ -111,25 +116,43 @@ graphics.OpenclCts.bruteforce_cosh:
 graphics.OpenclCts.bruteforce_divide:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_exp:
+  expectation: FAIL
+  since_build: R116-15479.0.0
+graphics.OpenclCts.bruteforce_exp2:
+  expectation: FAIL
+  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_fdim:
   expectation: FAIL
   tickets:
   - b/227133190
+graphics.OpenclCts.bruteforce_floor:
+  expectation: FAIL
+  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_fma:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_fmin:
+  expectation: FAIL
+  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_fract:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.bruteforce_half_divide:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_half_exp:
+  expectation: FAIL
+  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.bruteforce_half_recip:
   expectation: FAIL
   since_build: R114-15432.0.0
+graphics.OpenclCts.bruteforce_half_rsqrt:
+  expectation: FAIL
+  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_half_sqrt:
   expectation: FAIL
   since_build: R114-15432.0.0
@@ -139,9 +162,21 @@ graphics.OpenclCts.bruteforce_hypot:
 graphics.OpenclCts.bruteforce_islessgreater:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_isunordered:
+  expectation: FAIL
+  since_build: R116-15479.0.0
+graphics.OpenclCts.bruteforce_logb:
+  expectation: FAIL
+  since_build: R116-15479.0.0
+graphics.OpenclCts.bruteforce_minmag:
+  expectation: FAIL
+  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_multiply:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_not:
+  expectation: FAIL
+  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_pow:
   expectation: FAIL
   tickets:
@@ -154,6 +189,9 @@ graphics.OpenclCts.bruteforce_powr:
   expectation: FAIL
   tickets:
   - b/227133190
+graphics.OpenclCts.bruteforce_signbit:
+  expectation: FAIL
+  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_sin:
   expectation: FAIL
   tickets:
@@ -166,6 +204,9 @@ graphics.OpenclCts.bruteforce_sinh:
   expectation: FAIL
   tickets:
   - b/227133190
+graphics.OpenclCts.bruteforce_sinpi:
+  expectation: FAIL
+  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_subtract:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -373,21 +414,6 @@ graphics.OpenclCts.relationals_relational_islessgreater:
 graphics.OpenclCts.samplerless_reads_1d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int16:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int8:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int16:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int8:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_short_565:
-  expectation: FAIL
-  since_build: R111-15291.0.0
 graphics.OpenclCts.samplerless_reads_1darray_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0

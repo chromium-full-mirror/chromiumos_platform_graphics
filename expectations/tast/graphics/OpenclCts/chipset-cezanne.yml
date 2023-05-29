@@ -1,7 +1,3 @@
-graphics.OpenclCts.api_get_kernel_arg_info:
-  expectation: FAIL
-  tickets:
-  - b/227134903
 graphics.OpenclCts.api_min_image_formats:
   expectation: FAIL
   since_build: R112-15343.0.0
@@ -55,41 +51,6 @@ graphics.OpenclCts.conversions_ulong_float:
   expectation: FAIL
   tickets:
   - b/253996509
-  since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_float:
-  expectation: FAIL
-  tickets:
-  - b/253999427
-  since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_half_float:
-  expectation: FAIL
-  tickets:
-  - b/253999427
-  since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int16:
-  expectation: FAIL
-  tickets:
-  - b/253999427
-  since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_snorm_int8:
-  expectation: FAIL
-  tickets:
-  - b/253999427
-  since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int16:
-  expectation: FAIL
-  tickets:
-  - b/253999427
-  since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_int8:
-  expectation: FAIL
-  tickets:
-  - b/253999427
-  since_build: R109-15229.0.0
-graphics.OpenclCts.samplerless_reads_1d_cl_unorm_short_565:
-  expectation: FAIL
-  tickets:
-  - b/253999427
   since_build: R109-15229.0.0
 graphics.OpenclCts.samplerless_reads_3d_cl_float:
   expectation: FAIL

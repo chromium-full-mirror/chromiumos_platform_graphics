@@ -36,7 +36,7 @@ import (
 	"google.golang.org/api/iterator"
 	"gopkg.in/yaml.v2"
 
-	"chromiumos/tast/local/graphics/expectations"
+	"go.chromium.org/tast-tests/cros/local/graphics/expectations"
 	"go.chromium.org/tast/core/errors"
 )
 

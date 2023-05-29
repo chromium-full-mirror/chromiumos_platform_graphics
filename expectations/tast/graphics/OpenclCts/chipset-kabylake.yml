@@ -1,7 +1,3 @@
-graphics.OpenclCts.api_get_kernel_arg_info:
-  expectation: FAIL
-  tickets:
-  - b/227134903
 graphics.OpenclCts.api_min_image_formats:
   expectation: FAIL
   since_build: R111-15291.0.0
