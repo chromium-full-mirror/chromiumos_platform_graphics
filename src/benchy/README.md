@@ -172,3 +172,48 @@ For more setup details, refer to
 ```
 go/borealis-benchy
 ```
+
+## Plx initial setup
+
+This only should need to be done once if the project changes from
+chromoes-graphics.
+
+### Plx workflow service account
+
+See [Graphics results database BigQuery initial setup](https://chromium.googlesource.com/chromiumos/platform/graphics/+/refs/heads/main/src/results_database/README.md#bigquery-initial-setup)
+first.
+
+First [create a Cloud service account](https://g3doc.corp.google.com/company/teams/plx/workflows/workflow-concepts.md?cl=head#cloud-service-account)
+under the chromeos-graphics Cloud project named plx-workflow.
+
+Grant the service account access to the project with the following roles:
+- BigQuery Data Viewer
+- BigQuery Job User
+
+Add the following principals access to the service account:
+- plx-security@prod.google.com as Service Account Token Creator
+- davidriley@prod.google.com as Service Account User
+
+### Plx workflow creation
+
+Create the following four Plx workflows:
+- chromeos-graphics.graphics.software_configs copy
+- chromeos-graphics.graphics.machines copy
+- chromeos-graphics.graphics.traces copy
+- chromeos-graphics.graphics.results copy
+
+For each:
+- Wait for schedule
+  - Advanced schedule of "17,37,57 */1 * * *" which is three times per hour
+- BigQuery data copy
+  - Cloud project id: chromeos-graphics
+  - Source table: chromeos-graphics.graphics.software_configs
+  - Quota accounting owner: chromeos-gfx-resource
+  - Destination table: chromeos_gfx_resource.software_configs
+- Settings
+  - Cloud authentication: Cloud service account plx-workflow@chromeos-graphics.iam.gserviceaccount.com
+- Share
+  - Add owner: chromeos-gaming-admin@prod.google.com
+- Save
+- Set to Enabled
+- Run now to test
