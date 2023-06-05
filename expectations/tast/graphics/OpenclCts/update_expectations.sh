@@ -60,7 +60,7 @@ do
         --board_regex "${board_regex}" \
         --exclude_model_regex "${exclude_model_regex}" \
         --exclude_reason_regex \
-        "deadline exceeded|exit status 127|[Ll]ost SSH connection|GPU hang|core dumped" \
+        "deadline exceeded|exit status 127|[Ll]ost SSH connection|GPU hang" \
         --test_regex "OpenclCts" \
         --build_regex "$1"
 done
