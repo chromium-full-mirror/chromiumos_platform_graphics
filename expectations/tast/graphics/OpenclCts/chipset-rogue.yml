@@ -80,9 +80,6 @@ graphics.OpenclCts.basic_writeimage_fp32:
 graphics.OpenclCts.basic_writeimage_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_acos:
-  expectation: FAIL
-  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_add:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -92,6 +89,9 @@ graphics.OpenclCts.bruteforce_asin:
 graphics.OpenclCts.bruteforce_atan:
   expectation: FAIL
   since_build: R116-15488.0.0
+graphics.OpenclCts.bruteforce_atan2:
+  expectation: FAIL
+  since_build: R116-15490.0.0
 graphics.OpenclCts.bruteforce_atanh:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -579,9 +579,39 @@ graphics.OpenclCts.integer_ops_ushort_math:
 graphics.OpenclCts.integer_ops_ushort_shift:
   expectation: FAIL
   since_build: R111-15291.0.0
+graphics.OpenclCts.printf_address_space_0:
+  expectation: FAIL
+  since_build: R116-15490.0.0
+graphics.OpenclCts.printf_address_space_1:
+  expectation: FAIL
+  since_build: R116-15490.0.0
+graphics.OpenclCts.printf_address_space_2:
+  expectation: FAIL
+  since_build: R116-15490.0.0
+graphics.OpenclCts.printf_address_space_3:
+  expectation: FAIL
+  since_build: R116-15490.0.0
+graphics.OpenclCts.printf_address_space_4:
+  expectation: FAIL
+  since_build: R116-15490.0.0
+graphics.OpenclCts.printf_char_0:
+  expectation: FAIL
+  since_build: R116-15490.0.0
+graphics.OpenclCts.printf_char_1:
+  expectation: FAIL
+  since_build: R116-15490.0.0
+graphics.OpenclCts.printf_char_2:
+  expectation: FAIL
+  since_build: R116-15490.0.0
+graphics.OpenclCts.printf_float_0:
+  expectation: FAIL
+  since_build: R116-15490.0.0
 graphics.OpenclCts.printf_float_1:
   expectation: FAIL
   since_build: R116-15488.0.0
+graphics.OpenclCts.printf_float_10:
+  expectation: FAIL
+  since_build: R116-15490.0.0
 graphics.OpenclCts.printf_float_11:
   expectation: FAIL
   since_build: R116-15488.0.0
