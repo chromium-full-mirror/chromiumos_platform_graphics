@@ -282,19 +282,3 @@ graphics.OpenclCts.samplerless_reads_1dbuffer_cl_unorm_short_565:
 graphics.OpenclCts.thread_dimensions_full_3d_explicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.vectors_vec_align_packed_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_packed_struct_arr:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_struct_arr:
-  expectation: FAIL
-  tickets:
-  - b/227134903

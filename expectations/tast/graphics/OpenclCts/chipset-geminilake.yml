@@ -125,6 +125,9 @@ graphics.OpenclCts.cl_copy_images_3dto2darray_cl_unorm_int16:
 graphics.OpenclCts.cl_copy_images_3dto2darray_cl_unorm_int8:
   expectation: FAIL
   since_build: R116-15490.0.0
+graphics.OpenclCts.cl_copy_images_3dto2darray_cl_unorm_short_565:
+  expectation: FAIL
+  since_build: R116-15499.0.0
 graphics.OpenclCts.cl_fill_images_2darray_cl_float:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -428,19 +431,3 @@ graphics.OpenclCts.thread_dimensions_quick_2d_implicit_local:
 graphics.OpenclCts.thread_dimensions_quick_3d_explicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.vectors_vec_align_packed_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_packed_struct_arr:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_struct_arr:
-  expectation: FAIL
-  tickets:
-  - b/227134903

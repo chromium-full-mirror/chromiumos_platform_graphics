@@ -340,15 +340,6 @@ graphics.OpenclCts.printf_vector_3:
 graphics.OpenclCts.printf_vector_4:
   expectation: FAIL
   since_build: R116-15488.0.0
-graphics.OpenclCts.profiling_read_image_char:
-  expectation: FAIL
-  since_build: R110-15273.0.0
-graphics.OpenclCts.profiling_read_image_float:
-  expectation: FAIL
-  since_build: R110-15273.0.0
-graphics.OpenclCts.profiling_read_image_uchar:
-  expectation: FAIL
-  since_build: R112-15343.0.0
 graphics.OpenclCts.samplerless_reads_1dbuffer_cl_float:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -376,19 +367,3 @@ graphics.OpenclCts.samplerless_reads_3d_cl_float:
 graphics.OpenclCts.samplerless_reads_3d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.vectors_vec_align_packed_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_packed_struct_arr:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_struct_arr:
-  expectation: FAIL
-  tickets:
-  - b/227134903

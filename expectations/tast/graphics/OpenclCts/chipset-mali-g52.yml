@@ -357,19 +357,3 @@ graphics.OpenclCts.thread_dimensions_full_3d_explicit_local:
 graphics.OpenclCts.thread_dimensions_quick_3d_explicit_local:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.vectors_vec_align_packed_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_packed_struct_arr:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_struct_arr:
-  expectation: FAIL
-  tickets:
-  - b/227134903

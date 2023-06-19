@@ -86,6 +86,12 @@ graphics.OpenclCts.bruteforce_add:
 graphics.OpenclCts.bruteforce_asin:
   expectation: FAIL
   since_build: R116-15488.0.0
+graphics.OpenclCts.bruteforce_asinpi:
+  expectation: FAIL
+  since_build: R116-15506.0.0
+graphics.OpenclCts.bruteforce_assignment:
+  expectation: FAIL
+  since_build: R116-15499.0.0
 graphics.OpenclCts.bruteforce_atan:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -131,12 +137,18 @@ graphics.OpenclCts.bruteforce_floor:
 graphics.OpenclCts.bruteforce_fma:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_fmin:
+  expectation: FAIL
+  since_build: R116-15499.0.0
 graphics.OpenclCts.bruteforce_fract:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.bruteforce_half_divide:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_half_exp:
+  expectation: FAIL
+  since_build: R116-15499.0.0
 graphics.OpenclCts.bruteforce_half_exp2:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -152,6 +164,9 @@ graphics.OpenclCts.bruteforce_half_sqrt:
 graphics.OpenclCts.bruteforce_hypot:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_isfinite:
+  expectation: FAIL
+  since_build: R116-15499.0.0
 graphics.OpenclCts.bruteforce_isgreaterequal:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -179,9 +194,6 @@ graphics.OpenclCts.bruteforce_log2:
 graphics.OpenclCts.bruteforce_maxmag:
   expectation: FAIL
   since_build: R116-15488.0.0
-graphics.OpenclCts.bruteforce_minmag:
-  expectation: FAIL
-  since_build: R116-15479.0.0
 graphics.OpenclCts.bruteforce_multiply:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -215,6 +227,9 @@ graphics.OpenclCts.bruteforce_sinh:
   expectation: FAIL
   tickets:
   - b/227133190
+graphics.OpenclCts.bruteforce_sinpi:
+  expectation: FAIL
+  since_build: R116-15499.0.0
 graphics.OpenclCts.bruteforce_subtract:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -222,10 +237,10 @@ graphics.OpenclCts.bruteforce_tan:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.bruteforce_tanpi:
+graphics.OpenclCts.bruteforce_tanh:
   expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.bruteforce_trunc:
+  since_build: R116-15499.0.0
+graphics.OpenclCts.bruteforce_tanpi:
   expectation: FAIL
   since_build: R116-15488.0.0
 graphics.OpenclCts.buffers_image_migrate:
@@ -715,19 +730,3 @@ graphics.OpenclCts.thread_dimensions_quick_2d_implicit_local:
 graphics.OpenclCts.thread_dimensions_quick_3d_explicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.vectors_vec_align_packed_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_packed_struct_arr:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_struct_arr:
-  expectation: FAIL
-  tickets:
-  - b/227134903

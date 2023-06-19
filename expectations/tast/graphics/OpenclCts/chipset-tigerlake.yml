@@ -296,15 +296,3 @@ graphics.OpenclCts.printf_vector_4:
 graphics.OpenclCts.printf_vector_5:
   expectation: FAIL
   since_build: R116-15488.0.0
-graphics.OpenclCts.vectors_vec_align_packed_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_packed_struct_arr:
-  expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.vectors_vec_align_struct:
-  expectation: FAIL
-  tickets:
-  - b/227134903
