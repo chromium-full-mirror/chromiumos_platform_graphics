@@ -875,15 +875,17 @@ jmp pm_exception_end
 ;   to get an idea of when the interrupt service began execution.
 ;
 ;   We are only saving registers that are not expected to be saved by the
-;   interrupt hanlder function. Using the EFI ABI.
+;   interrupt hanlder function (using the EFI ABI).
 ;
 ;   Interrupt Function Prototype:
 ;    ap_interrupt(ap_buffer *p, uint64_t tsc, uint32_t vector)
 ;******************************************************************************
 pm_ext_int:
-push eax                                ;Save the registers as we need them
-push edx                                ;to sample the TSC
-rdtsc                                   ;Read the TSC
+push eax                                ;Save these registers
+push edx
+lfence                                  ;To sample the TSC at this point
+rdtsc                                   ;Read the TSC (into EDX:EAX)
+lfence
 push ecx
 
 mov cx, cs                              ;Figure out which vector this
@@ -1249,7 +1251,9 @@ jmp lm_halt
 lm_ext_int:
 push rax                               ;Same as protected mode
 push rdx
-rdtsc
+lfence                                 ;We are surrounding RDTSC with lfence
+rdtsc                                  ;as we want the TSC to be sampled at this
+lfence                                 ;point in the instruction stream
 shl rdx, 32
 or rdx, rax                            ;Combine TSC sample into single 64-bit value
 push rcx
@@ -1257,8 +1261,10 @@ push r8
 push r9
 push r10
 push r11
+push rbx
+push rbp
 
-mov rcx, fs:[ap_buffer]
+mov ecx, fs:[ap_buffer]
 mov ax, cs
 shr ax, 3
 sub ax, 1
@@ -1268,12 +1274,16 @@ mov rbx, [rax + PRIV_INTJMP + (r8 * 8)]
 inc dword [rax + PRIV_INTCNT + (r8 * 4)]
 test rbx, rbx
 jz no_lm_int_handler
+mov rbp, rsp                            ;This register MUST be saved by callee if used
+lea rsp, [rsp - 32]                     ;Allocate shadow stack space before call
 call rbx
-
+mov rsp, rbp                            ;Restore it
 no_lm_int_handler:
 
 mov r11d, fs:[apic_base]                ;Send an EOI to APIC
 mov dword [r11d + XAPIC_EOI_REGISTER], 0
+pop rbp
+pop rbx
 pop r11
 pop r10
 pop r9
