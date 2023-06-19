@@ -239,12 +239,14 @@ BOOLEAN EFIAPI VmPerfGetOptionString(
 
     if (GetOption(OptionName, &OptionSplit)) {
         /* Copy the string over */
-        AsciiStrnCpyS(
-            OptionStringValue,
-            OptionStringLength,
-            OptionSplit.Value,
-            AsciiStrLen(OptionSplit.Value)
-        );
+        if (OptionStringValue && OptionStringLength > 0) {
+            AsciiStrnCpyS(
+                OptionStringValue,
+                OptionStringLength,
+                OptionSplit.Value,
+                AsciiStrLen(OptionSplit.Value)
+            );
+        }
         return TRUE;
     }
     return FALSE;
