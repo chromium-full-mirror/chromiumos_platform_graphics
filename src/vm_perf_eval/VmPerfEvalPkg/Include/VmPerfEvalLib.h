@@ -164,6 +164,59 @@ typedef struct {
     IDENTITY_PT_BUILDER     *PtBuilder;
 }   CORE_ENTRY_INFO;
 
+/**
+ * Structure to hold information about
+ * the CPU this application is running on.
+ */
+typedef struct {
+    /*
+    * Holds the vendor string returned by the CPUID instruction
+    * on the very first standard space leaf. It is generally
+    * a good indicator of the CPU vendor:
+    *
+    * "AuthenticAMD"
+    * "GenuineIntel"
+    */
+    CHAR8       VendorString[16];
+
+    /*
+    * If (from the CPUID instruction) we determine we are running
+    * under a VM, this field will contain the hypervisor name.
+    * Currently the only known hypervisor is "KVMKVMKVM",
+    * which is the Linux KVM. It MAY be possible
+    * for virtual machine monitor software to change this.
+    */
+    CHAR8       HypervisorName[16];
+
+    /*
+    * If supported by the CPU (can support extended space CPUID),
+    * this will contain the brand name string. This will generally
+    * include the actual brand name for this processor and may
+    * include the base clock frequency of the CPU.
+    */
+    CHAR8       BrandName[64];
+
+    /* Set to TRUE if the application is running on a VM */
+    BOOLEAN     Virtualized;
+
+    /* Set to TRUE if the TSC deadline timer mode is supported by this CPU */
+    BOOLEAN     TscDeadline;
+
+    /*
+    * Set to TRUE if MONITOR/MWAIT instructions are supported (extended sleep)
+    */
+    BOOLEAN     MonitorMwait;
+
+    /*
+    * Set to TRUE if we are running under KVM
+    * (a VM + Hypervisor String = KVMKVMKVM)
+    */
+    BOOLEAN     RunningUnderKvm;
+
+    /* Set to TRUE if the KVM Halt Poll control MSR is supported */
+    BOOLEAN     KvmHaltPollControl;
+} VM_PERF_CPU_INFORMATION;
+
 typedef struct {
     /* The APIC ID of this core */
     UINT32                  ApicId;
@@ -304,7 +357,10 @@ typedef struct {
     EFI_FILE_PROTOCOL           *LogFile;
 
     /* The array containing basic info about each enumerated core */
-    VM_PERF_EVAL_ENUM_CPU   AcpiCores[VM_PERF_MAX_CORES];
+    VM_PERF_EVAL_ENUM_CPU       AcpiCores[VM_PERF_MAX_CORES];
+
+    /* Instance of the CPU information structure */
+    VM_PERF_CPU_INFORMATION     CpuInformation;
 }   VM_PERF_EVAL_CTX;
 
 /**
@@ -658,6 +714,28 @@ BOOLEAN EFIAPI VmPerfGetOptionString(
     CHAR8 *OptionName,
     CHAR8 *OptionStringValue,
     UINT32 OptionStringLength
+);
+
+/**
+ * @brief Retrieves some information about the CPU the application is currently
+ * running on.
+ *
+ * The information retrieved includes vendor string, brand name string and
+ * some pertinent CPU feature flags.
+ *
+ * @param   CpuInfo         Pointer to VM_PERF_CPU_INFORMATION
+*/
+VOID EFIAPI VmPerfGetCpuInformation(
+    VM_PERF_CPU_INFORMATION *CpuInfo
+);
+
+/**
+ * @brief Logs CPU information on the console.
+ *
+ * @param   Ctx             Pointer to Vm Perf Eval context
+*/
+VOID EFIAPI VmPerfLogCpuInformation(
+    VM_PERF_EVAL_CTX *Ctx
 );
 
 #endif      /* __VM_PERF_EVAL_LIB_H__ */

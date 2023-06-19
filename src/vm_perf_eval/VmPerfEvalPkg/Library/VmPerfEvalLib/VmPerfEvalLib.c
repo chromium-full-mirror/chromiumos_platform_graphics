@@ -12,8 +12,29 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
+#include <Register/Intel/Cpuid.h>
 #include <Library/PrintLib.h>
 #include "VmPerfEvalInternal.h"
+
+/*
+* These two values are the CPUID leafs we can use to retrieve
+* hypervisor information.
+*
+* The first leaf (0x40000000) can be used to determine which
+* hypervisor we are running under. The string returned
+* by KVM is "KVMKVMKVM". If we find this string, we can
+* assume we are running under KVM. The next leaf (0x40000001)
+* can be used to retrieve feature flags regarding the current
+* KVM implementation.
+*
+* In the kernel source tree, see Documentation/virt/kvm/cpuid.rst
+* for more details.
+*
+* This information is useful as certain KVM parameters can be manipulated
+* directly from the vCPU through the use of special MSRs.
+*/
+#define HYPERVISOR_INFORMATION_LEAF_0         0x40000000
+#define HYPERVISOR_INFORMATION_LEAF_KVM_FLAGS 0x40000001
 
 /* Boot strapper code for the AP's on the system */
 static const UINT8 ApBootCode[] = {
@@ -195,6 +216,9 @@ BOOLEAN EFIAPI VmPerfInitialize(
     * on the machine we are running on.
     */
     Ctx->NumAcpiCores = VmPerfEvalScanCpus(Ctx);
+
+    /* Retrieve CPU information */
+    VmPerfGetCpuInformation(&Ctx->CpuInformation);
     return TRUE;
 }
 
@@ -372,4 +396,148 @@ EFI_PHYSICAL_ADDRESS EFIAPI VmPerfMakeRealModeEntryPoint(
     EntryPoint = (CSValue << 16);
 
     return EntryPoint;
+}
+
+
+static
+VOID
+EFIAPI
+VmPerfGetKvmInformation(
+    VM_PERF_CPU_INFORMATION *CpuInfo
+)
+{
+    UINT32 Eax, Ebx, Ecx, Edx;
+
+    /* If we get here, we should at least support the KVM_FEATURES leaf */
+    AsmCpuid(HYPERVISOR_INFORMATION_LEAF_KVM_FLAGS, &Eax, &Ebx, &Ecx, &Edx);
+
+    if (Eax & (1 << 12)) {
+        CpuInfo->KvmHaltPollControl = TRUE;
+    }
+}
+
+VOID EFIAPI VmPerfGetCpuInformation(
+    VM_PERF_CPU_INFORMATION *CpuInfo
+)
+{
+    UINT32 CpuStringDwords[16];
+    UINT32 CpuSigString[4];
+    CHAR8 *CpuSig, *CpuString;
+
+    UINT32 Eax, Ebx, Ecx, Edx;
+    CPUID_VERSION_INFO_ECX VersionEcx;
+
+    /* Clear the CPU identification string buffer */
+    gBS->SetMem(CpuStringDwords, sizeof(CpuStringDwords), 0);
+    gBS->SetMem(CpuSigString, sizeof(CpuSigString), 0);
+
+    /* Clear the associated information in the CPU info structure */
+    gBS->SetMem(CpuInfo->BrandName, sizeof(CpuInfo->BrandName), 0);
+    gBS->SetMem(CpuInfo->HypervisorName, sizeof(CpuInfo->HypervisorName), 0);
+    gBS->SetMem(CpuInfo->VendorString, sizeof(CpuInfo->VendorString), 0);
+    CpuInfo->Virtualized = FALSE;
+    CpuInfo->TscDeadline = FALSE;
+    CpuInfo->MonitorMwait = FALSE;
+    CpuInfo->RunningUnderKvm = FALSE;
+    CpuInfo->KvmHaltPollControl = FALSE;
+
+    AsmCpuid(CPUID_EXTENDED_FUNCTION, &Eax, NULL, NULL, NULL);
+
+    if (Eax >= CPUID_BRAND_STRING3) {
+        /* We prefer to use the brand string if available */
+        AsmCpuid(CPUID_BRAND_STRING1, &Eax, &Ebx, &Ecx, &Edx);
+
+        CpuStringDwords[0] = Eax;
+        CpuStringDwords[1] = Ebx;
+        CpuStringDwords[2] = Ecx;
+        CpuStringDwords[3] = Edx;
+
+        AsmCpuid(CPUID_BRAND_STRING2, &Eax, &Ebx, &Ecx, &Edx);
+
+        CpuStringDwords[4] = Eax;
+        CpuStringDwords[5] = Ebx;
+        CpuStringDwords[6] = Ecx;
+        CpuStringDwords[7] = Edx;
+
+        AsmCpuid(CPUID_BRAND_STRING3, &Eax, &Ebx, &Ecx, &Edx);
+
+        CpuStringDwords[8] = Eax;
+        CpuStringDwords[9] = Ebx;
+        CpuStringDwords[10] = Ecx;
+        CpuStringDwords[11] = Edx;
+
+        CpuString = (CHAR8 *)CpuStringDwords;
+        AsciiStrnCpyS(
+            CpuInfo->BrandName, sizeof(CpuInfo->BrandName),
+            CpuString, 48
+        );
+    }
+
+    /* Use the vendor string and set the max main index we can use */
+    AsmCpuid(CPUID_SIGNATURE, &Eax, &Ebx, &Ecx, &Edx);
+
+    CpuSigString[0] = Ebx;
+    CpuSigString[1] = Edx;
+    CpuSigString[2] = Ecx;
+    CpuSig = (CHAR8 *)CpuSigString;
+    AsciiStrnCpyS(
+        CpuInfo->VendorString, sizeof(CpuInfo->VendorString),
+        CpuSig, 12
+    );
+
+    if (Eax >= CPUID_VERSION_INFO) {
+        /* Figure out if we are running on a virtual machine */
+        AsmCpuid(CPUID_VERSION_INFO, &Eax, &Ebx, &Ecx, &Edx);
+
+        VersionEcx.Uint32 = Ecx;
+
+        /* Also transfer any CPUID information we can get */
+        CpuInfo->TscDeadline = VersionEcx.Bits.TSC_Deadline;
+        CpuInfo->MonitorMwait = VersionEcx.Bits.MONITOR;
+
+        if (VersionEcx.Bits.ParaVirtualized) {
+            /* Try and retrieve the name of the hypervisor */
+            AsmCpuid(HYPERVISOR_INFORMATION_LEAF_0, &Eax, &Ebx, &Ecx, &Edx);
+
+            gBS->SetMem(CpuSigString, sizeof(CpuSigString), 0);
+            CpuSigString[0] = Ebx;
+            CpuSigString[1] = Ecx;
+            CpuSigString[2] = Edx;
+            CpuSig = (CHAR8 *)CpuSigString;
+
+            AsciiStrnCpyS(
+                CpuInfo->HypervisorName, sizeof(CpuInfo->HypervisorName),
+                CpuSig, 12
+            );
+            CpuInfo->Virtualized = TRUE;
+
+            /* Check if we are running under KVM */
+            if (!AsciiStrCmp(CpuInfo->HypervisorName, "KVMKVMKVM")) {
+                CpuInfo->RunningUnderKvm = TRUE;
+
+                /* Obtain KVM information */
+                if (Eax >= HYPERVISOR_INFORMATION_LEAF_KVM_FLAGS)
+                    VmPerfGetKvmInformation(CpuInfo);
+            }
+        }
+    }
+}
+
+VOID EFIAPI VmPerfLogCpuInformation(
+    VM_PERF_EVAL_CTX *Ctx
+)
+{
+    VM_PERF_CPU_INFORMATION *CpuInfo = &Ctx->CpuInformation;
+
+    VmPerfLog(Ctx, 0, L"CPU: %a\n", CpuInfo->BrandName);
+    VmPerfLog(Ctx, 0, L"Vendor String: %a\n", CpuInfo->VendorString);
+    VmPerfLog(Ctx, 0, L"TSC Frequency (Est.): %lu Hz\n",
+        Ctx->EstimatedTscFrequency);
+    VmPerfLog(Ctx, 0, L"TSC_Deadline: %u Monitor/Mwait: %u\n",
+        CpuInfo->TscDeadline ? 1 : 0,
+        CpuInfo->MonitorMwait ? 1 : 0);
+
+    if (CpuInfo->Virtualized) {
+        VmPerfLog(Ctx, 0, L"Hypervisor: %a\n", CpuInfo->HypervisorName);
+    }
 }
