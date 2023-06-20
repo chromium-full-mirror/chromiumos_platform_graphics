@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Tool for updating expectations file using Stainless results.
+// Tool for updating expectations file using ResultDB results.
 // This script uses a tast package, so it needs to run with
 // ~/trunk/src/platform/tast/tools/go.sh.
 //
@@ -111,8 +111,8 @@ const modelValidationRegex = `^[a-z]+$`
 const buildValidationRegex = `^R[1-9][0-9]*-[1-9][0-9]*\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$`
 const testValidationRegex = `^tast\.[a-z]+\.[A-Z][a-zA-Z]*(\.[_a-zA-Z0-9]+)?$`
 
-// Uses the internal Google Stainless database for querying test results.
-const stainlessResultsDatabase = "google.com:stainless-prod.stainless.tests*"
+// Uses the internal Google ResultDB database for querying test results.
+const testResultsDatabase = "cros-test-analytics.resultdb.cros_test_results"
 const stainlessProjectID = "google.com:stainless-prod"
 
 func init() {
@@ -149,8 +149,8 @@ func init() {
 				"\t--exclude_reason_regex: Regular expression for failure reason to exclude from results. Optional. Default '%s'\n"+
 				"\t--test: Test name to query for expectations. Not a regular expression. For multiple tests, use multiple arguments. Optional\n"+
 				"\t--test_regex: Regular expression for tests to match. The user must provide either --test or --test_regex.\n"+
-				"\t--from_date: the start of the date range. Format: YYYYMMDD. Optional. Default date range is the last 7 days.\n"+
-				"\t--to_date: the end of the date range. Format: YYYYMMDD. Optional\n"+
+				"\t--from_date: the start of the date range. Format: YYYY-MM-DD. Optional. Default date range is the last 7 days.\n"+
+				"\t--to_date: the end of the date range. Format: YYYY-MM-DD. Optional\n"+
 				"\t--color: Colorize output log\n"+
 				"\t--no_color: Do not colorize output log\n", excludeReasonRegexDefault)
 	}
@@ -180,8 +180,8 @@ func init() {
 	flag.StringVar(&reasonRegex, "reason_regex", "", "regular expression for failure reasons to match")
 	flag.Var(&excludeReasons, "exclude_reason", "failure reason exclude match for expectations. Not a regular expression. For multiple reasons, use multiple arguments")
 	flag.StringVar(&excludeReasonRegex, "exclude_reason_regex", "", "regular expression for failure reasons to exclude")
-	flag.StringVar(&fromDate, "from_date", "", "the start of the date range. Format: YYYYMMDD")
-	flag.StringVar(&toDate, "to_date", "", "the end of the date range. Format: YYYYMMDD")
+	flag.StringVar(&fromDate, "from_date", "", "the start of the date range. Format: YYYY-MM-DD")
+	flag.StringVar(&toDate, "to_date", "", "the end of the date range. Format: YYYY-MM-DD")
 	flag.BoolVar(&colorEnabled, "color", colorEnabled, "Colorize the output log")
 	flag.BoolVar(&colorDisabled, "no_color", colorDisabled, "Do not colorize the output log")
 }
@@ -217,10 +217,10 @@ func createTestResultsQueryString() (string, error) {
 		"SELECT\n"+
 			"  IFNULL(test, \"-\") AS `row`,\n"+
 			"  \"*\" AS `col`,\n"+
-			"  SUM(IF(status IN (\"GOOD\"), 1, 0)) AS pass,\n"+
+			"  SUM(IF(status IN (\"PASS\"), 1, 0)) AS pass,\n"+
 			"  SUM(IF(status IN (\"WARN\"), 1, 0)) AS warn,\n"+
-			"  SUM(IF(status IN (\"FAIL\", \"ERROR\", \"ABORT\") AND NOT REGEXP_CONTAINS(reason, \"Test passed! Consider removing FAIL expectation\"), 1, 0)) AS `fail`,\n"+
-			"  SUM(IF(status IN (\"FAIL\", \"ERROR\", \"ABORT\") AND REGEXP_CONTAINS(reason, \"Test passed! Consider removing FAIL expectation\"), 1, 0)) AS `unexpected_pass`,\n"+
+			"  SUM(IF(status IN (\"FAIL\", \"ERROR\", \"ABORT\") AND NOT REGEXP_CONTAINS(failure_reason, \"Test passed! Consider removing FAIL expectation\"), 1, 0)) AS `fail`,\n"+
+			"  SUM(IF(status IN (\"FAIL\", \"ERROR\", \"ABORT\") AND REGEXP_CONTAINS(failure_reason, \"Test passed! Consider removing FAIL expectation\"), 1, 0)) AS `unexpected_pass`,\n"+
 			"  SUM(IF(status NOT IN (\"GOOD\", \"WARN\", \"FAIL\", \"ERROR\", \"ABORT\", \"NOT_RUN\"),\n"+
 			"         1, 0)) AS other,\n"+
 			"  SUM(IF(status IN (\"NOT_RUN\"), 1, 0)) AS notrun,\n"+
@@ -228,9 +228,9 @@ func createTestResultsQueryString() (string, error) {
 			"FROM\n"+
 			"  `%s`\n"+
 			"WHERE\n"+
-			"  _TABLE_SUFFIX BETWEEN \"%s\" AND \"%s\"\n"+
+			"  queued_time BETWEEN \"%s 00:00:00 UTC\" AND \"%s 00:00:00 UTC\"\n"+
 			"  AND (suite IS NULL OR NOT REGEXP_CONTAINS(suite, r\"^(au$|paygen_au)\"))\n"+
-			"  AND job_name NOT LIKE \"git_%%\"", stainlessResultsDatabase, fromDate, toDate)
+			"  AND job_name NOT LIKE \"git_%%\"", testResultsDatabase, fromDate, toDate)
 
 	// Board
 	if len(boardRegex) > 0 {
@@ -254,12 +254,12 @@ func createTestResultsQueryString() (string, error) {
 
 	// Failure reason
 	if len(reasonRegex) > 0 {
-		queryString = addQueryCriteria(queryString, "reason", reasonRegex)
+		queryString = addQueryCriteria(queryString, "failure_reason", reasonRegex)
 	}
 
 	// Exclude failure reason
 	if len(excludeReasonRegex) > 0 {
-		queryString = addExcludeCriteria(queryString, "reason", excludeReasonRegex)
+		queryString = addExcludeCriteria(queryString, "failure_reason", excludeReasonRegex)
 	}
 
 	// Build
@@ -360,11 +360,11 @@ func buildRegexStringFromList(items []string, name, validateRegexString string, 
 }
 
 func formatTime(t time.Time) string {
-	return fmt.Sprintf("%04d%02d%02d", t.Year(), t.Month(), t.Day())
+	return fmt.Sprintf("%04d-%02d-%02d", t.Year(), t.Month(), t.Day())
 }
 
 func validateTime(t string) error {
-	_, err := time.Parse("20060102", t)
+	_, err := time.Parse("2006-01-02", t)
 	return err
 }
 
