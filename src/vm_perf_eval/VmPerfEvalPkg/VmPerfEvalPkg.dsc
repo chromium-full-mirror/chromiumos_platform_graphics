@@ -51,3 +51,4 @@
  VmPerfEvalPkg/Application/VmPerfFullLoad/VmPerfFullLoad.inf
  VmPerfEvalPkg/Application/VmPerfLibTest/VmPerfLibTest.inf
  VmPerfEvalPkg/Application/VmPerfQuantifiedWork/VmPerfQuantifiedWork.inf
+ VmPerfEvalPkg/Application/VmPerfApicTimerTest/VmPerfApicTimerTest.inf

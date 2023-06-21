@@ -1,0 +1,34 @@
+## @file
+# Copyright 2023 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+##
+
+[Defines]
+   INF_VERSION              = 0x00010005
+   BASE_NAME                = VmPerfApicTimerTest
+   FILE_GUID                = 0FE3B1AB-0CA7-4B80-AD83-8DCA56F4F8A7
+   MODULE_TYPE              = UEFI_APPLICATION
+   VERSION_STRING           = 1.0
+   ENTRY_POINT              = UefiMain
+
+
+[Sources]
+   VmPerfApicTimerTest.c
+   VmPerfApicTimerTestDeadlineAp.c
+   VmPerfApicTimerRecord.c
+   VmPerfApicTimerCState.c
+   VmPerfApicTimerKvm.c
+   VmPerfApicTimerOptions.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  ShellPkg/ShellPkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  VmPerfEvalPkg/VmPerfEvalPkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[LibraryClasses]
+ UefiApplicationEntryPoint
+ UefiLib
+ VmPerfEvalLib
