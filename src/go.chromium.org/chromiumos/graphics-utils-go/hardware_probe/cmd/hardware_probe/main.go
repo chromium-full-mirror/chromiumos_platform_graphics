@@ -141,22 +141,15 @@ func getCPUSOCFamily() (CPUSOCFamily, error) {
 type probeResult struct {
 	CPUFamily  CPUSOCFamily `json:"CPU_SOC_Family"`
 	GPUInfos   []GPUInfo    `json:"GPU_Family"`
-	VGADevices []VGADevice  `json:"VGA_Devices"`
+	VGADevices []VGADevice  `json:"VGA_Devices,omitempty"`
 }
 
 func fatal(format string, args ...interface{}) {
-	fmt.Printf(format+"\n", args...)
+	fmt.Fprintf(os.Stderr, format+"\n", args...)
 	os.Exit(1)
 }
 
-func log(format string, args ...interface{}) {
-	fmt.Printf(format+"\n", args...)
-}
-
 func main() {
-	gpuQuery := flag.Bool("gpu-family", false, "Output the GPU family to stdout")
-	gpuVendorQuery := flag.Bool("gpu-vendor", false, "Output the GPU vendor to stdout")
-	cpuQuery := flag.Bool("cpu-soc-family", false, "Output the CPU family to stdout")
 	outputFile := flag.String("output", "", "Output result to file in json format")
 	flag.Parse()
 
@@ -173,35 +166,19 @@ func main() {
 	}
 	result.GPUInfos = gpuInfos
 
-	if cpuSocFamily == socIntel || cpuSocFamily == socAMD {
-		vgaDevices, err := GetVGADevices()
-		if err != nil {
-			fatal("Failed to determine VGA device: %v", err)
-		}
-		result.VGADevices = vgaDevices
+	vgaDevices, err := GetVGADevices()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to determine VGA device: %v.\n", err)
 	}
+	result.VGADevices = vgaDevices
 
-	if *gpuQuery {
-		for _, gpu := range result.GPUInfos {
-			log("GPU_Family: %v", gpu.Family)
-		}
+	b, err := json.MarshalIndent(result, "", "    ")
+	if err != nil {
+		fatal("Failed to marshal result: %v", result)
 	}
-	if *gpuVendorQuery {
-		for _, gpu := range result.GPUInfos {
-			log("GPU_Vendor: %v", gpu.GPUVendor.String())
-		}
-	}
-	if *cpuQuery {
-		log("CPU_SOC_Family: %v", result.CPUFamily)
-	}
-
+	fmt.Println(string(b))
 	// Output JSON file
 	if len(*outputFile) != 0 {
-		b, err := json.Marshal(result)
-		if err != nil {
-			fatal("Failed to marshal result: %v", result)
-		}
-		log("Output result to %v", *outputFile)
 		if err := os.WriteFile(*outputFile, b, 0755); err != nil {
 			fatal("Failed to write to %v: %v", *outputFile, err)
 		}
