@@ -19,12 +19,18 @@ type VGADevice struct {
 	BDF      string  // PCI device's BDF information
 	Class    string  // PCI device's class name
 	Name     string  // PCI device's name, which also contains its vendor's name
+	VendorID string  // Vendor ID based on its BDF value. Example: AMD=0x1002, Intel=0x8086, NVIDIA=0x10de.
 	DeviceID string  // Device ID based on its BDF value.
 	BootVGA  bool    // True if the PCI device boot_vga is true.
 	GPUInfo  GPUInfo // GPU Family name.
 }
 
-var pciRegex = regexp.MustCompile(`(\S+) (.*): (.*)`)
+var (
+	// Example output
+	// 0000:61:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Lexa XT [Radeon PRO WX 3200] (rev 10)
+	pciCommand = []string{"lspci", "-D"}
+	pciRegex   = regexp.MustCompile(`(\S+) (.*): (.*)`)
+)
 
 func readPCIDevice(bdf string, file string) (string, error) {
 	filePath := fmt.Sprintf("/sys/bus/pci/devices/%s/%s", bdf, file)
@@ -38,7 +44,7 @@ func readPCIDevice(bdf string, file string) (string, error) {
 // GetVGADevices returns the list of vga devices shown when running lspci
 func GetVGADevices() ([]VGADevice, error) {
 	// With -D, lspci will be force to omit the domain numbers.
-	out, err := exec.Command("lspci", "-D").Output()
+	out, err := exec.Command(pciCommand[0], pciCommand[1:]...).Output()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to run lspci")
 	}
@@ -57,6 +63,12 @@ func GetVGADevices() ([]VGADevice, error) {
 			return nil, errors.Wrap(err, "failed to read pci device")
 		}
 		deviceID = strings.ToLower(deviceID)
+
+		vendorID, err := readPCIDevice(matches[1], "vendor")
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to read pci device vendor")
+		}
+		vendorID = strings.ToLower(vendorID)
 
 		// If boot_vga is not exist, consider it false.
 		bootVGA := false
@@ -77,6 +89,7 @@ func GetVGADevices() ([]VGADevice, error) {
 			BDF:      matches[1],
 			Class:    matches[2],
 			Name:     matches[3],
+			VendorID: vendorID,
 			DeviceID: deviceID,
 			BootVGA:  bootVGA,
 			GPUInfo:  gpuInfo,
