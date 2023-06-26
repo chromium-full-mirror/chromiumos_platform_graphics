@@ -16,6 +16,7 @@ func getAMDPCIIDMap() map[string]string {
 		// Update it if mesa/kernel fails to import the desired PCI ID mapping.
 
 		"0x1506": "gc_10_3_7",
+		"0x15bf": "gc_11_0_1",
 
 		// This is mapping imported from mesa and kernel repository.
 

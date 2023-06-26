@@ -16,6 +16,7 @@ import (
 )
 
 var manualMapping = map[string]string{
+	"0x15bf": "gc_11_0_1",
 	"0x1506": "gc_10_3_7",
 }
 
