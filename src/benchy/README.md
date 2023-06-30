@@ -11,7 +11,7 @@ in json protobuf format for uploading to the results database for further
 analysis by plx.
 
 The plan is specified according via the benchy plan protos, and the tool
-allows formulation of a plan through command-line paramters to add and
+allows formulation of a plan through command-line parameters to add and
 import desired entities.
 
 The formulated plan is executed, in parallel if possible, using a results
@@ -35,6 +35,13 @@ gcloud auth login
 gcloud auth application-default login
 ```
 
+# Quick setup
+
+Run `./setup_benchy.sh` to create a Python venv, install dependencies, and run
+`bash` with `$PATH` and other required environment variables set.
+
+# Manual setup: Google Cloud environment
+
 Set project for BQ uploads:
 ```sh
 gcloud config set project chromeos-graphics
@@ -46,13 +53,9 @@ export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.config/gcloud/application_default_c
 gcloud auth application-default set-quota-project chromeos-graphics
 ```
 
-## Python setup
+## Manual setup: Python
 
-The following installs the necessary python libraries.
-
-### Host
-
-Optionally run these from a Python virtual enviornment.  The source
+Optionally run these from a Python virtual environment.  The source
 will need to be done each time.
 ```sh
 python3 -m venv ~/venv
@@ -120,7 +123,7 @@ python to generate the plan.  Parameters are set on device by specifying
 a command line that is substituted using named % substitutions.
 
 For example:
-- 'sudo sysctl vm.swappiness=%(parameter_value)s'
+- `sudo sysctl vm.swappiness=%(parameter_value)s`
 
 In general, substitutions can be done for each plan element (device, build,
 workload, parameter) and all of the named fields.
@@ -154,7 +157,7 @@ Once uploaded the results are regularly imported into plx tables:
 - chromeos_gfx_resource.machines
 - chromeos_gfx_resource.software_configs
 
-Furthermore, two views faciliate viewing results:
+Furthermore, two views facilitate viewing results:
 - chromeos_gfx_resource.results_benchy
 - chromeos_gfx_resource.results_flattened_benchy
 
