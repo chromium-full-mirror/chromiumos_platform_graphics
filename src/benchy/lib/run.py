@@ -15,6 +15,7 @@ import re
 import subprocess
 import sys
 import time
+import threading
 
 # pylint: disable=import-error
 from chromiumos.config.api.test.benchy.v1 import plan_pb2
@@ -61,6 +62,33 @@ RESULTS_CHART_JSON = 'results-chart.json'
 HOST_SOFTWARE_CONFIG_JSON = 'host_software_config.json'
 GUEST_SOFTWARE_CONFIG_JSON = 'guest_software_config.json'
 
+
+class ParallelFlashLimiter:
+    """Optional semaphore to limit number of devices to flash in parallel."""
+
+    def __init__(self):
+        self.semaphore = None
+
+    def set_limit(self, parallel_max):
+        """Set or reset the max number of devices to flash in parallel."""
+        if parallel_max:
+            logging.info(f"Max devices to flash in parallel: {parallel_max}")
+            self.semaphore = threading.Semaphore(parallel_max)
+        else:
+            self.semaphore = None
+
+    def __enter__(self):
+        if self.semaphore:
+            self.semaphore.acquire()
+
+    def __exit__(self, t, v, tb):
+        if self.semaphore:
+            self.semaphore.release()
+
+# Single limiter instance used by configuration and setup code.
+parallel_flash_limiter = ParallelFlashLimiter()
+
+
 def add_subparser(subparsers):
     """Add command line parsing for the subcommand."""
     subparser = subparsers.add_parser('run',
@@ -71,6 +99,9 @@ def add_subparser(subparsers):
                            help='input plan filename')
     subparser.add_argument('--noparallel', dest='parallel', action='store_false',
                            help='do not test in parallel')
+    subparser.add_argument('--parallel-flash-max', dest='parallel_flash_max',
+                           type=int,
+                           help='max number of devices to flash in parallel')
     subparser.add_argument('--retry',
                            type=int,
                            default=3,
@@ -432,9 +463,10 @@ class Build:
         if version == self.pb.version:
             logging.info('correct version already present, skipping flashing')
             return
-        cmd = 'cros flash %(device_hostname)s %(image)s' % cmd_args
+        cmd = 'cros flash --no-ping %(device_hostname)s %(image)s' % cmd_args
         logging.info(cmd)
-        local_call(cmd)
+        with parallel_flash_limiter:
+            local_call(cmd)
 
 class Parameter:
     """Manages configuring a parameter."""
@@ -545,6 +577,9 @@ def run(args):
     plan = common.read_plan(args.input)
     logging.info('read plan')
     logging.info(plan)
+
+    # Allow args.parallel_flash_max devices to be flashed in parallel.
+    parallel_flash_limiter.set_limit(args.parallel_flash_max)
 
     execute(plan, args.output, args.parallel, args.retry)
 
