@@ -395,7 +395,8 @@ class TastRunner:
         # TODO(lsuhua): make the vars as options in plan instead of hardcoding.
         if not tast_dir:
             tast_parameter = self.tast_parameter if self.tast_parameter else ""
-            cmd = ('cros_sdk tast run '
+            # TODO(b/289576525) Remove --no-ns-pid when cros_sdk will run without it.
+            cmd = ('cros_sdk --no-ns-pid tast run '
                    '-buildbundle=crosint '
                    '-var=borealis.keepState=true '
                    '-var=borealis.noShutDown=1 '
@@ -427,7 +428,8 @@ class TastResult:
         # creating a lot of old tast directories.
         filename = os.path.join(self.tast_dir, 'tests', self.test, file)
         try:
-            output = local_call(f'cros_sdk cat {filename}', stdout=True)
+            # TODO(b/289576525) Remove --no-ns-pid when cros_sdk will run without it.
+            output = local_call(f'cros_sdk --no-ns-pid cat {filename}', stdout=True)
         except subprocess.CalledProcessError:
             # TODO(davidriley): Don't ignore error?
             logging.info('Unable to read %s, ignoring', filename)
