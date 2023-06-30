@@ -660,7 +660,7 @@ def execute_workload_with_params(workload_pb, parameter_set,
         param.set_parameter(v, job_info)
         if p.execution_mode == plan_pb2.Parameter.ExecutionMode.EXECUTION_TAST_VARIABLE:
             tast_parameter_list.append("-var=" + p.command_line % job_info.make_args())
-    logging.info("tast_prameter_list is : %s", tast_parameter_list)
+    logging.info("tast_parameter_list is: %s", tast_parameter_list)
     workload = Workload(workload_pb, job_info, " ".join(tast_parameter_list))
     logging.debug('>>> workload %s', job_info.make_id())
 
