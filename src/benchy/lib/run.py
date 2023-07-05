@@ -636,9 +636,19 @@ def execute(plan, output_dir, parallel=False, retry=1):
             mapfunc = executor.map
         else:
             mapfunc = map
-        results = mapfunc(lambda x: execute_device(plan, param_combinations,
-                                                   x, job, job_info.copy(), retry),
-                          plan.devices)
+
+        # Run execute_device(), logging exceptions immediately, as the
+        # ThreadPoolExecutor won't log them until all tasks finish.
+        def wrapper(device_pb):
+            """Wrapper to report exceptions immediately."""
+            try:
+                execute_device(plan, param_combinations, device_pb, job, job_info.copy(), retry)
+            except Exception:  # pylint: disable=broad-except
+                logging.exception('exception raised during execution for device %s:',
+                                  json_format.MessageToDict(device_pb))
+                raise
+
+        results = mapfunc(wrapper, plan.devices)
 
     # Flatten results from list of lists into a  flat list.
     results = list(itertools.chain(*results))
