@@ -193,10 +193,11 @@ def get_device_version(cmd_args):
     milestone, release_version = '', ''
 
     for line in lsb_release.splitlines():
-        if line.startswith('CHROMEOS_RELEASE_CHROME_MILESTONE'):
-            milestone = line.rstrip().split('=', 2)[1]
-        elif line.startswith('CHROMEOS_RELEASE_VERSION'):
-            release_version = line.rstrip().split('=', 2)[1]
+        k, v = line.rstrip().split('=', 1)
+        if k == 'CHROMEOS_RELEASE_CHROME_MILESTONE':
+            milestone = v
+        elif k == 'CHROMEOS_RELEASE_VERSION':
+            release_version = v
     return f'R{milestone}-{release_version}'
 
 def get_owner():
