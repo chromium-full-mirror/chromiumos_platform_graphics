@@ -24,7 +24,12 @@ from chromiumos.config.api.test.results.v1 import result_pb2
 from chromiumos.config.api.test.results.v1 import software_config_pb2
 from google.protobuf import json_format
 
-import lib.common as common
+from lib import common
+
+
+# Disable f-string warnings from pylint, because we frequently
+# use %-formatting with a `cmd_args` dictionary.
+# pylint: disable=consider-using-f-string
 
 
 # This subcommand handles fully executing a plan of:
@@ -72,7 +77,7 @@ class ParallelFlashLimiter:
     def set_limit(self, parallel_max):
         """Set or reset the max number of devices to flash in parallel."""
         if parallel_max:
-            logging.info(f"Max devices to flash in parallel: {parallel_max}")
+            logging.info("Max devices to flash in parallel: %d", parallel_max)
             self.semaphore = threading.Semaphore(parallel_max)
         else:
             self.semaphore = None

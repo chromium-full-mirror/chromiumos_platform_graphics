@@ -25,5 +25,5 @@ def read_plan(file):
 def write_plan(plan, file=None):
     """Write out a plan file."""
     plan_json = json_format.MessageToJson(plan)
-    with open(file, 'w') if file else nullcontext(sys.stdout) as f:
+    with open(file, 'w', encoding='utf-8') if file else nullcontext(sys.stdout) as f:
         f.write(plan_json)

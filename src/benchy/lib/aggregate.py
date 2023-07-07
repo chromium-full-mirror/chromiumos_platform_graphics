@@ -97,7 +97,7 @@ def aggregate(args):
                           metric['name'])].append(float(metric['value']))
 
     already_has_header = False
-    with open(output_file, 'w') as file:
+    with open(output_file, 'w', encoding='utf-8') as file:
         writer = csv.writer(file, delimiter=',')
         for k, v in perfdict.items():
             if not already_has_header:

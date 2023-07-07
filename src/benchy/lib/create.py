@@ -7,7 +7,7 @@
 # pylint: disable=import-error
 from chromiumos.config.api.test.benchy.v1 import plan_pb2
 
-import lib.common as common
+from lib import common
 
 
 def add_subparser(subparsers):
@@ -59,7 +59,8 @@ def create(args):
         plan.parameters.add(
             name='guest_swappiness',
             values=['20', '10'],
-            command_line='borealis.Benchmark.guestTuningCmd="sysctl vm.swappiness=%(parameter_value)s"',
+            command_line=
+                'borealis.Benchmark.guestTuningCmd="sysctl vm.swappiness=%(parameter_value)s"',
             execution_mode=plan_pb2.Parameter.ExecutionMode.EXECUTION_TAST_VARIABLE)
         plan.parameters.add(
             name='abc',

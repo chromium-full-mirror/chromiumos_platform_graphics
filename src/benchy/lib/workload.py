@@ -5,7 +5,7 @@
 """benchy workload subcommand."""
 
 # pylint: disable=import-error
-import lib.common as common
+from lib import common
 
 
 def add_subparser(subparsers):
