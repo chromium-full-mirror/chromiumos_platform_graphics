@@ -645,6 +645,10 @@ def execute(plan, output_dir, parallel=False, retry=1):
 def execute_device(plan, param_combinations, device_pb, job, job_info, retry):
     """Execute the plan for a given device."""
     _ = Device(device_pb, job_info)
+
+    # Set thread name so log messages are easy to associate with devices.
+    threading.current_thread().name = '-'.join(job_info.make_file_parts())
+
     logging.debug('> device %s', job_info.make_id())
 
     machine = job.get_machine_info(job_info)
