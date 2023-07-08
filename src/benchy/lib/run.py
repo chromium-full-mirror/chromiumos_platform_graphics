@@ -468,6 +468,9 @@ class Build:
         # this likely doesn't handle dev builds well.
         version = get_device_version(cmd_args)
         logging.info('existing version %s', version)
+        if self.pb.version == 'none':
+            logging.info('not flashing anything, as instructed by build plan')
+            return
         if version == self.pb.version:
             logging.info('correct version already present, skipping flashing')
             return
