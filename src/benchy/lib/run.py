@@ -111,6 +111,8 @@ def add_subparser(subparsers):
                            type=int,
                            default=3,
                            help='retry a failed workload up to `retry` times')
+    subparser.add_argument('--save-log', action='store_true',
+                           help='also log to log.txt in the output directory')
     subparser.set_defaults(func=run)
 
 def perform_call(execution_mode, command_line, cmd_args, stdout=False):
@@ -591,6 +593,17 @@ def run(args):
 
     # Allow args.parallel_flash_max devices to be flashed in parallel.
     parallel_flash_limiter.set_limit(args.parallel_flash_max)
+
+    if args.save_log:
+        # Set up logging tee to record a copy of our log output.
+        fh = logging.FileHandler(
+            filename=os.path.join(args.output, 'log.txt'),
+            encoding='utf-8')
+        fh.setFormatter(
+            logging.Formatter(
+                fmt=common.LOGGING_FORMAT,
+                datefmt=common.LOGGING_DATE_FORMAT))
+        logging.getLogger().addHandler(fh)
 
     execute(plan, args.output, args.parallel, args.retry)
 

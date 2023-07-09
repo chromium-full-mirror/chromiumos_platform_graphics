@@ -13,6 +13,11 @@ from chromiumos.config.api.test.benchy.v1 import plan_pb2
 from google.protobuf import json_format
 
 
+# Format strings for log handlers
+LOGGING_FORMAT = '%(asctime)s %(levelname)s [%(threadName)s] %(message)s'
+LOGGING_DATE_FORMAT = '%H:%M:%S'
+
+
 def read_plan(file):
     """Read in a plan file."""
     lines = fileinput.input(file if file else '-')

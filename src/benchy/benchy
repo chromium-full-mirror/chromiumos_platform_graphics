@@ -11,6 +11,7 @@ import logging
 
 from lib import aggregate
 from lib import build
+from lib import common
 from lib import create
 from lib import device
 from lib import run
@@ -44,8 +45,8 @@ def main():
     args = parser.parse_args()
 
     logging.basicConfig(
-        format='%(asctime)s %(levelname)s [%(threadName)s] %(message)s',
-        datefmt='%H:%M:%S',
+        format=common.LOGGING_FORMAT,
+        datefmt=common.LOGGING_DATE_FORMAT,
         level=logging.DEBUG if args.debug else logging.INFO)
 
     if args.func:
