@@ -21,9 +21,15 @@ graphics.OpenclCts.bruteforce_half_powr:
 graphics.OpenclCts.cl_copy_images_2d_cl_float:
   expectation: FAIL
   since_build: R116-15488.0.0
+graphics.OpenclCts.cl_copy_images_2d_cl_signed_int32:
+  expectation: FAIL
+  since_build: R117-15535.0.0
 graphics.OpenclCts.cl_copy_images_2d_cl_unorm_int16:
   expectation: FAIL
   since_build: R116-15488.0.0
+graphics.OpenclCts.cl_copy_images_2d_cl_unsigned_int32:
+  expectation: FAIL
+  since_build: R117-15535.0.0
 graphics.OpenclCts.cl_copy_images_2darrayto2d_cl_float:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -108,6 +114,9 @@ graphics.OpenclCts.cl_copy_images_2dto2darray_cl_float:
 graphics.OpenclCts.cl_copy_images_2dto2darray_cl_half_float:
   expectation: FAIL
   since_build: R116-15488.0.0
+graphics.OpenclCts.cl_copy_images_2dto2darray_cl_signed_int16:
+  expectation: FAIL
+  since_build: R117-15535.0.0
 graphics.OpenclCts.cl_copy_images_2dto2darray_cl_signed_int32:
   expectation: FAIL
   since_build: R117-15527.0.0
@@ -141,6 +150,9 @@ graphics.OpenclCts.cl_copy_images_2dto2darray_cl_unsigned_int8:
 graphics.OpenclCts.cl_copy_images_2dto3d_cl_float:
   expectation: FAIL
   since_build: R116-15488.0.0
+graphics.OpenclCts.cl_copy_images_2dto3d_cl_signed_int32:
+  expectation: FAIL
+  since_build: R117-15535.0.0
 graphics.OpenclCts.cl_copy_images_2dto3d_cl_snorm_int16:
   expectation: FAIL
   since_build: R116-15490.0.0
@@ -195,6 +207,12 @@ graphics.OpenclCts.cl_copy_images_3dto2darray_cl_unsigned_int32:
 graphics.OpenclCts.cl_copy_images_3dto2darray_cl_unsigned_int8:
   expectation: FAIL
   since_build: R117-15527.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_signed_int32:
+  expectation: FAIL
+  since_build: R117-15535.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int32:
+  expectation: FAIL
+  since_build: R117-15535.0.0
 graphics.OpenclCts.cl_fill_images_2darray_cl_float:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -234,6 +252,9 @@ graphics.OpenclCts.cl_fill_images_2darray_cl_unsigned_int8:
 graphics.OpenclCts.cl_fill_images_3d_cl_float:
   expectation: FAIL
   since_build: R117-15527.0.0
+graphics.OpenclCts.cl_fill_images_3d_cl_snorm_int16:
+  expectation: FAIL
+  since_build: R117-15535.0.0
 graphics.OpenclCts.cl_fill_images_3d_cl_unorm_int16:
   expectation: FAIL
   since_build: R116-15488.0.0

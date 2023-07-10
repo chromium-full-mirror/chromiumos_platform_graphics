@@ -610,7 +610,7 @@ func editExpectationsFromStainless(exp map[string]expectations.Expectation) erro
 
 			if countTrueArgs(pass, fail, unexpectedPass) == 0 {
 				// This ignore tests that didn't run.
-				fmt.Fprintf(os.Stderr, colorYellow+"Test "+colorYellowBold+"%s"+colorYellow+" had no passing or failing results. Skipping."+colorReset, testName)
+				fmt.Fprintf(os.Stderr, colorYellow+"Test "+colorYellowBold+"%s"+colorYellow+" had no passing or failing results. Skipping.\n"+colorReset, testName)
 				return nil
 			}
 

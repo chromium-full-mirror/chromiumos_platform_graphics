@@ -12,6 +12,12 @@ graphics.OpenclCts.api_null_buffer_arg:
 graphics.OpenclCts.basic_local_kernel_scope:
   expectation: FAIL
   since_build: R113-15390.0.0
+graphics.OpenclCts.cl_copy_images_2dto3d_cl_float:
+  expectation: FAIL
+  since_build: R117-15535.0.0
+graphics.OpenclCts.cl_copy_images_3dto2d_cl_half_float:
+  expectation: FAIL
+  since_build: R117-15535.0.0
 graphics.OpenclCts.cl_copy_images_3dto2d_cl_signed_int16:
   expectation: FAIL
   since_build: R117-15527.0.0
@@ -51,6 +57,9 @@ graphics.OpenclCts.contractions_contractions_float_7:
 graphics.OpenclCts.image_streams_3d_cl_float:
   expectation: FAIL
   since_build: R109-15232.0.0
+graphics.OpenclCts.image_streams_3d_cl_half_float:
+  expectation: FAIL
+  since_build: R117-15535.0.0
 graphics.OpenclCts.image_streams_3d_cl_unorm_int16:
   expectation: FAIL
   since_build: R117-15527.0.0
@@ -66,49 +75,10 @@ graphics.OpenclCts.integer_ops_char_compare:
 graphics.OpenclCts.integer_ops_int_compare:
   expectation: FAIL
   since_build: R113-15390.0.0
-graphics.OpenclCts.integer_ops_long_compare:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.integer_ops_quick_char_compare:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.integer_ops_quick_int_compare:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.integer_ops_quick_long_compare:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.integer_ops_quick_short_compare:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.integer_ops_quick_uchar_compare:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.integer_ops_quick_uint_compare:
-  expectation: FAIL
-  since_build: R114-15436.0.0
-graphics.OpenclCts.integer_ops_quick_ulong_compare:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.integer_ops_quick_ushort_compare:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.integer_ops_short_compare:
-  expectation: FAIL
-  since_build: R109-15232.0.0
 graphics.OpenclCts.integer_ops_uchar_compare:
   expectation: FAIL
   since_build: R113-15390.0.0
-graphics.OpenclCts.integer_ops_uint_compare:
-  expectation: FAIL
-  since_build: R113-15390.0.0
-graphics.OpenclCts.integer_ops_ulong_compare:
-  expectation: FAIL
-  since_build: R109-15232.0.0
 graphics.OpenclCts.integer_ops_ushort_compare:
-  expectation: FAIL
-  since_build: R113-15390.0.0
-graphics.OpenclCts.integer_ops_vector_scalar:
   expectation: FAIL
   since_build: R113-15390.0.0
 graphics.OpenclCts.samplerless_reads_1dbuffer_cl_float:
