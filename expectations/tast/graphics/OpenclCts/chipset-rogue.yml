@@ -83,15 +83,18 @@ graphics.OpenclCts.basic_writeimage_fp32:
 graphics.OpenclCts.basic_writeimage_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_acos:
+graphics.OpenclCts.bruteforce_acospi:
   expectation: FAIL
-  since_build: R117-15535.0.0
+  since_build: R117-15538.0.0
 graphics.OpenclCts.bruteforce_add:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.bruteforce_asin:
   expectation: FAIL
   since_build: R117-15535.0.0
+graphics.OpenclCts.bruteforce_asinh:
+  expectation: FAIL
+  since_build: R117-15538.0.0
 graphics.OpenclCts.bruteforce_asinpi:
   expectation: FAIL
   since_build: R117-15535.0.0
@@ -139,6 +142,9 @@ graphics.OpenclCts.bruteforce_exp10:
 graphics.OpenclCts.bruteforce_exp2:
   expectation: FAIL
   since_build: R116-15479.0.0
+graphics.OpenclCts.bruteforce_fabs:
+  expectation: FAIL
+  since_build: R117-15538.0.0
 graphics.OpenclCts.bruteforce_fdim:
   expectation: FAIL
   tickets:
@@ -179,9 +185,15 @@ graphics.OpenclCts.bruteforce_half_powr:
 graphics.OpenclCts.bruteforce_half_recip:
   expectation: FAIL
   since_build: R117-15527.0.0
+graphics.OpenclCts.bruteforce_half_rsqrt:
+  expectation: FAIL
+  since_build: R117-15538.0.0
 graphics.OpenclCts.bruteforce_half_sin:
   expectation: FAIL
   since_build: R117-15527.0.0
+graphics.OpenclCts.bruteforce_half_tan:
+  expectation: FAIL
+  since_build: R117-15538.0.0
 graphics.OpenclCts.bruteforce_hypot:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -285,6 +297,9 @@ graphics.OpenclCts.bruteforce_tan:
   expectation: FAIL
   tickets:
   - b/227133190
+graphics.OpenclCts.bruteforce_tanh:
+  expectation: FAIL
+  since_build: R117-15538.0.0
 graphics.OpenclCts.bruteforce_tanpi:
   expectation: FAIL
   since_build: R116-15488.0.0
