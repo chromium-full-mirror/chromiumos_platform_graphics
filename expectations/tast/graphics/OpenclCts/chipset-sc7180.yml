@@ -23,9 +23,6 @@ graphics.OpenclCts.api_get_kernel_arg_info:
 graphics.OpenclCts.api_kernel_arg_multi_setup_random:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.api_kernel_attributes:
-  expectation: FAIL
-  since_build: R116-15488.0.0
 graphics.OpenclCts.api_min_max_image_buffer_size:
   expectation: FAIL
   tickets:
