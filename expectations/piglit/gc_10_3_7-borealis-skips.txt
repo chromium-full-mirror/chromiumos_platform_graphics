@@ -20,6 +20,7 @@ glx@glx-make-current
 glx@glx-multi-window-single-context
 glx@glx-visuals-depth
 glx@glx-visuals-depth -pixmap
+shaders@glsl-fs-raytrace-bug27060
 shaders@glsl-uniform-interstage-limits@subdivide 5
 shaders@glsl-uniform-interstage-limits@subdivide 5- statechanges
 shaders@point-vertex-id divisor
@@ -147,6 +148,7 @@ spec@arb_gl_spirv@execution@xfb@vs_two_sets_ifc
 spec@arb_gl_spirv@execution@xfb@vs_two_sets_struct
 spec@arb_gl_spirv@linker@uniform@multisampler
 spec@arb_gl_spirv@linker@uniform@multisampler-array
+spec@arb_gpu_shader5@arb_gpu_shader5-xfb-streams-without-invocations spirv
 spec@arb_gpu_shader_fp64@execution@conversion@frag-conversion-explicit-dmat2-mat2
 spec@arb_gpu_shader_fp64@execution@conversion@frag-conversion-explicit-dmat2x3-mat2x3
 spec@arb_gpu_shader_fp64@execution@conversion@frag-conversion-explicit-dmat2x4-mat2x4
@@ -185,6 +187,7 @@ spec@arb_gpu_shader_fp64@execution@conversion@vert-conversion-explicit-dvec2-vec
 spec@arb_gpu_shader_fp64@execution@conversion@vert-conversion-explicit-dvec3-vec3
 spec@arb_occlusion_query@occlusion_query_meta_no_fragments
 spec@arb_occlusion_query@occlusion_query_meta_save
+spec@arb_pipeline_statistics_query@arb_pipeline_statistics_query-frag
 spec@arb_pixel_buffer_object@texsubimage array pbo
 spec@arb_point_sprite@arb_point_sprite-mipmap
 spec@arb_program_interface_query@arb_program_interface_query-getprogramresourceindex
@@ -814,6 +817,7 @@ spec@arb_transform_feedback_overflow_query@arb_transform_feedback_overflow_query
 spec@egl_android_native_fence_sync@egl_khr_fence_sync android_native
 spec@egl_chromium_sync_control@conformance
 spec@egl_chromium_sync_control@conformance@eglGetSyncValuesCHROMIUM_msc_and_sbc_test
+spec@egl_khr_fence_sync@conformance
 spec@egl_khr_gl_colorspace@srgb
 spec@egl_khr_gl_image@egl_khr_gl_renderbuffer_image-clear-shared-image gl_depth_component24
 spec@egl_mesa_configless_context@basic
@@ -918,6 +922,7 @@ spec@ext_texture_integer@texwrap formats bordercolor-swizzled@GL_ALPHA32I_EXT- s
 spec@ext_texture_integer@texwrap formats bordercolor-swizzled@GL_ALPHA32UI_EXT- swizzled- border color only
 spec@ext_texture_integer@texwrap formats bordercolor-swizzled@GL_ALPHA8I_EXT- swizzled- border color only
 spec@ext_texture_integer@texwrap formats bordercolor-swizzled@GL_ALPHA8UI_EXT- swizzled- border color only
+spec@ext_texture_lod_bias@lodbias
 spec@ext_texture_shared_exponent@texwrap formats bordercolor
 spec@ext_texture_shared_exponent@texwrap formats bordercolor@GL_RGB9_E5- border color only
 spec@ext_texture_shared_exponent@texwrap formats bordercolor-swizzled
@@ -1081,6 +1086,7 @@ spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=2
 spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=4
 spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=6
 spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=8
+spec@!opengl 1.1@draw-sync
 spec@!opengl 1.1@linestipple
 spec@!opengl 1.1@linestipple@Factor 2x
 spec@!opengl 1.1@linestipple@Factor 3x

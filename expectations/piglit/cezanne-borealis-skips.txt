@@ -1,4 +1,3 @@
-block
 # boards: guybrush
 bordercolor@GL_COMPRESSED_INTENSITY- border color only
 bordercolor@GL_COMPRESSED_LUMINANCE_ALPHA- border color only
@@ -20,7 +19,6 @@ bordercolor@GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT- border color only
 bordercolor@GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT- border color only
 bordercolor@GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT- border color only
 bordercolor@GL_COMPRESSED_SRGB_S3TC_DXT1_EXT- border color only
-border color only
 bordercolor-swizzled@GL_COMPRESSED_ALPHA- swizzled- border color only
 bordercolor-swizzled@GL_COMPRESSED_INTENSITY- swizzled- border color only
 bordercolor-swizzled@GL_COMPRESSED_LUMINANCE_ALPHA- swizzled- border color
@@ -91,9 +89,8 @@ glx@glx_arb_sync_control@waitformsc
 glx@glx_ext_no_config_context@no fbconfig
 glx@glx-make-current
 glx@glx-multi-window-single-context
+glx@glx-visuals-depth
 glx@glx-visuals-depth -pixmap
-glx@glx-visuals-depth,Timeout
-# guybrush
 on GL_PROGRAM_INPUT
 only
 precision
@@ -124,7 +121,7 @@ shader/rgba32ui/image1D test
 shader/rgba8i/image1D test
 shader/rgba8_snorm/image1D test
 shader/rgba8ui/image1D test
-shaders@glsl-fs-raytrace-bug27060,Timeout
+shaders@glsl-fs-raytrace-bug27060
 shaders@glsl-uniform-interstage-limits@subdivide 5
 shaders@glsl-uniform-interstage-limits@subdivide 5- statechanges
 shaders@point-vertex-id divisor
@@ -245,6 +242,7 @@ spec@arb_gl_spirv@execution@xfb@vs_two_sets_ifc
 spec@arb_gl_spirv@execution@xfb@vs_two_sets_struct
 spec@arb_gl_spirv@linker@uniform@multisampler
 spec@arb_gl_spirv@linker@uniform@multisampler-array
+spec@arb_gpu_shader5@arb_gpu_shader5-xfb-streams-without-invocations spirv
 spec@arb_gpu_shader_fp64@execution@conversion@frag-conversion-explicit-dmat2-mat2
 spec@arb_gpu_shader_fp64@execution@conversion@frag-conversion-explicit-dmat2x3-mat2x3
 spec@arb_gpu_shader_fp64@execution@conversion@frag-conversion-explicit-dmat2x4-mat2x4
@@ -735,7 +733,6 @@ spec@ext_framebuffer_multisample@no-color 8 depth-computed single
 spec@ext_framebuffer_multisample@no-color 8 depth single
 spec@ext_framebuffer_object@fbo-blending-format-quirks
 spec@ext_framebuffer_object@fbo-fragcoord
-spec@ext_framebuffer_object@fbo-fragcoord,Timeout
 spec@ext_framebuffer_object@fbo-scissor-bitmap
 spec@ext_framebuffer_object@getteximage-formats init-by-clear-and-render
 spec@ext_framebuffer_object@getteximage-formats init-by-rendering
@@ -822,7 +819,6 @@ spec@ext_texture_integer@texwrap formats bordercolor-swizzled@GL_ALPHA32UI_EXT-
 spec@ext_texture_integer@texwrap formats bordercolor-swizzled@GL_ALPHA8I_EXT-
 spec@ext_texture_integer@texwrap formats bordercolor-swizzled@GL_ALPHA8UI_EXT-
 spec@ext_texture_lod_bias@lodbias
-spec@ext_texture_lod_bias@lodbias,Timeout
 spec@ext_texture_shared_exponent@texwrap formats
 spec@ext_texture_shared_exponent@texwrap formats bordercolor
 spec@ext_texture_shared_exponent@texwrap formats bordercolor@GL_RGB9_E5- border
@@ -874,6 +870,7 @@ spec@ext_texture_srgb@texwrap formats-s3tc bordercolor@GL_COMPRESSED_SLUMINANCE-
 spec@ext_texture_srgb@texwrap formats-s3tc bordercolor@GL_COMPRESSED_SRGB-
 spec@ext_texture_srgb@texwrap formats-s3tc bordercolor@GL_COMPRESSED_SRGB_ALPHA-
 spec@ext_texture_srgb@texwrap formats-s3tc bordercolor-swizzled
+spec@ext_timer_query@time-elapsed
 spec@glsl-1.10@execution@samplers@glsl-fs-shadow2d-clamp-z
 spec@glsl-1.10@execution@vs-loop-array-index-unroll
 spec@glsl-1.30@execution@texelfetch@fs-texelfetch-isampler1darray
@@ -982,7 +979,6 @@ spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=4
 spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=6
 spec@!opengl 1.1@depthstencil-default_fb-drawpixels-32f_24_8_rev samples=8
 spec@!opengl 1.1@draw-sync
-spec@!opengl 1.1@draw-sync,Timeout
 spec@!opengl 1.1@linestipple
 spec@!opengl 1.1@linestipple@Factor 2x
 spec@!opengl 1.1@linestipple@Factor 3x
@@ -1085,7 +1081,6 @@ spec@!opengl 1.5@draw-elements-user
 spec@!opengl 2.0@gl-2.0-edgeflag
 spec@!opengl 2.0@gl-2.0-edgeflag-immediate
 spec@!opengl 2.0@tex3d-npot
-spec@!opengl 2.0@tex3d-npot,Timeout
 spec@!opengl 2.0@vs-point_size-zero
 spec@!opengl 3.2@gl-3.2-adj-prims cull-back pv-first
 spec@!opengl 3.2@gl-3.2-adj-prims cull-back pv-last

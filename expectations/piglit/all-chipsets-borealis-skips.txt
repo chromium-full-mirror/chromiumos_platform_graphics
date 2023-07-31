@@ -1,5 +1,9 @@
 # Skip tests on all borealis
 
+
+# Started failing in b/286107516
+spec@arb_gpu_shader5@arb_gpu_shader5-xfb-streams-without-invocations spirv
+
 # GLES3 is not built for piglit in borealis
 spec@oes_viewport_array@viewport-gs-write-simple
 
