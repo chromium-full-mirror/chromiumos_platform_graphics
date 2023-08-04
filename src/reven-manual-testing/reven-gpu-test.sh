@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 RESULTS="/tmp/graphics/results"
+DOWNLOADS="/home/chronos/user/Downloads"
 rm -rf "${RESULTS}"
 mkdir -p "${RESULTS}"
 DEQP="/usr/local/deqp"
@@ -59,6 +60,9 @@ deqp-runner run --output="${RESULTS}"/deqp-runner \
 | tee "${RESULTS}"/deqp-gles2.txt | tee -a "${RESULTS}"/log.txt
 echo '---' | tee -a "${RESULTS}"/log.txt
 
+# Copy results to Downloads folder so they can be attached to a feedback report
+cp "${RESULTS}"/log.txt "${DOWNLOADS}"/log.txt
+
 # On older devices this can take > 20 minutes and is not always supported.
 # TODO(ihf): enable when all reven devices support it.
 ## Run dEQP gles3
@@ -78,4 +82,4 @@ echo '---' | tee -a "${RESULTS}"/log.txt
 #| tee "${RESULTS}"/deqp-gles3.txt | tee -a "${RESULTS}"/log.txt
 #echo '---' | tee -a "${RESULTS}"/log.txt
 
-echo "Output is in ""${RESULTS}""/log.txt"
+echo "Full output is in ""${RESULTS}"", log.txt is in Downloads folder."
