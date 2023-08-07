@@ -142,6 +142,9 @@ graphics.OpenclCts.bruteforce_exp10:
 graphics.OpenclCts.bruteforce_exp2:
   expectation: FAIL
   since_build: R116-15479.0.0
+graphics.OpenclCts.bruteforce_expm1:
+  expectation: FAIL
+  since_build: R117-15569.0.0
 graphics.OpenclCts.bruteforce_fabs:
   expectation: FAIL
   since_build: R117-15538.0.0

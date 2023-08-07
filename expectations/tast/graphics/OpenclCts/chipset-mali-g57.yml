@@ -12,6 +12,9 @@ graphics.OpenclCts.basic_imagedim_non_pow2:
 graphics.OpenclCts.basic_local_kernel_scope:
   expectation: FAIL
   since_build: R113-15390.0.0
+graphics.OpenclCts.cl_copy_images_2darrayto2d_cl_float:
+  expectation: FAIL
+  since_build: R117-15569.0.0
 graphics.OpenclCts.contractions_contractions_float_0:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -42,6 +45,9 @@ graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
 graphics.OpenclCts.samplerless_reads_1dbuffer_cl_unorm_short_565:
   expectation: FAIL
   since_build: R116-15488.0.0
+graphics.OpenclCts.samplerless_reads_3d_cl_float:
+  expectation: FAIL
+  since_build: R117-15569.0.0
 graphics.OpenclCts.samplerless_reads_3d_cl_half_float:
   expectation: FAIL
   since_build: R117-15527.0.0
