@@ -6,7 +6,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
@@ -28,6 +27,7 @@ const (
 	vendorRockchip
 	vendorVirtio
 	vendorVmware
+	vendorSoftware
 )
 
 // String is string representation of the enum.
@@ -49,6 +49,8 @@ func (s gpuVendor) String() string {
 		return "virtio"
 	case vendorVmware:
 		return "vmware"
+	case vendorSoftware:
+		return "software"
 	default:
 		return "unknown"
 	}
@@ -110,13 +112,41 @@ func getWaffleInfo() (string, error) {
 	}
 	graphicsAPI, err := getGraphicsAPI()
 	if err != nil {
-		return "", errors.Wrap(err, "failed to get graphcis api")
+		return "", errors.Wrap(err, "failed to get graphics api")
 	}
 	out, err := exec.Command("wflinfo", "-p", "null", "-a", graphicsAPI).Output()
 	if err != nil {
 		return "", errors.Wrap(err, "failed to run wflinfo")
 	}
 	return string(out), nil
+}
+
+func getGlxinfo() (string, error) {
+	out, err := exec.Command("glxinfo").Output()
+	if err != nil {
+		return "", errors.Wrap(err, "failed to run glxinfo")
+	}
+	return string(out), nil
+}
+
+func getOpenGLRendererString() (string, error) {
+	reg := regexp.MustCompile(`OpenGL renderer string: (\S+)`)
+
+	glxinfo, glxErr := getGlxinfo()
+	if glxErr == nil {
+		if matches := reg.FindStringSubmatch(glxinfo); matches != nil {
+			return matches[1], nil
+		}
+	}
+
+	// Check waffleinfo instead.
+	wflinfo, waffleErr := getWaffleInfo()
+	if waffleErr == nil {
+		if matches := reg.FindStringSubmatch(wflinfo); matches != nil {
+			return matches[1], nil
+		}
+	}
+	return "", errors.Wrap(glxErr, waffleErr.Error())
 }
 
 // getGPUInfos returns the GPU family name for the host.
@@ -128,16 +158,14 @@ func getGPUInfos() ([]GPUInfo, error) {
 		return nil, errors.Wrap(err, "failed to determine Mali")
 	}
 	if hasMali {
-		wflinfo, err := getWaffleInfo()
+		renderer, err := getOpenGLRendererString()
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to get waffle info")
+			return nil, errors.Wrap(err, "failed to get renderer string")
 		}
-		maliReg := regexp.MustCompile(`OpenGL renderer string: (Mali-\w+)`)
-		matches := maliReg.FindStringSubmatch(wflinfo)
-		if matches == nil {
-			return nil, errors.Errorf("failed to find mali version: %v", wflinfo)
+		if !strings.HasPrefix(renderer, "Mali-") {
+			return nil, errors.Errorf("unexpected opengl renderer for mali: %v", renderer)
 		}
-		gpuFamily := strings.ToLower(matches[1])
+		gpuFamily := strings.ToLower(renderer[5:])
 		// Fill in GPU_Vendor for qualcomm and mediatek.
 		socFamily, err := getCPUSOCFamily()
 		if err == nil {
@@ -183,12 +211,22 @@ func getGPUInfos() ([]GPUInfo, error) {
 	sort.Slice(vgaDevices, func(i, j int) bool {
 		return vgaDevices[i].BootVGA
 	})
-	if len(vgaDevices) == 0 {
-		return nil, fmt.Errorf("failed to determine GPU from vgaDevices: %v", vgaDevices)
+	if len(vgaDevices) > 0 {
+		gpuNames := []GPUInfo{}
+		for _, device := range vgaDevices {
+			gpuNames = append(gpuNames, device.GPUInfo)
+		}
+		return gpuNames, nil
 	}
-	gpuNames := []GPUInfo{}
-	for _, device := range vgaDevices {
-		gpuNames = append(gpuNames, device.GPUInfo)
+
+	// Most likely it is running under a VM and doesn't expose GPU drivers to the VGA devices.
+	renderer, err := getOpenGLRendererString()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get opengl renderer string")
 	}
-	return gpuNames, nil
+	renderer = strings.ToLower(renderer)
+	if strings.Contains(renderer, "llvmpipe") || strings.Contains(renderer, "software") {
+		return []GPUInfo{{Family: renderer, GPUVendor: vendorSoftware}}, nil
+	}
+	return nil, errors.Errorf("unknown opengl renderer: %v", renderer)
 }
