@@ -1,0 +1,18 @@
+video.ChromeStackDecoderVerification.h264_files_from_bugs_277849540_1:
+  expectation: FAIL
+  tickets:
+  - b/279344021
+  comments: Need help from Qualcomm to fix.
+  since_build: R117-15561.2.0
+video.ChromeStackDecoderVerification.h264_files_from_bugs_277849540_2:
+  expectation: FAIL
+  tickets:
+  - b/279344021
+  comments: Need help from Qualcomm to fix.
+  since_build: R117-15561.2.0
+video.ChromeStackDecoderVerification.h264_files_from_bugs_277849540_3:
+  expectation: FAIL
+  tickets:
+  - b/279344021
+  comments: Need help from Qualcomm to fix.
+  since_build: R117-15561.2.0
