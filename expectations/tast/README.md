@@ -166,6 +166,5 @@ Note: this uses the `--test` option to list a single test, but the
 
 After modifying the file, it must be reviewed and committed before it is used
 for future testing.
-
-[expectations package]: https://chromium.googlesource.com/chromiumos/platform/tast-tests/+/HEAD/src/chromiumos/tast/local/graphics/expectations/
+[expectations package]: https://chromium.googlesource.com/chromiumos/platform/tast-tests/+/HEAD/src/go.chromium.org/tast-tests/cros/local/graphics/expectations/
 [graphics-expectations]: https://chromium.googlesource.com/chromiumos/platform/graphics/+/HEAD/expectations/
