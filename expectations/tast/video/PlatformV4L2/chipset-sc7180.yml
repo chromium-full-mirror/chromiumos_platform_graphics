@@ -1,0 +1,6 @@
+video.PlatformV4L2.decoder:
+  expectation: FAIL
+  tickets:
+  - b/176992632
+  comments: Close to having all passing, waiting on Qualcomm for the last 2.
+  since_build: R108-15175.0.0
