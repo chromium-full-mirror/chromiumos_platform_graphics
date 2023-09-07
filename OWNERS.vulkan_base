@@ -1,11 +1,11 @@
 # Do not use "set noparent" in this file (add it to the including file).
 
-# DO NOT EDIT.
-# Deprecated by OWNERS.vulkan_base.
+# Owners for the base Vulkan packages, such as vulkan-loader, vulkan-layers,
+# vulkan-tools, vulkan-headers, etc.
 
+basni@chromium.org
 chadversary@chromium.org
 ihf@chromium.org
 linyaa@google.com
-msturner@google.com
 olv@google.com
 rjodin@chromium.org
