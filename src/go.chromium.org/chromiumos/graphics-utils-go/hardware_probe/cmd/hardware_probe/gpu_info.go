@@ -165,7 +165,7 @@ func getGPUInfos() ([]GPUInfo, error) {
 		if !strings.HasPrefix(renderer, "Mali-") {
 			return nil, errors.Errorf("unexpected opengl renderer for mali: %v", renderer)
 		}
-		gpuFamily := strings.ToLower(renderer[5:])
+		gpuFamily := strings.ToLower(renderer)
 		// Fill in GPU_Vendor for qualcomm and mediatek.
 		socFamily, err := getCPUSOCFamily()
 		if err == nil {
