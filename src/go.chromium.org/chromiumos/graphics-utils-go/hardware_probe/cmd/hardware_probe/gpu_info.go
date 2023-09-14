@@ -81,6 +81,17 @@ func hasMaliGPUEnabled() (bool, error) {
 	return true, nil
 }
 
+// hasPanfrostGPUEnabled checks if the panfrost driver is enabled
+func hasPanfrostGPUEnabled() (bool, error) {
+	if _, err := os.Stat("/sys/bus/platform/drivers/panfrost"); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+		return false, errors.Wrap(err, "failed to determine if the device has Panfrost driver")
+	}
+	return true, nil
+}
+
 func getWaffleInfo() (string, error) {
 	getUseFlags := func() ([]string, error) {
 		flags := []string{}
@@ -152,12 +163,14 @@ func getOpenGLRendererString() (string, error) {
 // getGPUInfos returns the GPU family name for the host.
 // TODO(ddmail): Support returning mulitple mali/qualcomm GPUs.
 func getGPUInfos() ([]GPUInfo, error) {
-	// Check for mali
-	hasMali, err := hasMaliGPUEnabled()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to determine Mali")
+	// Check for mali or panfrost
+	hasMali, errMali := hasMaliGPUEnabled()
+	hasPanfrost, errPanfrost := hasPanfrostGPUEnabled()
+	if errMali != nil && errPanfrost != nil {
+		return nil, errors.New("failed to detect either Mali or Panfrost")
 	}
-	if hasMali {
+
+	if hasMali || hasPanfrost {
 		renderer, err := getOpenGLRendererString()
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get renderer string")
