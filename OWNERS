@@ -21,6 +21,5 @@ include /OWNERS.nvidia
 include /OWNERS.v4l2
 include /OWNERS.vadumpcaps
 include /OWNERS.virglrenderer
-include /OWNERS.vulkan_layers
-include /OWNERS.vulkan_loader
+include /OWNERS.vulkan_base
 include /OWNERS.waffle
