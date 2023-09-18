@@ -156,6 +156,9 @@ graphics.OpenclCts.integer_ops_short_compare:
 graphics.OpenclCts.integer_ops_uchar_compare:
   expectation: FAIL
   since_build: R113-15390.0.0
+graphics.OpenclCts.integer_ops_uchar_math:
+  expectation: FAIL
+  since_build: R119-15609.0.0
 graphics.OpenclCts.integer_ops_uchar_shift:
   expectation: FAIL
   since_build: R117-15538.0.0

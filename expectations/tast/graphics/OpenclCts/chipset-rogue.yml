@@ -116,6 +116,12 @@ graphics.OpenclCts.bruteforce_atanh:
 graphics.OpenclCts.bruteforce_atanpi:
   expectation: FAIL
   since_build: R117-15535.0.0
+graphics.OpenclCts.bruteforce_cbrt:
+  expectation: FAIL
+  since_build: R119-15611.0.0
+graphics.OpenclCts.bruteforce_copysign:
+  expectation: FAIL
+  since_build: R119-15611.0.0
 graphics.OpenclCts.bruteforce_cos:
   expectation: FAIL
   tickets:
@@ -152,6 +158,12 @@ graphics.OpenclCts.bruteforce_floor:
 graphics.OpenclCts.bruteforce_fma:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_fmax:
+  expectation: FAIL
+  since_build: R119-15611.0.0
+graphics.OpenclCts.bruteforce_fmod:
+  expectation: FAIL
+  since_build: R119-15611.0.0
 graphics.OpenclCts.bruteforce_fract:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -194,6 +206,9 @@ graphics.OpenclCts.bruteforce_isfinite:
 graphics.OpenclCts.bruteforce_isgreater:
   expectation: FAIL
   since_build: R117-15535.0.0
+graphics.OpenclCts.bruteforce_islessequal:
+  expectation: FAIL
+  since_build: R119-15611.0.0
 graphics.OpenclCts.bruteforce_islessgreater:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -230,6 +245,9 @@ graphics.OpenclCts.bruteforce_minmag:
 graphics.OpenclCts.bruteforce_multiply:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_nextafter:
+  expectation: FAIL
+  since_build: R119-15611.0.0
 graphics.OpenclCts.bruteforce_pow:
   expectation: FAIL
   tickets:
@@ -245,6 +263,9 @@ graphics.OpenclCts.bruteforce_powr:
 graphics.OpenclCts.bruteforce_rint:
   expectation: FAIL
   since_build: R116-15488.0.0
+graphics.OpenclCts.bruteforce_rootn:
+  expectation: FAIL
+  since_build: R119-15611.0.0
 graphics.OpenclCts.bruteforce_signbit:
   expectation: FAIL
   since_build: R116-15479.0.0
