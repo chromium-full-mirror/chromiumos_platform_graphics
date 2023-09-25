@@ -57,30 +57,6 @@ graphics.OpenclCts.contractions_contractions_float_6:
 graphics.OpenclCts.contractions_contractions_float_7:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.image_streams_1d_cl_signed_int32:
-  expectation: FAIL
-  since_build: R118-15584.0.0
-graphics.OpenclCts.image_streams_1d_cl_snorm_int8:
-  expectation: FAIL
-  since_build: R117-15538.0.0
-graphics.OpenclCts.image_streams_1d_cl_unorm_int8:
-  expectation: FAIL
-  since_build: R117-15569.0.0
-graphics.OpenclCts.image_streams_1darray_cl_float:
-  expectation: FAIL
-  since_build: R118-15584.0.0
-graphics.OpenclCts.image_streams_1darray_cl_unsigned_int32:
-  expectation: FAIL
-  since_build: R118-15584.0.0
-graphics.OpenclCts.image_streams_2d_cl_half_float:
-  expectation: FAIL
-  since_build: R118-15584.0.0
-graphics.OpenclCts.image_streams_2d_cl_unorm_int8:
-  expectation: FAIL
-  since_build: R118-15584.0.0
-graphics.OpenclCts.image_streams_2darray_cl_unsigned_int8:
-  expectation: FAIL
-  since_build: R118-15584.0.0
 graphics.OpenclCts.image_streams_3d_cl_float:
   expectation: FAIL
   since_build: R109-15232.0.0
@@ -96,12 +72,6 @@ graphics.OpenclCts.image_streams_3d_cl_unorm_int8:
 graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.integer_ops_char_compare:
-  expectation: FAIL
-  since_build: R113-15390.0.0
-graphics.OpenclCts.integer_ops_uchar_compare:
-  expectation: FAIL
-  since_build: R113-15390.0.0
 graphics.OpenclCts.samplerless_reads_1dbuffer_cl_float:
   expectation: FAIL
   since_build: R116-15488.0.0

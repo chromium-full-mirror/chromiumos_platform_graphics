@@ -266,6 +266,9 @@ graphics.OpenclCts.bruteforce_rint:
 graphics.OpenclCts.bruteforce_rootn:
   expectation: FAIL
   since_build: R119-15611.0.0
+graphics.OpenclCts.bruteforce_round:
+  expectation: FAIL
+  since_build: R119-15621.0.0
 graphics.OpenclCts.bruteforce_signbit:
   expectation: FAIL
   since_build: R116-15479.0.0
