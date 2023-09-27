@@ -1,0 +1,14 @@
+# Xray
+
+## What is Xray?
+
+Xray is a small X11 test suite to test window management behavior, mostly trying
+to mimick what games do (resizing, fullscreen, modesetting etc.). It tests both
+spec-required behaviors and non-required (but desirable) behaviors from the
+compositor + WM + Xserver implementation combo.
+
+## How do I use it?
+
+To use it, install the X11 development libraries, then build it with "make".
+Once built, run all the tests with "./xray"
+
