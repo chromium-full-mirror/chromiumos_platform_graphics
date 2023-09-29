@@ -366,14 +366,9 @@ spec@arb_internalformat_query2@all internalformat_<x>_type pname checks@GL_INTER
 spec@arb_internalformat_query2@all internalformat_<x>_type pname checks@GL_INTERNALFORMAT_GREEN_TYPE
 spec@arb_internalformat_query2@all internalformat_<x>_type pname checks@GL_INTERNALFORMAT_RED_TYPE
 spec@arb_internalformat_query2@checks for pnames related to arb_image_load_store that return values from table 3.22 (opengl 4.2)
-spec@arb_internalformat_query2@checks for pnames related to arb_image_load_store that return values from table 3.22 (opengl 4.2)
-spec@arb_internalformat_query2@checks for pnames related to arb_image_load_store that return values from table 3.22 (opengl 4.2)@GL_IMAGE_COMPATIBILITY_CLASS
 spec@arb_internalformat_query2@checks for pnames related to arb_image_load_store that return values from table 3.22 (opengl 4.2)@GL_IMAGE_COMPATIBILITY_CLASS
 spec@arb_internalformat_query2@checks for pnames related to arb_image_load_store that return values from table 3.22 (opengl 4.2)@GL_IMAGE_PIXEL_FORMAT
-spec@arb_internalformat_query2@checks for pnames related to arb_image_load_store that return values from table 3.22 (opengl 4.2)@GL_IMAGE_PIXEL_FORMAT
 spec@arb_internalformat_query2@checks for pnames related to arb_image_load_store that return values from table 3.22 (opengl 4.2)@GL_IMAGE_PIXEL_TYPE
-spec@arb_internalformat_query2@checks for pnames related to arb_image_load_store that return values from table 3.22 (opengl 4.2)@GL_IMAGE_PIXEL_TYPE
-spec@arb_internalformat_query2@checks for pnames related to arb_image_load_store that return values from table 3.22 (opengl 4.2)@GL_IMAGE_TEXEL_SIZE
 spec@arb_internalformat_query2@checks for pnames related to arb_image_load_store that return values from table 3.22 (opengl 4.2)@GL_IMAGE_TEXEL_SIZE
 spec@arb_internalformat_query2@image_format_compatibility_type pname checks
 spec@arb_internalformat_query2@image_format_compatibility_type pname checks@GL_IMAGE_FORMAT_COMPATIBILITY_TYPE
@@ -848,7 +843,6 @@ spec@arb_separate_shader_objects@misc. api error checks
 spec@arb_separate_shader_objects@misc. api error checks@glUseProgramStages of a program that lacks a specified stage
 spec@arb_separate_shader_objects@mix-and-match-tcs-tes
 spec@arb_separate_shader_objects@rendezvous_by_location-3-stages
-spec@arb_separate_shader_objects@rendezvous by location (5 stages)
 spec@arb_separate_shader_objects@rendezvous by location (5 stages)
 spec@arb_separate_shader_objects@validateprogrampipeline
 spec@arb_shader_atomic_counter_ops@execution@atomic-counter-array-out-of-bounds-access
@@ -1470,16 +1464,10 @@ spec@arb_texture_buffer_object@bufferstorage
 spec@arb_texture_buffer_object@data-sync
 spec@arb_texture_buffer_object@fetch-outside-bounds
 spec@arb_texture_buffer_object@formats (fs- 3.1 core)
-spec@arb_texture_buffer_object@formats (fs- 3.1 core)
-spec@arb_texture_buffer_object@formats (fs- arb)
 spec@arb_texture_buffer_object@formats (fs- arb)
 spec@arb_texture_buffer_object@formats (fs- ext_gpu_shader4)
-spec@arb_texture_buffer_object@formats (fs- ext_gpu_shader4)
-spec@arb_texture_buffer_object@formats (vs- 3.1 core)
 spec@arb_texture_buffer_object@formats (vs- 3.1 core)
 spec@arb_texture_buffer_object@formats (vs- arb)
-spec@arb_texture_buffer_object@formats (vs- arb)
-spec@arb_texture_buffer_object@formats (vs- ext_gpu_shader4)
 spec@arb_texture_buffer_object@formats (vs- ext_gpu_shader4)
 spec@arb_texture_buffer_object@max-size
 spec@arb_texture_buffer_object@re-init
