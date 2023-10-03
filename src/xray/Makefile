@@ -7,7 +7,7 @@ COPT = -Wall -Wsign-compare -Wpointer-arith -Wcast-qual -Wcast-align
 CXX = c++ -std=c++11
 OPT = -O0 -g3 $(INCLUDES) $(COPT)
 
-LIB = -lX11 -lXxf86vm
+LIB = -lX11 -lXxf86vm -lXrandr
 
 INCLUDES =
 

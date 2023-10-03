@@ -48,15 +48,34 @@ ADD_TEST (test_set_mode_xf86vm);
 static bool test_set_mode_xrandr ()
 {
 	Display *d;
-	Window w;
 	int s;
 	bool success = true;
 
 	d = XOpenDisplay (NULL);
 	s = DefaultScreen (d);
+	Window root = RootWindow (d, s);
 
-	// TODO
+	XRRScreenConfiguration *screen_config = XRRGetScreenInfo (d, root);
+	if (!screen_config)
+		return false;
 
+	int num_modes;
+	XRRScreenSize *modes = XRRConfigSizes (screen_config, &num_modes);
+	if (!modes) {
+		XRRFreeScreenConfigInfo (screen_config);
+		return false;
+	}
+	// We try the largest mode (TODO: go back & forth between modes)
+	int mode_id = 0;
+
+	XRRSetScreenConfig (d, screen_config, root, mode_id, RR_Rotate_0, CurrentTime);
+
+	success &= utils_x11_flush (d);
+	success &=
+		utils_check_dimensions (d, RootWindow (d, s), modes[mode_id].width,
+					modes[mode_id].height);
+
+	XRRFreeScreenConfigInfo (screen_config);
 	return success;
 }
 
