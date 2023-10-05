@@ -125,7 +125,7 @@ func main() {
 	outPath := flag.String("output", "cmd/hardware_probe/amd_pci_ids.go", "Output file name")
 	kernelPath := flag.String("kernel", "../../../../../../../third_party/kernel/v6.1", "Path to the kernel repository")
 	mesaPath := flag.String("mesa", "../../../../../../../third_party/mesa", "Path to the mesa repository")
-	mesaLibPath := flag.String("mesaLib", "r300_pci_ids.h:r600_pci_ids.h:radeonsi_pci_ids.h", `Path to libaries under $mesa/include/pci_ids/.
+	mesaLibPath := flag.String("mesaLib", "r300_pci_ids.h:r600_pci_ids.h:radeonsi_pci_ids.h", `Path to libraries under $mesa/include/pci_ids/.
 Use ':' to split between multiple libraries`)
 	funcName := flag.String("function", "getAMDPCIIDMap", "Function name in the output go file")
 	flag.Parse()

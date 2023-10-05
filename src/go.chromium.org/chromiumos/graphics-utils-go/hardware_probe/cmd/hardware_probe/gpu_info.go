@@ -161,7 +161,7 @@ func getOpenGLRendererString() (string, error) {
 }
 
 // getGPUInfos returns the GPU family name for the host.
-// TODO(ddmail): Support returning mulitple mali/qualcomm GPUs.
+// TODO(ddmail): Support returning multiple mali/qualcomm GPUs.
 func getGPUInfos() ([]GPUInfo, error) {
 	// Check for mali or panfrost
 	hasMali, errMali := hasMaliGPUEnabled()
@@ -215,7 +215,7 @@ func getGPUInfos() ([]GPUInfo, error) {
 		}
 	}
 
-	// For AMD and intel, check the pci_id_map for their respecitive GPU.
+	// For AMD and intel, check the pci_id_map for their respective GPU.
 	vgaDevices, err := GetVGADevices()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get VGA info")

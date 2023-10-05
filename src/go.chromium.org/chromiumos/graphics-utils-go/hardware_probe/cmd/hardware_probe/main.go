@@ -162,7 +162,7 @@ func main() {
 
 	gpuInfos, err := getGPUInfos()
 	if err != nil {
-		fatal("Failed to detemine GPU: %v", err)
+		fatal("Failed to determine GPU: %v", err)
 	}
 	result.GPUInfos = gpuInfos
 

@@ -104,11 +104,11 @@ func main() {
 	outPath := flag.String("output", "cmd/hardware_probe/intel_pci_ids.go", "Output file name")
 	mesaPath := flag.String("mesa", "../../../../../../../third_party/mesa", "Path to the mesa repository")
 	funcName := flag.String("function", "getIntelPCIIDMap", "Function name in the output go file")
-	pciLibariesPath := flag.String("library", "i915_pci_ids.h:iris_pci_ids.h", `Path to libaries under $mesa/include/pci_ids/.
+	pciLibrariesPath := flag.String("library", "i915_pci_ids.h:iris_pci_ids.h", `Path to libraries under $mesa/include/pci_ids/.
 Use ':' to split between multiple libraries`)
 	flag.Parse()
 
-	pciLibraries := strings.Split(*pciLibariesPath, ":")
+	pciLibraries := strings.Split(*pciLibrariesPath, ":")
 	idMap := map[string]string{}
 	for _, pci_ids_h := range pciLibraries {
 		b, err := os.ReadFile(*mesaPath + "/include/pci_ids/" + pci_ids_h)
@@ -147,7 +147,7 @@ Use ':' to split between multiple libraries`)
 		CopyrightYear:    "2022",
 		OutPath:          *outPath,
 		ConstantMappings: idMap,
-		Library:          *pciLibariesPath,
+		Library:          *pciLibrariesPath,
 		FuncName:         *funcName,
 	}); err != nil {
 		fmt.Printf("Failed to generate file: %v\n", err)
