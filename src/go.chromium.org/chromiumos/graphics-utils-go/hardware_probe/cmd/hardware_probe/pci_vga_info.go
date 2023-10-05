@@ -104,7 +104,7 @@ func mapPCINameToGPUInfo(name, deviceID string) (GPUInfo, error) {
 		amdVGAString    = "Advanced Micro Devices"
 		intelVGAString  = "Intel Corporation"
 		nvidiaVGAString = "NVIDIA Corporation"
-		virtioVGAString = "Virtio GPU"
+		virtioVGAString = "Virtio"
 		vmwareVGAString = "VMWare"
 	)
 
