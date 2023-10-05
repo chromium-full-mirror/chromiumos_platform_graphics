@@ -12,27 +12,55 @@ In this directory, you will find a binary called hardware_probe, which tries to 
 
 ``` bash
 # In the cros_sdk chroot:
-> emerge-${BOARD} graphics-utils-go
+$ emerge-${BOARD} graphics-utils-go
 ```
 The executables are installed in `/usr/local/graphics/` for that board.
 Then follow the standard `cros deploy` tool to push the binary to your device.
 
 ### How to build for Linux
 
-To build the tool for Linux, tt requires a standard installation of the golang development tools and `make`.
+To build the tool for Linux, it requires a standard installation of the golang development tools and `make`.
 
 ``` bash
-# Make sure you are in the same directory as this README.md
-> make
+# Make sure you are in the same directory as this README.
+$ make
 ```
 
 ## How to run the binary
 
 ``` bash
-localhost ~ # ./hardware_probe --gpu-vendor --cpu-soc-family --gpu-family
-GPU_Family: sc7280
-GPU_Vendor: qualcomm
-CPU_SOC_Family: qualcomm
+# Run on a DUT after cros deploy:
+$ /usr/local/graphics/hardware_probe
+
+# Or run locally after running `make`:
+$ ./hardware_probe
+```
+
+Example output:
+``` json
+{
+    "CPU_SOC_Family": "intel",
+    "GPU_Family": [
+        {
+            "Family": "kabylake",
+            "GPUVendor": "intel"
+        }
+    ],
+    "VGA_Devices": [
+        {
+            "BDF": "0000:00:02.0",
+            "Class": "VGA compatible controller",
+            "Name": "Intel Corporation UHD Graphics 620 (rev 07)",
+            "VendorID": "0x8086",
+            "DeviceID": "0x5917",
+            "BootVGA": true,
+            "GPUInfo": {
+                "Family": "kabylake",
+                "GPUVendor": "intel"
+            }
+        }
+    ]
+}
 ```
 
 * Note that it may report more than one `GPU_Family` and `GPU_Vendor` if multiple GPUs are detected in the system.
