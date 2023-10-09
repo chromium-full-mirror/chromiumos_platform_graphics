@@ -24,6 +24,7 @@ all_chipsets[jasperlake]="dedede|keeby"
 all_chipsets[cometlake]="drallion|hatch|puff"
 all_chipsets[geminilake]="octopus"
 all_chipsets[tigerlake]="volteer"
+all_chipsets[meteorlake]="rex"
 # Qualcomm
 all_chipsets[sc7180]="strongbad|trogdor"
 all_chipsets[sc7280]="herobrine"
