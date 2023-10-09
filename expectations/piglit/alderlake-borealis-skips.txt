@@ -30,6 +30,7 @@ glx@glx-visuals-stencil -pixmap
 object namespace pollution@texture with glcopyimagesubdata
 shaders@glsl-fs-raytrace-bug27060
 shaders@glsl-fs-texturecube-2
+shaders@glsl-kwin-blur-1
 shaders@glsl-uniform-interstage-limits@subdivide 5
 shaders@glsl-uniform-interstage-limits@subdivide 5- statechanges
 shaders@point-vertex-id divisor
@@ -577,6 +578,7 @@ spec@arb_gpu_shader_fp64@uniform_buffers@vs-doubles-float-mixed
 spec@arb_gpu_shader_fp64@uniform_buffers@vs-nested-struct
 spec@arb_gpu_shader_fp64@varying-packing@simple dmat2x4 separate
 spec@arb_gpu_shader_fp64@varying-packing@simple dmat3 separate
+spec@arb_map_buffer_range@copybuffersubdata offset=0
 spec@arb_occlusion_query@occlusion_query_meta_no_fragments
 spec@arb_occlusion_query@occlusion_query_meta_save
 spec@arb_pixel_buffer_object@texsubimage array pbo
@@ -1280,6 +1282,7 @@ spec@arb_tessellation_shader@execution@tes-input@tes-input-patch-float
 spec@arb_tessellation_shader@execution@tes-input@tes-input-patch-mat4x3
 spec@arb_tessellation_shader@execution@tes-input@tes-input-patch-vec3_2
 spec@arb_tessellation_shader@execution@tes-input@tes-input-uvec2
+spec@arb_tessellation_shader@execution@tes-input@tes-input-uvec4
 spec@arb_tessellation_shader@execution@variable-indexing@tcs-input-array-vec4-index-rd
 spec@arb_tessellation_shader@execution@variable-indexing@tes-input-array-vec4-index-rd
 spec@arb_tessellation_shader@execution@variable-indexing@tes-patch-input-array-vec4-index-rd
@@ -2810,6 +2813,7 @@ spec@oes_fixed_point@attribute-arrays
 spec@oes_matrix_get@all queries
 spec@oes_packed_depth_stencil@depth_stencil texture gles1
 spec@oes_point_sprite@arb_point_sprite-checkerboard_gles1
+spec@!opengl 1.0@gl-1.0-bitmap-heart-dance
 spec@!opengl 1.0@gl-1.0-edgeflag
 spec@!opengl 1.0@gl-1.0-edgeflag-quads
 spec@!opengl 1.0@gl-1.0-read-cache-stress-test
@@ -3038,6 +3042,7 @@ spec@!opengl 1.1@texwrap formats offset@GL_RGBA8- NPOT
 spec@!opengl 1.1@texwrap formats offset@GL_RGBA8- swizzled
 spec@!opengl 1.1@windowoverlap
 spec@!opengl 1.2@copyteximage 3d
+spec@!opengl 1.2@mipmap-setup
 spec@!opengl 1.2@tex3d
 spec@!opengl 1.2@texture-packed-formats
 spec@!opengl 1.2@texwrap 3d

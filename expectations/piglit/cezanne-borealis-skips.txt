@@ -122,6 +122,7 @@ shader/rgba8i/image1D test
 shader/rgba8_snorm/image1D test
 shader/rgba8ui/image1D test
 shaders@glsl-fs-raytrace-bug27060
+shaders@glsl-kwin-blur-1
 shaders@glsl-uniform-interstage-limits@subdivide 5
 shaders@glsl-uniform-interstage-limits@subdivide 5- statechanges
 shaders@point-vertex-id divisor
@@ -230,6 +231,9 @@ spec@arb_gl_spirv@execution@va64-simple
 spec@arb_gl_spirv@execution@vs-ps-simple
 spec@arb_gl_spirv@execution@vs-ps-specializations
 spec@arb_gl_spirv@execution@xfb@vs_aoa
+spec@arb_gl_spirv@execution@xfb@vs_block
+spec@arb_gl_spirv@execution@xfb@vs_block_array
+spec@arb_gl_spirv@execution@xfb@vs_block_array_offset_per_member
 spec@arb_gl_spirv@execution@xfb@vs_double
 spec@arb_gl_spirv@execution@xfb@vs_lines
 spec@arb_gl_spirv@execution@xfb@vs_simple
@@ -237,6 +241,7 @@ spec@arb_gl_spirv@execution@xfb@vs_simple_multiple_samples
 spec@arb_gl_spirv@execution@xfb@vs_struct
 spec@arb_gl_spirv@execution@xfb@vs_struct_array
 spec@arb_gl_spirv@execution@xfb@vs_triangles
+spec@arb_gl_spirv@execution@xfb@vs_two_block
 spec@arb_gl_spirv@execution@xfb@vs_two_sets
 spec@arb_gl_spirv@execution@xfb@vs_two_sets_ifc
 spec@arb_gl_spirv@execution@xfb@vs_two_sets_struct

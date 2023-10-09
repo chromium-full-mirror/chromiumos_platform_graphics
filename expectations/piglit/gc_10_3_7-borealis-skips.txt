@@ -778,6 +778,8 @@ spec@arb_texture_float@texwrap formats bordercolor-swizzled@GL_RGB16F- swizzled-
 spec@arb_texture_float@texwrap formats bordercolor-swizzled@GL_RGB32F- swizzled- border color only
 spec@arb_texture_float@texwrap formats bordercolor-swizzled@GL_RGBA16F- swizzled- border color only
 spec@arb_texture_float@texwrap formats bordercolor-swizzled@GL_RGBA32F- swizzled- border color only
+spec@arb_texture_multisample@arb_texture_multisample-dsa-texelfetch
+spec@arb_texture_multisample@arb_texture_multisample-dsa-texelfetch@Texture type: GL_RGB9_E5
 spec@arb_texture_rectangle@copyteximage rect
 spec@arb_texture_rectangle@copyteximage rect samples=2
 spec@arb_texture_rectangle@copyteximage rect samples=4
@@ -832,6 +834,7 @@ spec@ext_framebuffer_multisample@no-color 8 depth-computed single
 spec@ext_framebuffer_multisample@no-color 8 depth single
 spec@ext_framebuffer_object@fbo-blending-format-quirks
 spec@ext_framebuffer_object@fbo-fragcoord
+spec@ext_framebuffer_object@fbo-scissor-bitmap
 spec@ext_framebuffer_object@getteximage-formats init-by-clear-and-render
 spec@ext_framebuffer_object@getteximage-formats init-by-rendering
 spec@ext_gpu_shader4@execution@texelfetch@fs-texelfetch-isampler1darray
