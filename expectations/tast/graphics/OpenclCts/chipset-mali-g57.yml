@@ -1,7 +1,15 @@
-graphics.OpenclCts.api_min_max_image_buffer_size:
+graphics.OpenclCts.allocations_single_1_image2d_read:
   expectation: FAIL
-  tickets:
-  - b/227133131
+  since_build: R120-15656.0.0
+graphics.OpenclCts.allocations_single_1_image2d_read_non_blocking:
+  expectation: FAIL
+  since_build: R120-15656.0.0
+graphics.OpenclCts.allocations_single_1_image2d_write:
+  expectation: FAIL
+  since_build: R120-15656.0.0
+graphics.OpenclCts.allocations_single_1_image2d_write_non_blocking:
+  expectation: FAIL
+  since_build: R120-15656.0.0
 graphics.OpenclCts.api_null_buffer_arg:
   expectation: FAIL
   tickets:
@@ -39,12 +47,3 @@ graphics.OpenclCts.contractions_contractions_float_7:
 graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_unorm_short_565:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.samplerless_reads_3d_cl_float:
-  expectation: FAIL
-  since_build: R117-15569.0.0
-graphics.OpenclCts.samplerless_reads_3d_cl_half_float:
-  expectation: FAIL
-  since_build: R117-15527.0.0

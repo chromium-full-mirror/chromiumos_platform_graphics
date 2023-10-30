@@ -1,56 +1,7 @@
-graphics.OpenclCts.api_min_max_image_buffer_size:
-  expectation: FAIL
-  tickets:
-  - b/227133131
 graphics.OpenclCts.api_null_buffer_arg:
   expectation: FAIL
   tickets:
   - b/227134903
 graphics.OpenclCts.basic_vload_local:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_float:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_half_float:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_signed_int16:
-  expectation: FAIL
-  since_build: R117-15527.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_signed_int32:
-  expectation: FAIL
-  since_build: R117-15527.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_signed_int8:
-  expectation: FAIL
-  since_build: R117-15527.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_snorm_int16:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_snorm_int8:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_unorm_int16:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_unorm_int8:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_unorm_short_565:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_unsigned_int16:
-  expectation: FAIL
-  since_build: R117-15527.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_unsigned_int32:
-  expectation: FAIL
-  since_build: R117-15527.0.0
-graphics.OpenclCts.samplerless_reads_1dbuffer_cl_unsigned_int8:
-  expectation: FAIL
-  since_build: R117-15527.0.0
-graphics.OpenclCts.samplerless_reads_3d_cl_float:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.samplerless_reads_3d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
