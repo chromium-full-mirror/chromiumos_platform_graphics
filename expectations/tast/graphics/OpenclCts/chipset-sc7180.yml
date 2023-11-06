@@ -13,12 +13,6 @@ graphics.OpenclCts.allocations_single_1_buffer_non_blocking:
 graphics.OpenclCts.allocations_single_1_image2d_read:
   expectation: FAIL
   since_build: R120-15656.0.0
-graphics.OpenclCts.allocations_single_1_image2d_read_non_blocking:
-  expectation: FAIL
-  since_build: R119-15609.0.0
-graphics.OpenclCts.allocations_single_1_image2d_write_non_blocking:
-  expectation: FAIL
-  since_build: R120-15660.0.0
 graphics.OpenclCts.api_get_kernel_arg_info:
   expectation: FAIL
   tickets:

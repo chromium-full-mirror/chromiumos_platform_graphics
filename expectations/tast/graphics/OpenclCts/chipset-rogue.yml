@@ -280,6 +280,9 @@ graphics.OpenclCts.bruteforce_powr:
   expectation: FAIL
   tickets:
   - b/227133190
+graphics.OpenclCts.bruteforce_remainder:
+  expectation: FAIL
+  since_build: R121-15668.0.0
 graphics.OpenclCts.bruteforce_rint:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -307,6 +310,9 @@ graphics.OpenclCts.bruteforce_sinh:
 graphics.OpenclCts.bruteforce_sinpi:
   expectation: FAIL
   since_build: R116-15499.0.0
+graphics.OpenclCts.bruteforce_sqrt:
+  expectation: FAIL
+  since_build: R121-15668.0.0
 graphics.OpenclCts.bruteforce_subtract:
   expectation: FAIL
   since_build: R110-15241.0.0
