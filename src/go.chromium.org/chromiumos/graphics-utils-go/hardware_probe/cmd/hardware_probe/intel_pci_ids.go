@@ -292,5 +292,9 @@ func getIntelPCIIDMap() map[string]string {
 		"0xa7a1": "raptorlake",
 		"0xa7a8": "raptorlake",
 		"0xa7a9": "raptorlake",
+		"0xa7aa": "raptorlake",
+		"0xa7ab": "raptorlake",
+		"0xa7ac": "raptorlake",
+		"0xa7ad": "raptorlake",
 	}
 }
