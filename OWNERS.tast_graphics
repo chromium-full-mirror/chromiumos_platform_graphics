@@ -1,0 +1,7 @@
+# Do not use "set noparent" in this file (add it to the including file).
+
+# The tast ownership should be narrow to ensure no tests are added or
+# deleted without knowldedge.
+
+ihf@chromium.org
+pwang@chromium.org

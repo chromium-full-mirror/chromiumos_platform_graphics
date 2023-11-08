@@ -18,8 +18,10 @@ include /OWNERS.mesa_iris
 include /OWNERS.mesa_panfrost
 include /OWNERS.minigbm
 include /OWNERS.nvidia
+include /OWNERS.tast_graphics
 include /OWNERS.v4l2
 include /OWNERS.vadumpcaps
+include /OWNERS.video
 include /OWNERS.virglrenderer
 include /OWNERS.vulkan_base
 include /OWNERS.waffle
