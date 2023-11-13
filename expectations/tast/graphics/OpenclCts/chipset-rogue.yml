@@ -184,6 +184,9 @@ graphics.OpenclCts.bruteforce_half_exp10:
 graphics.OpenclCts.bruteforce_half_exp2:
   expectation: FAIL
   since_build: R116-15488.0.0
+graphics.OpenclCts.bruteforce_half_log:
+  expectation: FAIL
+  since_build: R121-15670.0.0
 graphics.OpenclCts.bruteforce_half_log10:
   expectation: FAIL
   since_build: R118-15585.0.0
@@ -196,6 +199,9 @@ graphics.OpenclCts.bruteforce_half_recip:
 graphics.OpenclCts.bruteforce_half_rsqrt:
   expectation: FAIL
   since_build: R120-15660.0.0
+graphics.OpenclCts.bruteforce_half_sin:
+  expectation: FAIL
+  since_build: R121-15670.0.0
 graphics.OpenclCts.bruteforce_half_sqrt:
   expectation: FAIL
   since_build: R120-15660.0.0
@@ -292,6 +298,9 @@ graphics.OpenclCts.bruteforce_rootn:
 graphics.OpenclCts.bruteforce_round:
   expectation: FAIL
   since_build: R119-15621.0.0
+graphics.OpenclCts.bruteforce_rsqrt:
+  expectation: FAIL
+  since_build: R121-15670.0.0
 graphics.OpenclCts.bruteforce_signbit:
   expectation: FAIL
   since_build: R116-15479.0.0
@@ -347,18 +356,6 @@ graphics.OpenclCts.cl_fill_images_2darray_cl_half_float:
 graphics.OpenclCts.cl_fill_images_3d_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.cl_fill_images_3d_cl_signed_int16:
-  expectation: FAIL
-  since_build: R117-15527.0.0
-graphics.OpenclCts.cl_fill_images_3d_cl_snorm_int16:
-  expectation: FAIL
-  since_build: R111-15291.0.0
-graphics.OpenclCts.cl_fill_images_3d_cl_unorm_int16:
-  expectation: FAIL
-  since_build: R111-15291.0.0
-graphics.OpenclCts.cl_fill_images_3d_cl_unsigned_int16:
-  expectation: FAIL
-  since_build: R117-15527.0.0
 graphics.OpenclCts.contractions_contractions_float_0:
   expectation: FAIL
   since_build: R110-15241.0.0
