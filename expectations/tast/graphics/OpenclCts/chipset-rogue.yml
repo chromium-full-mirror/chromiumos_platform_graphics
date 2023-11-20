@@ -250,6 +250,9 @@ graphics.OpenclCts.bruteforce_isordered:
 graphics.OpenclCts.bruteforce_isunordered:
   expectation: FAIL
   since_build: R117-15527.0.0
+graphics.OpenclCts.bruteforce_ldexp:
+  expectation: FAIL
+  since_build: R121-15675.0.0
 graphics.OpenclCts.bruteforce_log10:
   expectation: FAIL
   since_build: R118-15585.0.0
