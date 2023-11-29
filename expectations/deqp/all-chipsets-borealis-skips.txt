@@ -2,3 +2,6 @@
 
 # https://buganizer.corp.google.com/issues/234387653#comment4
 dEQP-VK.info.instance_extensions
+
+# removed in https://gitlab.khronos.org/Tracker/vk-gl-cts/-/issues/4527
+dEQP-VK.memory.device_memory_report.vk_device_memory.allocation_failed
