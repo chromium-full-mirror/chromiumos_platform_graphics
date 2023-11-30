@@ -7,12 +7,24 @@ COPT = -Wall -Wsign-compare -Wpointer-arith -Wcast-qual -Wcast-align
 CXX = c++ -std=c++11
 OPT = -O0 -g3 $(INCLUDES) $(COPT)
 
-LIB = -lX11 -lXxf86vm -lXrandr
+LIB = -lXxf86vm -lXrandr -lX11
+
+prefix ?= /usr/local
+BINDIR = $(DESTDIR)$(prefix)/bin
+INSTALL ?= install
 
 INCLUDES =
 
+.PHONY: all clean indent install
+
 all:	$(APPNAME)
-	@echo OK.
+	@echo Done.
+
+install:
+	mkdir -p $(BINDIR)
+	mkdir -p $(BINDIR)/runtime
+	$(INSTALL) xray $(BINDIR)
+	@echo Done.
 
 $(APPNAME):$(COBJ1)
 	$(CXX) $(OPT) -o $(APPNAME) $(SOURCES) $(LIB)
