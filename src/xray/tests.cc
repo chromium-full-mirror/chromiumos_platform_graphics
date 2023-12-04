@@ -9,14 +9,14 @@
 
 // We set a low init priority so the vector is created before tests are added
 // through ADD_TEST()
-vector < test > test_list __attribute__((init_priority (101)));
+map < string, test > test_list __attribute__((init_priority (101)));
 
 int test_register (const char *name, bool (*func) (void))
 {
 	test t;
 	t.run = func;
 	strcpy (t.name, name);
-	test_list.push_back (t);
+	test_list.emplace (string(name), t);
 
 	return 0;
 }

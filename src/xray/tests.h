@@ -18,6 +18,6 @@ struct test
 };
 
 int test_register (const char *name, bool (*func) (void));
-extern vector < test > test_list;
+extern map < string, test > test_list;
 
 #endif

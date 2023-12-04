@@ -8,6 +8,7 @@
 #define __INCLUDES_H__
 
 #include <iostream>
+#include <map>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
