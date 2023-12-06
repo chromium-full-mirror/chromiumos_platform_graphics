@@ -1,0 +1,189 @@
+#!/bin/bash
+
+# Copyright 2023 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+set -e -o pipefail
+
+if [[ "$#" -ne 1 && "$#" -ne 2 || "$1" = -* ]]; then
+    echo >&2 "usage: check-downstream-patches <release-tag>"
+    exit 1
+fi
+
+if [[ -f /lib/gentoo/functions.sh ]]; then
+    # shellcheck disable=SC1091
+    . /lib/gentoo/functions.sh
+elif repo_top=$(repo --show-toplevel 2>/dev/null) && [[ -f "${repo_top}"/chroot/lib/gentoo/functions.sh ]]; then
+    # shellcheck disable=SC1091
+    . "${repo_top}"/chroot/lib/gentoo/functions.sh
+elif [[ -f ~/chromiumos/chroot/lib/gentoo/functions.sh ]]; then
+    # shellcheck disable=SC1090
+    . ~/chromiumos/chroot/lib/gentoo/functions.sh
+else
+    function einfo() {
+        echo "$@"
+    }
+    function eindent() { :; }
+    function eoutdent() { :; }
+fi
+
+remote="cros"
+upstream="upstream"
+upstream_ref="${remote}/${upstream}"
+
+tag="$1"
+if ! git rev-parse "${upstream}/${tag}^{tag}" &>/dev/null; then
+    einfo "\"${upstream}/${tag}\" is not a known tag"
+    exit 1
+fi
+
+# Get the branch name from the tag by removing the patch version and the "mesa-" prefix
+branch=${tag}
+branch=${branch%.*}
+branch=${branch#mesa-}
+upstream_branch="${upstream_ref}/${branch}"
+
+# Find the last uprev
+last_uprev_sha=$(git log -1 --format=%H --grep="CHROMIUM: Reset tree to ")
+last_uprev_subject=$(git log -1 --format=%s "${last_uprev_sha}")
+
+einfo "Checking downstream commits on top of commit ${last_uprev_sha} (\"${last_uprev_subject}\")"
+einfo "upstream ref: ${upstream_ref}"
+einfo "tag: ${upstream}/${tag}"
+einfo
+eindent
+
+declare -a no_upstream=()
+declare -a bad_upstream=()
+declare -A not_in_branch=()
+declare -A in_branch=()
+
+# Look at all commits since last uprev
+for sha in $(git log --reverse --format=%H "${last_uprev_sha}"..); do
+    upstream_sha=$(git show -s --format=%B "${sha}" | awk '/cherry picked from commit / {print $5}')
+    upstream_sha=${upstream_sha%%)}
+
+    if [[ -z "${upstream_sha}" ]]; then
+        einfo "${sha} lists no upstream sha"
+        no_upstream+=("${sha}")
+        continue
+    fi
+
+    # Get the full hash, in case it was truncated in the commit message
+    if ! git cat-file -e "${upstream_sha}" 2>/dev/null; then
+        einfo "${sha} claims to have an upstream sha of ${upstream_sha}, but this isn't a known commit"
+        bad_upstream+=("${sha}")
+        continue
+    fi
+    upstream_sha=$(git log -1 --format=%H "${upstream_sha}")
+
+    in_tag=$(git tag --contains "${upstream_sha}" --list "${upstream}/${tag}")
+    if [[ -n "${in_tag}" ]]; then
+        einfo "${sha} is upstream as ${upstream_sha} and is in ${tag}"
+        continue
+    fi
+
+    in_main=$(git branch --contains "${upstream_sha}" -a --list "${upstream_ref}/main")
+    if [[ -n "${in_main}" ]]; then
+        einfo "${sha} is upstream as ${upstream_sha} and is not in ${tag}"
+    fi
+
+    # Get the branchpoint tag
+    branchpoint_tag=$(git describe --tags --abbrev=0 --match "*-branchpoint" "${upstream_branch}" 2>/dev/null)
+
+    eindent
+
+    # Get the sha of the commit cherry picked to the release branch
+    cherrypicked_sha=$(git log -1 --format=%H --grep="cherry picked from commit ${upstream_sha}" "${branchpoint_tag}..${upstream_branch}")
+    if [[ -z "${cherrypicked_sha}" ]]; then
+        einfo "Has not been cherry picked to ${upstream_branch}"
+        not_in_branch[${sha}]=${upstream_sha}
+    else
+        einfo "Has been cherry picked to ${upstream_branch} as ${cherrypicked_sha}"
+        in_branch[${sha}]="${upstream_sha}:${cherrypicked_sha}"
+    fi
+
+    eoutdent
+done
+
+eoutdent
+echo
+
+if [[ "${#no_upstream[@]}" -eq 0 && "${#bad_upstream[@]}" -eq 0 && "${#not_in_branch[@]}" -eq 0 && "${#in_branch[@]}" -eq 0 ]]; then
+    einfo "All patches are in ${tag}. Nothing to do!"
+    exit
+fi
+
+einfo "Summary"
+
+if [[ "${#no_upstream[@]}" -gt 0 ]]; then
+    einfo
+    einfo "No upstream sha listed and should be checked:"
+    eindent
+    for sha in "${no_upstream[@]}"; do
+        subject=$(git log -1 --format=%s "${sha}")
+        einfo "${sha} (\"${subject}\")"
+    done
+    eoutdent
+fi
+
+if [[ "${#bad_upstream[@]}" -gt 0 ]]; then
+    einfo
+    einfo "Bad upstream sha listed and should be checked:"
+    eindent
+    for sha in "${bad_upstream[@]}"; do
+        subject=$(git log -1 --format=%s "${sha}")
+        einfo "${sha} (\"${subject}\")"
+    done
+    eoutdent
+fi
+
+if [[ "${#not_in_branch[@]}" -gt 0 ]]; then
+    einfo
+    einfo "In upstream/main (but not in the ${upstream_branch} branch) and may need to be reapplied:"
+    eindent
+    first=1
+    for sha in "${!not_in_branch[@]}"; do
+        if [[ ${first} -eq 1 ]]; then
+            first=0
+        else
+            einfo
+        fi
+
+        subject=$(git log -1 --format=%s "${sha}")
+        einfo "${sha} (\"${subject}\")"
+
+        upstream_sha=${not_in_branch[${sha}]}
+        subject=$(git log -1 --format=%s "${upstream_sha}")
+        einfo "Upstream: ${upstream_sha} (\"${subject}\")"
+    done
+    eoutdent
+fi
+
+if [[ "${#in_branch[@]}" -gt 0 ]]; then
+    einfo
+    einfo "In ${upstream_branch} (but not in the ${tag} tag) and may need to be reapplied:"
+    eindent
+    first=1
+    for sha in "${!in_branch[@]}"; do
+        if [[ ${first} -eq 1 ]]; then
+            first=0
+        else
+            einfo
+        fi
+
+        subject=$(git log -1 --format=%s "${sha}")
+        einfo "${sha} (\"${subject}\")"
+
+        IFS=':' read -ra shas <<< "${in_branch[${sha}]}"
+        upstream_sha=${shas[0]}
+        cherrypicked_sha=${shas[1]}
+        subject=$(git log -1 --format=%s "${upstream_sha}")
+        einfo "Upstream: ${upstream_sha} (\"${subject}\")"
+        eindent
+        einfo "(cherry picked to ${upstream_branch} as ${cherrypicked_sha})"
+        eoutdent
+    done
+    eoutdent
+fi

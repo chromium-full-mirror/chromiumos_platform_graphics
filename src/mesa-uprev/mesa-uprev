@@ -1,0 +1,40 @@
+#!/bin/bash
+# Copyright 2023 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+set -eu -o pipefail
+
+if [[ "$#" -ne 1 || "$1" = -* ]]; then
+    echo >&2 "usage: mesa-uprev <upstream-ref>"
+    exit 1
+fi
+
+RELEASE=$1
+
+# Make a branch where we'll do the uprev.
+git checkout -b "${RELEASE}-uprev" m/main
+
+# Merge the release tag in, choosing to resolve conflicts in favor of the
+# release tag. We expect this command to fail and there to be unresolved merge
+# conflicts, but that's okay.
+git merge upstream/"${RELEASE}" -X theirs --no-commit || true
+
+# Read the release tag into the git index.
+git read-tree upstream/"${RELEASE}"
+
+# Keep some downstream files we maintain.
+git add PRESUBMIT.cfg OWNERS
+
+# Make the commit.
+git commit -m "CHROMIUM: Reset tree to upstream/${RELEASE}"
+
+# Remove any files that are no longer present in the release tag.
+git clean -f
+
+# Throw away any changes to files.
+git reset --hard HEAD
+
+# Confirm that our local tree matches the release tag.
+git diff-tree --no-commit-id --name-status upstream/"${RELEASE}" HEAD \
+| { grep -v -E '^A\s*(OWNERS|PRESUBMIT\.cfg)$' && exit 1; }
