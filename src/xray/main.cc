@@ -35,7 +35,7 @@ int main (int argc, char *argv[])
 			cout << "  " << t->first << endl;
 			++i;
 		}
-		return;
+		return 0;
 	}
 
 	if (requested_tests.empty()) {
@@ -61,4 +61,6 @@ int main (int argc, char *argv[])
 
 	cout << "[  PASSED  ] " << passed << " tests." << endl;
 	cout << "[  FAILED  ] " << tried - passed << " tests." << endl;
+	if (tried - passed) return 1;
+	return 0;
 }
