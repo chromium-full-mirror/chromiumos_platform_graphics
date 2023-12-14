@@ -1,3 +1,15 @@
 dEQP-VK.api.version_check.version
 dEQP-VK.pipeline.extended_dynamic_state.before_draw.stencil_state_face_front_le_inc_wrap_clear_254_ref_253_depthfail
 dEQP-VK.wsi.display_control.register_display_event
+
+# https://gitlab.freedesktop.org/Mesa_CI/mesa_jenkins/-/blob/master/deqp-test/flaky.conf
+dEQP-GLES31.functional.image_load_store.2d_array.atomic.comp_swap_r32i_return_value
+dEQP-GLES31.functional.image_load_store.2d_array.atomic.comp_swap_r32ui_return_value
+dEQP-GLES31.functional.image_load_store.2d.atomic.comp_swap_r32i_return_value
+dEQP-GLES31.functional.image_load_store.2d.atomic.comp_swap_r32ui_return_value
+dEQP-GLES31.functional.image_load_store.3d.atomic.comp_swap_r32i_return_value
+dEQP-GLES31.functional.image_load_store.3d.atomic.comp_swap_r32ui_return_value
+dEQP-GLES31.functional.image_load_store.buffer.atomic.comp_swap_r32i_return_value
+dEQP-GLES31.functional.image_load_store.buffer.atomic.comp_swap_r32ui_return_value
+dEQP-GLES31.functional.image_load_store.cube.atomic.comp_swap_r32i_return_value
+dEQP-GLES31.functional.image_load_store.cube.atomic.comp_swap_r32ui_return_value
