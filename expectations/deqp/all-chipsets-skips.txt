@@ -6,3 +6,7 @@ dEQP-GLES.*.stress.*
 # This set of tests may emit warnings, but is not required for
 # conformance and I've never seen anyone pay attention to it.
 dEQP-GLES.*.accuracy.*
+
+# Fails whenever a Vulkan driver exposes an extension deqp is not aware of,
+# which happens often when a driver is newer than deqp. Just skip it.
+dEQP-VK.info.device_extensions

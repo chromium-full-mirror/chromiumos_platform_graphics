@@ -5,3 +5,7 @@ dEQP-VK.info.instance_extensions
 
 # removed in https://gitlab.khronos.org/Tracker/vk-gl-cts/-/issues/4527
 dEQP-VK.memory.device_memory_report.vk_device_memory.allocation_failed
+
+# Fails whenever a Vulkan driver exposes an extension deqp is not aware of,
+# which happens often when a driver is newer than deqp. Just skip it.
+dEQP-VK.info.device_extensions
