@@ -1,2 +1,10 @@
-# Test Config CPFE OS: 15445.0.0 and Mesa 23.1.0-rc3 (git-d04b95b27e)
-#No skip tests to add here
+# Timeout
+dEQP-VK.ray_tracing_pipeline.build.gpu.level_instances.aabbs_65536_4_4
+dEQP-VK.ray_tracing_pipeline.build.gpu.level_instances.mixed_65536_4_4
+dEQP-VK.ray_tracing_pipeline.build.gpu.level_instances.triangles_65536_4_4
+dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_AABB_14
+dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_AABB_15
+dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_tri_14
+dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_tri_15
+dEQP-VK.subgroups.ballot_broadcast.mesh.subgroupbroadcast_dvec4_requiredsubgroupsize32_mesh
+dEQP-VK.subgroups.ballot_broadcast.mesh.subgroupbroadcast_dvec4_requiredsubgroupsize32_task
