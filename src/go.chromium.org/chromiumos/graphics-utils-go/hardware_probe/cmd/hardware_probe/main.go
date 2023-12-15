@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"flag"
@@ -14,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -138,10 +140,85 @@ func getCPUSOCFamily() (CPUSOCFamily, error) {
 	return socUnknown, fmt.Errorf("failed to determine soc")
 }
 
+// Memory is the size of the system RAM in Gb.
+type Memory int64
+
+func getMemory() (Memory, error) {
+	memoryBytes, err := func() (int64, error) {
+		b, err := ioutil.ReadFile("/proc/meminfo")
+		if err != nil {
+			return 0, err
+		}
+		memReg := regexp.MustCompile(`MemTotal:\s+(\d+)\s+(\S+)`)
+		sc := bufio.NewScanner(bytes.NewReader(b))
+		for sc.Scan() {
+			text := sc.Text()
+			match := memReg.FindStringSubmatch(text)
+			if match == nil {
+				continue
+			}
+			if match[2] != "kB" {
+				return 0, errors.Errorf("expect MemTotal in kB, got %v", match[2])
+			}
+			val, err := strconv.ParseInt(match[1], 10, 64)
+			if err != nil {
+				return 0, errors.Wrapf(err, "failed to parse %v", text)
+			}
+			// meminfo reported kB is 2^10 bytes not 10^3.
+			return val << 10, nil
+		}
+		return 0, fmt.Errorf("MemTotal not found; got: %v", string(b))
+	}()
+	if err != nil {
+		return 0, errors.Wrap(err, "failed to get memory size")
+	}
+	// memoryBytes reported by /proc/meminfo is less than actual installed memory.
+	// We report it by rounding to the nearest Gb.
+	return Memory((memoryBytes + 1<<29) >> 30), nil
+}
+
+type Disk struct {
+	Name   string `json:"name"`
+	Size   int64  `json:"size"`    // Size is in bytes.
+	SizeGb int64  `json:"size_gb"` // SizeGb is in bytes_gb.
+}
+
+// getLargestDisk returns the largest size disk captured by lsblk tool.
+func getLargestDisk() (Disk, error) {
+	b, err := exec.Command("lsblk", "-J", "-b").Output()
+	if err != nil {
+		return Disk{}, err
+	}
+	r, err := parseLsblk(b)
+	if err != nil {
+		return Disk{}, err
+	}
+	largest := blockDevices{}
+	for _, blockDevice := range r.BlockDevices {
+		if blockDevice.Type != "disk" {
+			continue
+		}
+		if largest.Size < blockDevice.Size {
+			largest = blockDevice
+		}
+	}
+	return Disk{
+		Name:   largest.Name,
+		Size:   largest.Size,
+		SizeGb: largest.Size / 1_000_000_000,
+	}, nil
+}
+
 type probeResult struct {
 	CPUFamily  CPUSOCFamily `json:"CPU_SOC_Family"`
+	Disk       Disk         `json:"Disk"`
 	GPUInfos   []GPUInfo    `json:"GPU_Family"`
+	Memory     Memory       `json:"Memory"`
 	VGADevices []VGADevice  `json:"VGA_Devices,omitempty"`
+}
+
+func log(format string, args ...interface{}) {
+	fmt.Printf(format+"\n", args...)
 }
 
 func fatal(format string, args ...interface{}) {
@@ -154,33 +231,52 @@ func main() {
 	flag.Parse()
 
 	result := probeResult{}
+
+	memory, err := getMemory()
+	if err != nil {
+		log("Failed to get total memory: %v", err)
+	} else {
+		result.Memory = memory
+	}
+
+	disk, err := getLargestDisk()
+	if err != nil {
+		log("Failed to get disk storage size: %v", err)
+	} else {
+		result.Disk = disk
+	}
+
 	cpuSocFamily, err := getCPUSOCFamily()
 	if err != nil {
-		fatal("Failed to determine CPU SOC family: %v", err)
+		log("Failed to determine CPU SOC family: %v", err)
+	} else {
+		result.CPUFamily = cpuSocFamily
 	}
-	result.CPUFamily = cpuSocFamily
 
 	gpuInfos, err := getGPUInfos()
 	if err != nil {
-		fatal("Failed to determine GPU: %v", err)
+		log("Failed to determine GPU: %v", err)
+	} else {
+		result.GPUInfos = gpuInfos
 	}
-	result.GPUInfos = gpuInfos
 
 	vgaDevices, err := GetVGADevices()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to determine VGA device: %v.\n", err)
+		log("Failed to determine VGA device: %v", err)
+	} else {
+		result.VGADevices = vgaDevices
 	}
-	result.VGADevices = vgaDevices
 
 	b, err := json.MarshalIndent(result, "", "    ")
 	if err != nil {
-		fatal("Failed to marshal result: %v", result)
+		log("Failed to marshal result: %v", result)
 	}
-	fmt.Println(string(b))
 	// Output JSON file
 	if len(*outputFile) != 0 {
 		if err := os.WriteFile(*outputFile, b, 0755); err != nil {
 			fatal("Failed to write to %v: %v", *outputFile, err)
 		}
+	} else {
+		log(string(b))
 	}
 }
