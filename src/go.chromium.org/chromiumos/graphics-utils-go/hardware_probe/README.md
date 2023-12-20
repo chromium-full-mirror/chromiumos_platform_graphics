@@ -23,7 +23,7 @@ To build the tool for Linux, it requires a standard installation of the golang d
 
 ``` bash
 # Make sure you are in the same directory as this README.
-$ make
+$ GO111MODULE=off make
 ```
 
 ## How to run the binary
@@ -38,6 +38,7 @@ $ ./hardware_probe
 
 Example output:
 ``` json
+$ ./hardware_probe
 {
     "CPU_SOC_Family": "intel",
     "Disk": {
@@ -66,6 +67,22 @@ Example output:
             }
         }
     ]
+}
+
+$ ./hardware_probe --software
+{
+    "OpenGLES": "3.2",
+    "OpenGLESPackage": {
+        "Name": "media-libs/mesa-amd",
+        "Version": "23.0.2",
+        "Revision": "169"
+    },
+    "VulkanAPIVersion": "1.3.255",
+    "VulkanPackage": {
+        "Name": "media-libs/mesa-radv",
+        "Version": "23.2.1",
+        "Revision": "16"
+    }
 }
 ```
 

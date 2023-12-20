@@ -209,7 +209,7 @@ func getLargestDisk() (Disk, error) {
 	}, nil
 }
 
-type probeResult struct {
+type hardwareResult struct {
 	CPUFamily  CPUSOCFamily `json:"CPU_SOC_Family"`
 	Disk       Disk         `json:"Disk"`
 	GPUInfos   []GPUInfo    `json:"GPU_Family"`
@@ -217,17 +217,24 @@ type probeResult struct {
 	VGADevices []VGADevice  `json:"VGA_Devices,omitempty"`
 }
 
-func fatal(format string, args ...interface{}) {
+type softwareResult struct {
+	OpenGLES         *Version        `json:"OpenGLES,omitempty"`
+	OpenGLESPackage  *PortagePackage `json:"OpenGLESPackage,omitempty"`
+	VulkanAPIVersion *Version        `json:"VulkanAPIVersion,omitempty"`
+	VulkanPackage    *PortagePackage `json:"VulkanPackage,omitempty"`
+}
+
+func debug(format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, format+"\n", args...)
+}
+
+func fatal(format string, args ...interface{}) {
+	debug(format, args...)
 	os.Exit(1)
 }
 
-func main() {
-	outputFile := flag.String("output", "", "Output result to file in json format")
-	flag.Parse()
-
-	result := probeResult{}
-
+func queryHardware() ([]byte, error) {
+	result := hardwareResult{}
 	memory, err := getMemory()
 	if err != nil {
 		fatal("Failed to get total memory: %v", err)
@@ -257,15 +264,62 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Failed to determine VGA device: %v.\n", err)
 	}
 	result.VGADevices = vgaDevices
+	return json.MarshalIndent(result, "", "    ")
+}
 
-	b, err := json.MarshalIndent(result, "", "    ")
+func querySoftware() ([]byte, error) {
+	result := softwareResult{}
+	gles, err := getGLESVersion()
 	if err != nil {
-		fatal("Failed to marshal result: %v", result)
+		fatal("Failed to get opengl es version: %v", err)
 	}
-	fmt.Println(string(b))
+	result.OpenGLES = gles
+
+	_, apiVersion, err := getVulkanVersion()
+	if err != nil {
+		fatal("Failed to get vulkan information: %v", err)
+	}
+	result.VulkanAPIVersion = apiVersion
+
+	glDriverPackage, err := getGLESDriverPackage()
+	if err != nil {
+		debug("Failed to get gl driver package: %v", err)
+	} else {
+		result.OpenGLESPackage = glDriverPackage
+	}
+
+	vulkanDriverPackage, err := getVulkanDriverPackage()
+	if err != nil {
+		debug("Failed to get vulkan driver package: %v", err)
+	} else {
+		result.VulkanPackage = vulkanDriverPackage
+	}
+	return json.MarshalIndent(result, "", "    ")
+}
+
+func main() {
+	software := flag.Bool("software", false, "If set, query the software properties instead of hardware")
+	outputFile := flag.String("output", "", "Output result to file in json format")
+	flag.Parse()
+
+	result := []byte{}
+	if *software {
+		b, err := querySoftware()
+		if err != nil {
+			fatal("Failed to generate software result: ", err)
+		}
+		result = b
+	} else {
+		b, err := queryHardware()
+		if err != nil {
+			fatal("Failed to generate hardware result: ", err)
+		}
+		result = b
+	}
+	fmt.Println(string(result))
 	// Output JSON file
 	if len(*outputFile) != 0 {
-		if err := os.WriteFile(*outputFile, b, 0755); err != nil {
+		if err := os.WriteFile(*outputFile, result, 0755); err != nil {
 			fatal("Failed to write to %v: %v", *outputFile, err)
 		}
 	}
