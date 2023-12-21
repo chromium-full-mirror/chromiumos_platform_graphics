@@ -1,1 +1,54 @@
-mtk_b_278742497.yml
+video.ChromeStackDecoderVerification.h264_files_from_bugs_277849540_1:
+  expectation: FAIL
+  tickets:
+  - b/278742497
+  comments: Need help from MTK to fix.
+  since_build: R117-15561.2.0
+video.ChromeStackDecoderVerification.h264_files_from_bugs_277849540_2:
+  expectation: FAIL
+  tickets:
+  - b/278742497
+  comments: Need help from MTK to fix.
+  since_build: R117-15561.2.0
+video.ChromeStackDecoderVerification.h264_files_from_bugs_277849540_3:
+  expectation: FAIL
+  tickets:
+  - b/278742497
+  comments: Need help from MTK to fix.
+  since_build: R117-15561.2.0
+video.ChromeStackDecoderVerification.vp9_2_group1_buf:
+  expectation: FAIL
+  tickets:
+  - b/278935312
+  comments: Current decoder implementation does not support 10 bit
+  since_build: R122-15713.0.0
+video.ChromeStackDecoderVerification.vp9_2_group1_frm_resize:
+  expectation: FAIL
+  tickets:
+  - b/278935312
+  comments: Current decoder implementation does not support 10 bit
+  since_build: R122-15713.0.0
+video.ChromeStackDecoderVerification.vp9_2_group1_gf_dist:
+  expectation: FAIL
+  tickets:
+  - b/278935312
+  comments: Current decoder implementation does not support 10 bit
+  since_build: R122-15713.0.0
+video.ChromeStackDecoderVerification.vp9_2_group1_odd_size:
+  expectation: FAIL
+  tickets:
+  - b/278935312
+  comments: Current decoder implementation does not support 10 bit
+  since_build: R122-15713.0.0
+video.ChromeStackDecoderVerification.vp9_2_group1_sub8x8:
+  expectation: FAIL
+  tickets:
+  - b/278935312
+  comments: Current decoder implementation does not support 10 bit
+  since_build: R122-15713.0.0
+video.ChromeStackDecoderVerification.vp9_2_group1_sub8x8_sf:
+  expectation: FAIL
+  tickets:
+  - b/278935312
+  comments: Current decoder implementation does not support 10 bit
+  since_build: R122-15713.0.0

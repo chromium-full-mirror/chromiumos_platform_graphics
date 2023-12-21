@@ -1,0 +1,6 @@
+video.ChromeStackDecoder.vp9_2:
+  expectation: FAIL
+  tickets:
+  - b/278935312
+  comments: Current decoder implementation does not support 10 bit
+  since_build: R122-15713.0.0
