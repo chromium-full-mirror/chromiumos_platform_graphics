@@ -396,33 +396,23 @@ func checkPackageInstalled(ctx context.Context, name string) error {
 	return nil
 }
 
-func replayTrace(ctx context.Context, config flags.ReplayAppConfig, traceFileName string, timeoutInSeconds uint32) (map[string]comm.ValueEntry, error) {
+// TODO(syedfaaiz) Need to either get rid of the timeout on Proton or find out a way to use it in the expected manner.
+func replayTrace(ctx context.Context, config flags.ReplayAppConfig, traceFileName string, timeoutInSeconds uint32, proton bool) (map[string]comm.ValueEntry, error) {
+	if proton {
+		copyD3dBinaries(ctx)
+	}
+	appArgs := config.Args
 	if timeoutInSeconds < replayMinTime {
 		return nil, errors.New("The requested timeout is too short to replay a trace file. Requested: %d, wanted >= %d", timeoutInSeconds, replayMinTime)
 	}
-	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeoutInSeconds)*time.Second)
-	defer cancel()
-	appArgs := config.Args
+	if !proton {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, time.Duration(timeoutInSeconds)*time.Second)
+		defer cancel()
 
-	// Add nested timeout to glretrace/eglretrace
-	appArgs = append(appArgs, fmt.Sprintf("--timeout=%d", timeoutInSeconds-10))
-	appArgs = append(appArgs, traceFileName)
-	exitCode, stdout, stderr := runCommand(ctx, config.EnvVars, config.AppName, appArgs...)
-	if exitCode != 0 {
-		return nil, errors.New("Failed to replay trace file [%s]. Exit code: %d. %s", traceFileName, exitCode, stderr)
+		// Add nested timeout to glretrace/eglretrace
+		appArgs = append(appArgs, fmt.Sprintf("--timeout=%d", timeoutInSeconds-10))
 	}
-	return parseReplayOutput(stdout, config.Postfix)
-}
-
-// TODO(syedfaaiz) : Need to either get rid of the timeout or find out a way to use it in the expected manner.
-func replayTraceProton(ctx context.Context, config flags.ReplayAppConfig, traceFileName string, timeoutInSeconds uint32) (map[string]comm.ValueEntry, error) {
-	copyD3dBinaries(ctx)
-	if timeoutInSeconds < replayMinTime {
-		return nil, errors.New("The requested timeout is too short to replay a trace file. Requested: %d, wanted >= %d", timeoutInSeconds, replayMinTime)
-	}
-
-	appArgs := config.Args
-	// Add nested timeout to glretrace/eglretrace
 	appArgs = append(appArgs, traceFileName)
 	exitCode, stdout, stderr := runCommand(ctx, config.EnvVars, config.AppName, appArgs...)
 	if exitCode != 0 {
@@ -462,19 +452,20 @@ func copyD3dBinaries(ctx context.Context) error {
 	return nil
 }
 
+// contains is case insensitive with regards to the tofind param.
+func contains(arr []string, tofind string) bool {
+	for _, val := range arr {
+		if strings.EqualFold(val, tofind) {
+			return true
+		}
+	}
+	return false
+}
+
 func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileName string, replayTimeout uint32) (map[string]comm.ValueEntry, error) {
 	res := make(map[string]comm.ValueEntry)
 	if err := notifyInitFinished(ctx, config.ProxyServer.URL); err != nil {
 		return res, err
-	}
-	// contains is case insensitive with regards to the tofind param.
-	contains := func(arr []string, tofind string) bool {
-		for _, val := range arr {
-			if strings.EqualFold(val, tofind) {
-				return true
-			}
-		}
-		return false
 	}
 
 	if len(config.Flags) == 0 {
@@ -488,17 +479,16 @@ func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileN
 			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Warning, Unable to find a trace replay config: %v, Skip running with flag: %v.", err, flag))
 			continue
 		}
+		proton := contains([]string{comm.TestFlagD3DW32, comm.TestFlagD3DW64}, flag)
 		// Flush all pending filesistem pending i/o ops
 		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Syncing file system"))
 		exec.Command("sync").Run()
-		rr := make(map[string]comm.ValueEntry)
-		if contains([]string{comm.TestFlagD3DW32, comm.TestFlagD3DW64}, flag) {
+		if proton {
 			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with Proton and %v binary", replayConfig.AppName))
-			rr, err = replayTraceProton(ctx, replayConfig, traceFileName, replayTimeout)
 		} else {
 			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with the default settings and %d seconds timeout...", replayTimeout))
-			rr, err = replayTrace(ctx, replayConfig, traceFileName, replayTimeout)
 		}
+		rr, err := replayTrace(ctx, replayConfig, traceFileName, replayTimeout, proton)
 		if err != nil {
 			return rr, err
 		}
@@ -530,7 +520,10 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 	if err != nil {
 		return res, errors.Wrap(err, "unable to find a trace replay config: %v", err)
 	}
-	traceReplayConfig.Args = append(traceReplayConfig.Args, "--dump-per-frame-stats=/tmp/per_frame_stats.json")
+	proton := contains([]string{comm.TestFlagD3DW32, comm.TestFlagD3DW64}, flag)
+	if !proton {
+		traceReplayConfig.Args = append(traceReplayConfig.Args, "--dump-per-frame-stats=/tmp/per_frame_stats.json")
+	}
 
 	timeStart := time.Now()
 	timeNow := timeStart
@@ -542,7 +535,7 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 		timeSinceStr := strings.ReplaceAll(time.Since(timeStart).String(), "µ", "u")
 		msg := fmt.Sprintf("Replaying the trace with <%s> flag, #%d at +%s from test start", flag, runCount+1, timeSinceStr)
 		logMsg(ctx, config.ProxyServer.URL, msg)
-		rr, err := replayTrace(ctx, traceReplayConfig, traceFileName, replayTimeout)
+		rr, err := replayTrace(ctx, traceReplayConfig, traceFileName, replayTimeout, proton)
 		if err != nil {
 			return res, err
 		}
