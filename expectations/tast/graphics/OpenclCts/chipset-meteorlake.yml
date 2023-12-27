@@ -10,12 +10,3 @@ graphics.OpenclCts.api_null_buffer_arg:
 graphics.OpenclCts.basic_parameter_types:
   expectation: FAIL
   since_build: R120-15639.0.0
-graphics.OpenclCts.bruteforce_cbrt:
-  expectation: FAIL
-  since_build: R122-15706.0.0
-graphics.OpenclCts.bruteforce_frexp:
-  expectation: FAIL
-  since_build: R122-15706.0.0
-graphics.OpenclCts.bruteforce_powr:
-  expectation: FAIL
-  since_build: R122-15706.0.0

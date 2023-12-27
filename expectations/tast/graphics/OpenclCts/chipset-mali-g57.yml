@@ -41,6 +41,3 @@ graphics.OpenclCts.contractions_contractions_float_7:
 graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.profiling_write_image_float:
-  expectation: FAIL
-  since_build: R122-15706.0.0

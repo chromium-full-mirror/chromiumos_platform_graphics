@@ -262,6 +262,9 @@ graphics.OpenclCts.bruteforce_log10:
 graphics.OpenclCts.bruteforce_log1p:
   expectation: FAIL
   since_build: R118-15585.0.0
+graphics.OpenclCts.bruteforce_log2:
+  expectation: FAIL
+  since_build: R122-15719.0.0
 graphics.OpenclCts.bruteforce_logb:
   expectation: FAIL
   since_build: R117-15527.0.0
