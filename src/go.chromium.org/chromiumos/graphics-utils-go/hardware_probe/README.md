@@ -40,18 +40,12 @@ Example output:
 ``` json
 {
     "CPU_SOC_Family": "intel",
-    "Disk": {
-        "name": "nvme0n1",
-        "size": 256060514304,
-        "size_gb": 256
-    },
     "GPU_Family": [
         {
             "Family": "kabylake",
             "GPUVendor": "intel"
         }
     ],
-    "Memory": 8,
     "VGA_Devices": [
         {
             "BDF": "0000:00:02.0",
