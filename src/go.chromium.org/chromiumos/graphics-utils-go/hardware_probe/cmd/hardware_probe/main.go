@@ -224,6 +224,10 @@ type softwareResult struct {
 	VulkanPackage    *PortagePackage `json:"VulkanPackage,omitempty"`
 }
 
+func log(format string, args ...interface{}) {
+	fmt.Fprintf(os.Stdout, format+"\n", args...)
+}
+
 func debug(format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, format+"\n", args...)
 }
@@ -237,33 +241,38 @@ func queryHardware() ([]byte, error) {
 	result := hardwareResult{}
 	memory, err := getMemory()
 	if err != nil {
-		fatal("Failed to get total memory: %v", err)
+		debug("Failed to get total memory: %v", err)
+	} else {
+		result.Memory = memory
 	}
-	result.Memory = memory
 
 	disk, err := getLargestDisk()
 	if err != nil {
-		fatal("Failed to get disk storage size: %v", err)
+		debug("Failed to get disk storage size: %v", err)
+	} else {
+		result.Disk = disk
 	}
-	result.Disk = disk
 
 	cpuSocFamily, err := getCPUSOCFamily()
 	if err != nil {
-		fatal("Failed to determine CPU SOC family: %v", err)
+		debug("Failed to determine CPU SOC family: %v", err)
+	} else {
+		result.CPUFamily = cpuSocFamily
 	}
-	result.CPUFamily = cpuSocFamily
 
 	gpuInfos, err := getGPUInfos()
 	if err != nil {
-		fatal("Failed to determine GPU: %v", err)
+		debug("Failed to determine GPU: %v", err)
+	} else {
+		result.GPUInfos = gpuInfos
 	}
-	result.GPUInfos = gpuInfos
 
 	vgaDevices, err := GetVGADevices()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to determine VGA device: %v.\n", err)
+		debug("Failed to determine VGA device: %v", err)
+	} else {
+		result.VGADevices = vgaDevices
 	}
-	result.VGADevices = vgaDevices
 	return json.MarshalIndent(result, "", "    ")
 }
 
@@ -271,16 +280,17 @@ func querySoftware() ([]byte, error) {
 	result := softwareResult{}
 	gles, err := getGLESVersion()
 	if err != nil {
-		fatal("Failed to get opengl es version: %v", err)
+		debug("Failed to get opengl es version: %v", err)
+	} else {
+		result.OpenGLES = gles
 	}
-	result.OpenGLES = gles
 
 	_, apiVersion, err := getVulkanVersion()
 	if err != nil {
-		fatal("Failed to get vulkan information: %v", err)
+		debug("Failed to get vulkan information: %v", err)
+	} else {
+		result.VulkanAPIVersion = apiVersion
 	}
-	result.VulkanAPIVersion = apiVersion
-
 	glDriverPackage, err := getGLESDriverPackage()
 	if err != nil {
 		debug("Failed to get gl driver package: %v", err)
@@ -316,11 +326,12 @@ func main() {
 		}
 		result = b
 	}
-	fmt.Println(string(result))
 	// Output JSON file
 	if len(*outputFile) != 0 {
 		if err := os.WriteFile(*outputFile, result, 0755); err != nil {
 			fatal("Failed to write to %v: %v", *outputFile, err)
 		}
+	} else {
+		log(string(result))
 	}
 }
