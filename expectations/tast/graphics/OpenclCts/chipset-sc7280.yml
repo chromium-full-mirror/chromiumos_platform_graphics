@@ -52,16 +52,7 @@ graphics.OpenclCts.basic_async_strided_copy_global_to_local:
 graphics.OpenclCts.basic_async_strided_copy_local_to_global:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.basic_explicit_s2v_char:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.basic_explicit_s2v_long:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.basic_explicit_s2v_uchar:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.basic_explicit_s2v_ulong:
+graphics.OpenclCts.basic_explicit_s2v:
   expectation: FAIL
   since_build: R109-15232.0.0
 graphics.OpenclCts.basic_hiloeo:
