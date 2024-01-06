@@ -10,7 +10,7 @@
 
 // Test size hints
 
-static bool test_min_size_hint ()
+static bool test_min_size_hints ()
 {
 	Display *d;
 	Window w;
@@ -41,7 +41,7 @@ static bool test_min_size_hint ()
 	return success;
 }
 
-ADD_TEST (test_min_size_hint);
+ADD_TEST (test_min_size_hints);
 
 static bool test_max_size_hints ()
 {
