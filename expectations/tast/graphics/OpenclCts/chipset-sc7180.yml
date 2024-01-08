@@ -27,12 +27,6 @@ graphics.OpenclCts.api_null_buffer_arg:
   expectation: FAIL
   tickets:
   - b/227134903
-graphics.OpenclCts.basic_arrayimagecopy:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.basic_arrayimagecopy3d:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.basic_astype:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -57,12 +51,6 @@ graphics.OpenclCts.basic_hiloeo:
 graphics.OpenclCts.basic_image_r8:
   expectation: FAIL
   since_build: R117-15527.0.0
-graphics.OpenclCts.basic_imagearraycopy:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.basic_imagearraycopy3d:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.basic_intmath_long:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -305,21 +293,6 @@ graphics.OpenclCts.buffers_sub_buffers_overlapping:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.buffers_sub_buffers_read_write:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.cl_copy_images_1darray_cl_half_float:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_half_float:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.cl_copy_images_2dto2darray_cl_half_float:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.cl_copy_images_2dto3d_cl_half_float:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.cl_copy_images_3dto2darray_cl_half_float:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.conversions_char_char:

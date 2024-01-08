@@ -47,9 +47,6 @@ graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
 graphics.OpenclCts.integer_ops_uint_compare:
   expectation: FAIL
   since_build: R113-15390.0.0
-graphics.OpenclCts.integer_ops_uint_logic:
-  expectation: FAIL
-  since_build: R117-15538.0.0
 graphics.OpenclCts.integer_ops_ulong_compare:
   expectation: FAIL
   since_build: R110-15241.0.0
