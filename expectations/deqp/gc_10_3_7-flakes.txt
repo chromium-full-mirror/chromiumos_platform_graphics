@@ -12,5 +12,4 @@ dEQP-VK.reconvergence.subgroup_uniform_control_flow_ballot.compute.nesting4.2.35
 dEQP-VK.reconvergence.subgroup_uniform_control_flow_elect.compute.nesting4.2.35
 dEQP-VK.reconvergence.workgroup_uniform_control_flow_ballot.compute.nesting4.2.35
 dEQP-VK.reconvergence.workgroup_uniform_control_flow_elect.compute.nesting4.2.35
-dEQP-VK.wsi.display_control.register_display_event
 dEQP-VK.wsi.display.get_display_plane_capabilities2
