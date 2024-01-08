@@ -1,8 +1,3 @@
-# These tests should not exist. They are from renderpass-with-dynamic-rendering.txt which should
-# have been removed upstream.
-dEQP-VK.renderpass_with_dynamic_rendering.dedicated_allocation.*
-dEQP-VK.renderpass_with_dynamic_rendering.suballocation.*
-
 # The flush_finish tests throw warnings when behavior doesn't match
 # their expectations, except that tiling GPUs don't behave the way they
 # expect in their timing setup so the tests take exceptionally long
