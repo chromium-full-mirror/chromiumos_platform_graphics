@@ -115,8 +115,10 @@ func getGLESDriverPackage() (*PortagePackage, error) {
 			if err != nil {
 				continue
 			}
-			if strings.Contains(string(data), "libEGL.so") {
-				return p, nil
+			for _, library := range []string{"libEGL.so", "libEGL_mesa.so", "libglapi.so"} {
+				if strings.Contains(string(data), library) {
+					return p, nil
+				}
 			}
 		}
 		return "", errors.Errorf("None of the packages are installing libEGL.so")
