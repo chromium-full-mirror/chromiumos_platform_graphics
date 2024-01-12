@@ -1,6 +1,5 @@
 # Do not use "set noparent" in this file (add it to the including file).
 
-chadversary@chromium.org
 linyaa@google.com
 include /OWNERS.mesa_amd
 include /OWNERS.mesa_iris
