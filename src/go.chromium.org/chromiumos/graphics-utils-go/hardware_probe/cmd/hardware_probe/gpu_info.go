@@ -70,6 +70,14 @@ type GPUInfo struct {
 	GPUVendor gpuVendor // GPUVendor is the vendor of the GPU, e.g. Intel, qualcomm, mediatek, etc.
 }
 
+func (info GPUInfo) Labels(keyPrefix string) map[string]string {
+	m := make(map[string]string)
+	m[keyPrefix + "Family"] = info.Family
+	m[keyPrefix + "Vendor"] = info.GPUVendor.String()
+	// TODO: Add PCIID
+	return m
+}
+
 // hasMaliGPUEnabled checks if mali driver is in the device.
 func hasMaliGPUEnabled() (bool, error) {
 	if _, err := os.Stat("/dev/mali0"); err != nil {

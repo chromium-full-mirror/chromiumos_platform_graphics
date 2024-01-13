@@ -237,7 +237,7 @@ func fatal(format string, args ...interface{}) {
 	os.Exit(1)
 }
 
-func queryHardware() ([]byte, error) {
+func queryHardware() hardwareResult {
 	result := hardwareResult{}
 	memory, err := getMemory()
 	if err != nil {
@@ -273,10 +273,10 @@ func queryHardware() ([]byte, error) {
 	} else {
 		result.VGADevices = vgaDevices
 	}
-	return json.MarshalIndent(result, "", "    ")
+	return result
 }
 
-func querySoftware() ([]byte, error) {
+func querySoftware() softwareResult {
 	result := softwareResult{}
 	gles, err := getGLESVersion()
 	if err != nil {
@@ -304,29 +304,70 @@ func querySoftware() ([]byte, error) {
 	} else {
 		result.VulkanPackage = vulkanDriverPackage
 	}
-	return json.MarshalIndent(result, "", "    ")
+	return result
+}
+
+func queryLabels() (interface{}, error) {
+	combineMap := func(a, b map[string]string) {
+		for k, v := range b {
+			a[k] = v
+		}
+	}
+
+	hardware := queryHardware()
+	software := querySoftware()
+
+	result := make(map[string]string)
+	result["PlatformCPUVendor"] = hardware.CPUFamily.String()
+	result["PlatformDiskSize"] = fmt.Sprintf("%v", hardware.Disk.SizeGb)
+	result["PlatformMemorySize"] = fmt.Sprintf("%v", hardware.Memory)
+	// We sorted GPUInfos by bootVGA flag, this is the one comes by default when booting.
+	// Assume it is the integrated GPU.
+	combineMap(result, hardware.GPUInfos[0].Labels("GPU"))
+	if len(hardware.GPUInfos) > 1 {
+		// TODO: Support 3+ GPUs.
+		combineMap(result, hardware.GPUInfos[1].Labels("dGPU"))
+	}
+
+	// Software properties.
+	if software.VulkanAPIVersion != nil {
+		result["VulkanVersion"] = software.VulkanAPIVersion.String()
+	}
+	if software.OpenGLES != nil {
+		result["OpenGLESVersion"] = software.OpenGLES.String()
+	}
+	return result, nil
+
 }
 
 func main() {
 	software := flag.Bool("software", false, "If set, query the software properties instead of hardware")
-	outputFile := flag.String("output", "", "Output result to file in json format")
+	labels := flag.Bool("labels", false, "If set, output gathered information key:value pair for infra.")
+	outputFile := flag.String("output", "", "If set, output result to file.")
 	flag.Parse()
 
-	result := []byte{}
-	if *software {
-		b, err := querySoftware()
+	var result []byte
+	var err error
+	if *labels {
+		resultMap, err := queryLabels()
 		if err != nil {
-			fatal("Failed to generate software result: ", err)
+			fatal("Failed to generate infra labels: ", err)
 		}
-		result = b
+		// Output it in key: val format.
+		for k, v := range resultMap.(map[string]string) {
+			result = append(result, []byte(fmt.Sprintf("%v: %v\n", k, v))...)
+		}
+	} else if *software {
+		result, err = json.MarshalIndent(querySoftware(), "", "    ")
+		if err != nil {
+			fatal("failed to marshal softare result: %v", err)
+		}
 	} else {
-		b, err := queryHardware()
+		result, err = json.MarshalIndent(queryHardware(), "", "    ")
 		if err != nil {
-			fatal("Failed to generate hardware result: ", err)
+			fatal("Failed to marshal hardware result: %v", err)
 		}
-		result = b
 	}
-	// Output JSON file
 	if len(*outputFile) != 0 {
 		if err := os.WriteFile(*outputFile, result, 0755); err != nil {
 			fatal("Failed to write to %v: %v", *outputFile, err)

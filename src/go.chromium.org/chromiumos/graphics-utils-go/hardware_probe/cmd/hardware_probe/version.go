@@ -14,6 +14,11 @@ type Version struct {
 	n []int
 }
 
+// String returns the string representation of the Version, e.g. 1.3.21
+func (v Version) String() string {
+	return fmt.Sprintf("%v", strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v.n)), "."), "[]"))
+}
+
 // MarshalJSON marshals the enum as a quoted json string.
 func (v *Version) MarshalJSON() ([]byte, error) {
 	presentation := fmt.Sprintf("\"%v\"", strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v.n)), "."), "[]"))
