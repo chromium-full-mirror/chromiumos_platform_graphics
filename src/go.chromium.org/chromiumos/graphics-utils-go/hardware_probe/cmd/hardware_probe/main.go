@@ -222,6 +222,7 @@ type softwareResult struct {
 	OpenGLESPackage  *PortagePackage `json:"OpenGLESPackage,omitempty"`
 	VulkanAPIVersion *Version        `json:"VulkanAPIVersion,omitempty"`
 	VulkanPackage    *PortagePackage `json:"VulkanPackage,omitempty"`
+	ClvkPacakge      *PortagePackage `json:"ClvkPackage,omitempty"`
 }
 
 func log(format string, args ...interface{}) {
@@ -303,6 +304,13 @@ func querySoftware() softwareResult {
 		debug("Failed to get vulkan driver package: %v", err)
 	} else {
 		result.VulkanPackage = vulkanDriverPackage
+	}
+
+	clvkPackage, err := getClvkDriverPackage()
+	if err != nil {
+		debug("Failed to get clvk package: %v", err)
+	} else {
+		result.ClvkPacakge = clvkPackage
 	}
 	return result
 }

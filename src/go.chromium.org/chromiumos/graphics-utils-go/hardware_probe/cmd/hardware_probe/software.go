@@ -195,3 +195,31 @@ func getVulkanDriverPackage() (*PortagePackage, error) {
 	}
 	return nil, errors.Errorf("failed to find GL driver portage package")
 }
+
+func getClvkDriverPackage() (*PortagePackage, error) {
+	resolver := func(packages []string) (string, error) {
+		// Returns the one that installs libOpenCL.so.
+		for _, p := range packages {
+			// CONTENTS file under each entry contains the installed objs.
+			data, err := os.ReadFile(filepath.Join(p, "CONTENTS"))
+			if err != nil {
+				continue
+			}
+			if strings.Contains(string(data), "libOpenCL.so") {
+				return p, nil
+			}
+		}
+		return "", errors.Errorf("None of the packages are installing libOpenCL.so")
+	}
+
+	// Search for all possible package in ChromeOS that may provide clvk.
+	for _, globPattern := range []string{
+		"media-libs/clvk*",
+	} {
+		portagePackage, err := queryPortageDB(globPattern, resolver)
+		if err == nil {
+			return &portagePackage, nil
+		}
+	}
+	return nil, errors.Errorf("failed to find Clvk portage package")
+}
