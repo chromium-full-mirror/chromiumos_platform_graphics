@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -350,7 +351,7 @@ func queryLabels() (interface{}, error) {
 
 func main() {
 	software := flag.Bool("software", false, "If set, query the software properties instead of hardware")
-	labels := flag.Bool("labels", false, "If set, output gathered information key:value pair for infra.")
+	labels := flag.Bool("labels", false, "If set, output gathered hardware+software information key:value pair for infra.")
 	outputFile := flag.String("output", "", "If set, output result to file.")
 	flag.Parse()
 
@@ -361,9 +362,14 @@ func main() {
 		if err != nil {
 			fatal("Failed to generate infra labels: ", err)
 		}
-		// Output it in key: val format.
-		for k, v := range resultMap.(map[string]string) {
-			result = append(result, []byte(fmt.Sprintf("%v: %v\n", k, v))...)
+		var keys []string
+		// Sort it and output in key:val format
+		for k := range resultMap.(map[string]string) {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			result = append(result, []byte(fmt.Sprintf("%v: %v\n", key, resultMap.(map[string]string)[key]))...)
 		}
 	} else if *software {
 		result, err = json.MarshalIndent(querySoftware(), "", "    ")
