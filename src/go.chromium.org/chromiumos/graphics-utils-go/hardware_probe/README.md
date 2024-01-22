@@ -23,7 +23,7 @@ To build the tool for Linux, it requires a standard installation of the golang d
 
 ``` bash
 # Make sure you are in the same directory as this README.
-$ GO111MODULE=off make
+$ make
 ```
 
 ## How to run the binary
