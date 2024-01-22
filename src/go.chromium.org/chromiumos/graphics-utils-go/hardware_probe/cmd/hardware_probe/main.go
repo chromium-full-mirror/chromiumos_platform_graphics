@@ -7,6 +7,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -18,6 +19,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"go.chromium.org/chromiumos/graphics-utils-go/hardware_probe/cmd/hardware_probe/display"
 )
 
 // CPUArch is type of CPU architecture.
@@ -211,11 +214,12 @@ func getLargestDisk() (Disk, error) {
 }
 
 type hardwareResult struct {
-	CPUFamily  CPUSOCFamily `json:"CPU_SOC_Family"`
-	Disk       Disk         `json:"Disk"`
-	GPUInfos   []GPUInfo    `json:"GPU_Family"`
-	Memory     Memory       `json:"Memory"`
-	VGADevices []VGADevice  `json:"VGA_Devices,omitempty"`
+	CPUFamily         CPUSOCFamily      `json:"CPU_SOC_Family"`
+	Disk              Disk              `json:"Disk"`
+	GPUInfos          []GPUInfo         `json:"GPU_Family"`
+	Memory            Memory            `json:"Memory"`
+	VGADevices        []VGADevice       `json:"VGA_Devices,omitempty"`
+	ConnectedDisplays []display.Display `json:"ConnectedDisplays,omitempty"`
 }
 
 type softwareResult struct {
@@ -274,6 +278,13 @@ func queryHardware() hardwareResult {
 		debug("Failed to determine VGA device: %v", err)
 	} else {
 		result.VGADevices = vgaDevices
+	}
+
+	displays, err := display.ModetestConnectedDisplays(context.Background())
+	if err != nil {
+		debug("Failed to get displays: %v", err)
+	} else {
+		result.ConnectedDisplays = displays
 	}
 	return result
 }
