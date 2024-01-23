@@ -4,20 +4,22 @@
  * found in the LICENSE file.
  */
 
-#ifndef __TESTS_H__
-#define __TESTS_H__
+#ifndef SRC_XRAY_TESTS_H_
+#define SRC_XRAY_TESTS_H_
 
-#include "includes.h"
+#include <map>
+#include <string>
+
+#include "./includes.h"
 
 #define ADD_TEST(f) static int test_gen_##f = test_register(#f, f)
 
-struct test
-{
-	char name[128];
-	bool (*run) (void);
+struct test {
+  char name[128];
+  bool (*run)(void);
 };
 
-int test_register (const char *name, bool (*func) (void));
-extern map < string, test > test_list;
+int test_register(const char *name, bool (*func)(void));
+extern std::map<std::string, test> test_list;
 
-#endif
+#endif  // SRC_XRAY_TESTS_H_

@@ -4,23 +4,20 @@
  * found in the LICENSE file.
  */
 
-#ifndef __INCLUDES_H__
-#define __INCLUDES_H__
+#ifndef SRC_XRAY_INCLUDES_H_
+#define SRC_XRAY_INCLUDES_H_
 
-#include <iostream>
-#include <map>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <vector>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/xf86vmode.h>
 #include <X11/extensions/Xrandr.h>
 
-using namespace std;
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <iostream>
+#include <vector>
 
-#endif
+#endif  // SRC_XRAY_INCLUDES_H_
