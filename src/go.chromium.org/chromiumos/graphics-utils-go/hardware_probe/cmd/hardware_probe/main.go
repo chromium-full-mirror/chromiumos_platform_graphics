@@ -16,7 +16,6 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -213,6 +212,11 @@ func getLargestDisk() (Disk, error) {
 	}, nil
 }
 
+type labels struct {
+	LabelsReporting interface{} `json:"LabelsReporting,omitempty"`
+	LabelsScheduling interface{} `json:"LabelsScheduling,omitempty"`
+}
+
 type hardwareResult struct {
 	CPUFamily         CPUSOCFamily      `json:"CPU_SOC_Family"`
 	Disk              Disk              `json:"Disk"`
@@ -241,6 +245,30 @@ func debug(format string, args ...interface{}) {
 func fatal(format string, args ...interface{}) {
 	debug(format, args...)
 	os.Exit(1)
+}
+
+type Result struct {
+	Hardware hardwareResult
+	Software softwareResult
+	Label    labels
+}
+
+func (b Result) MarshalJSON() ([]byte, error) {
+	// For backward compatibility, we flat the json to avoid "Hardware"/"Software"/"Labels" entries in final json
+	type intermediate struct {
+		hardwareResult
+		softwareResult
+		labels
+	}
+	v := intermediate{b.Hardware, b.Software, b.Label}
+	return json.Marshal(v)
+}
+
+func queryResult() Result {
+	hardware := queryHardware()
+	software := querySoftware()
+	label := getLabels(hardware, software)
+	return Result{hardware, software, label}
 }
 
 func queryHardware() hardwareResult {
@@ -327,16 +355,12 @@ func querySoftware() softwareResult {
 	return result
 }
 
-func queryLabels() (interface{}, error) {
+func getLabels(hardware hardwareResult, software softwareResult) labels {
 	combineMap := func(a, b map[string]string) {
 		for k, v := range b {
 			a[k] = v
 		}
 	}
-
-	hardware := queryHardware()
-	software := querySoftware()
-
 	result := make(map[string]string)
 	result["PlatformCPUVendor"] = hardware.CPUFamily.String()
 	result["PlatformDiskSize"] = fmt.Sprintf("%v", hardware.Disk.SizeGb)
@@ -348,51 +372,40 @@ func queryLabels() (interface{}, error) {
 		// TODO: Support 3+ GPUs.
 		combineMap(result, hardware.GPUInfos[1].Labels("dGPU"))
 	}
-
 	// Software properties.
 	if software.VulkanAPIVersion != nil {
-		result["VulkanVersion"] = software.VulkanAPIVersion.String()
+		result["GPUVulkanVersion"] = software.VulkanAPIVersion.String()
 	}
 	if software.OpenGLES != nil {
-		result["OpenGLESVersion"] = software.OpenGLES.String()
+		result["GPUOpenGLESVersion"] = software.OpenGLES.String()
 	}
-	return result, nil
-
+	return labels{LabelsReporting: result}
 }
 
 func main() {
-	software := flag.Bool("software", false, "If set, query the software properties instead of hardware")
-	labels := flag.Bool("labels", false, "If set, output gathered hardware+software information key:value pair for infra.")
+	software := flag.Bool("software", false, "If set, output only the software related fields")
+	hardware := flag.Bool("hardware", false, "If set, output only the hardware related fields")
+	labelsReporting := flag.Bool("labels-reporting", false, "If set, output gathered field for infra.")
 	outputFile := flag.String("output", "", "If set, output result to file.")
 	flag.Parse()
 
-	var result []byte
-	var err error
-	if *labels {
-		resultMap, err := queryLabels()
-		if err != nil {
-			fatal("Failed to generate infra labels: ", err)
-		}
-		var keys []string
-		// Sort it and output in key:val format
-		for k := range resultMap.(map[string]string) {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		for _, key := range keys {
-			result = append(result, []byte(fmt.Sprintf("%v: %v\n", key, resultMap.(map[string]string)[key]))...)
-		}
-	} else if *software {
-		result, err = json.MarshalIndent(querySoftware(), "", "    ")
-		if err != nil {
-			fatal("failed to marshal softare result: %v", err)
-		}
-	} else {
-		result, err = json.MarshalIndent(queryHardware(), "", "    ")
-		if err != nil {
-			fatal("Failed to marshal hardware result: %v", err)
-		}
+	var resultStruct interface{}
+	resultStruct = queryResult()
+	if *software {
+		resultStruct = resultStruct.(Result).Software
 	}
+	if *hardware {
+		resultStruct = resultStruct.(Result).Hardware
+	}
+	if *labelsReporting {
+		resultStruct = resultStruct.(Result).Label.LabelsReporting
+	}
+
+	result, err := json.MarshalIndent(resultStruct, "", "    ")
+	if err != nil {
+		fatal("Failed to marshal hardware result: %v", err)
+	}
+
 	if len(*outputFile) != 0 {
 		if err := os.WriteFile(*outputFile, result, 0755); err != nil {
 			fatal("Failed to write to %v: %v", *outputFile, err)
