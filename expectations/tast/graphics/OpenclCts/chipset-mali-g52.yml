@@ -1,10 +1,12 @@
-graphics.OpenclCts.api_null_buffer_arg:
+graphics.OpenclCts.api_get_sampler_info:
   expectation: FAIL
-  tickets:
-  - b/227134903
-graphics.OpenclCts.basic_local_kernel_scope:
+  since_build: R123-15755.0.0
+graphics.OpenclCts.api_get_sampler_info_compatibility:
   expectation: FAIL
-  since_build: R113-15390.0.0
+  since_build: R123-15755.0.0
+graphics.OpenclCts.computeinfo_conformance_version:
+  expectation: FAIL
+  since_build: R123-15755.0.0
 graphics.OpenclCts.contractions_contractions_float_0:
   expectation: FAIL
   since_build: R109-15232.0.0
@@ -29,21 +31,18 @@ graphics.OpenclCts.contractions_contractions_float_6:
 graphics.OpenclCts.contractions_contractions_float_7:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.image_streams_3d_cl_float:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.image_streams_3d_cl_half_float:
-  expectation: FAIL
-  since_build: R117-15535.0.0
-graphics.OpenclCts.image_streams_3d_cl_unorm_int16:
-  expectation: FAIL
-  since_build: R117-15527.0.0
-graphics.OpenclCts.image_streams_3d_cl_unorm_int8:
-  expectation: FAIL
-  since_build: R109-15232.0.0
 graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R109-15232.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_1d_basic:
+  expectation: FAIL
+  since_build: R123-15755.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_2d_basic:
+  expectation: FAIL
+  since_build: R123-15755.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_3d_basic:
+  expectation: FAIL
+  since_build: R123-15755.0.0
 graphics.OpenclCts.thread_dimensions_full_3d_explicit_local:
   expectation: FAIL
   since_build: R109-15232.0.0

@@ -1,4 +1,12 @@
-graphics.OpenclCts.api_null_buffer_arg:
+graphics.OpenclCts.api_get_sampler_info:
   expectation: FAIL
-  tickets:
-  - b/227134903
+  since_build: R123-15755.0.0
+graphics.OpenclCts.api_get_sampler_info_compatibility:
+  expectation: FAIL
+  since_build: R123-15755.0.0
+graphics.OpenclCts.compiler_features_macro:
+  expectation: FAIL
+  since_build: R123-15755.0.0
+graphics.OpenclCts.computeinfo_conformance_version:
+  expectation: FAIL
+  since_build: R123-15755.0.0

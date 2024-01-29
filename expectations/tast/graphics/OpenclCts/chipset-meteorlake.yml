@@ -1,12 +1,12 @@
-graphics.OpenclCts.allocations_multiple_1_buffer:
+graphics.OpenclCts.api_get_sampler_info:
   expectation: FAIL
-  since_build: R120-15656.0.0
-graphics.OpenclCts.allocations_multiple_1_buffer_non_blocking:
+  since_build: R123-15755.0.0
+graphics.OpenclCts.api_get_sampler_info_compatibility:
   expectation: FAIL
-  since_build: R120-15656.0.0
-graphics.OpenclCts.api_null_buffer_arg:
-  expectation: FAIL
-  since_build: R120-15656.0.0
+  since_build: R123-15755.0.0
 graphics.OpenclCts.basic_parameter_types:
   expectation: FAIL
   since_build: R120-15639.0.0
+graphics.OpenclCts.computeinfo_conformance_version:
+  expectation: FAIL
+  since_build: R123-15755.0.0
