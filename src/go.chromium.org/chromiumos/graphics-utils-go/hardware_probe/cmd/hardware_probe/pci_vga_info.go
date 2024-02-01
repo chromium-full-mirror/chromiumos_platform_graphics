@@ -84,6 +84,9 @@ func GetVGADevices() ([]VGADevice, error) {
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to map %v to family name", matches[3])
 		}
+		// Instead of using PCI vendorID as its ID, lets use vendor as its vendorID.
+		// deviceID are hex values which has 0x prefix.
+		gpuInfo.ID = fmt.Sprintf("%v:%v", gpuInfo.GPUVendor, deviceID[2:])
 
 		vgaDevices = append(vgaDevices, VGADevice{
 			BDF:      matches[1],

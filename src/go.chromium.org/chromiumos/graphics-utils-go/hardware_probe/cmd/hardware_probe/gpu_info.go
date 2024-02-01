@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
@@ -67,14 +68,15 @@ func (s gpuVendor) MarshalJSON() ([]byte, error) {
 // GPUInfo contains information for GPU.
 type GPUInfo struct {
 	Family    string    // Family is the architector of the GPU, e.g. alderlake, ampere, etc.
-	GPUVendor gpuVendor // GPUVendor is the vendor of the GPU, e.g. Intel, qualcomm, mediatek, etc.
+	GPUVendor gpuVendor // GPUVendor is the vendor of the GPU, e.g. Intel, Qualcomm, Mediatek, etc.
+	ID        string    // For Intel, it is the PCIID, for ARM, we used the Family as its ID.
 }
 
 func (info GPUInfo) Labels(keyPrefix string) map[string]string {
 	m := make(map[string]string)
-	m[keyPrefix + "Family"] = info.Family
-	m[keyPrefix + "Vendor"] = info.GPUVendor.String()
-	// TODO: Add PCIID
+	m[keyPrefix+"Family"] = info.Family
+	m[keyPrefix+"Vendor"] = info.GPUVendor.String()
+	m[keyPrefix+"ID"] = info.ID
 	return m
 }
 
@@ -168,8 +170,19 @@ func getOpenGLRendererString() (string, error) {
 	return "", errors.Wrap(glxErr, waffleErr.Error())
 }
 
+// getGPUInfoFromFamilyAndVendor calculates the GPU ID for devices using its renderer/vendor and returns the GPUInfo structure.
+// This is mostly used in devices that have no access PCI information, e.g. ARM.
+func getGPUInfoFromFamilyAndVendor(family string, vendor gpuVendor) GPUInfo {
+	// The first part represents the vendorID.
+	vendorID := vendor.String()
+	// The second part represents the deviceID.
+	deviceID := family
+	ID := fmt.Sprintf("%v:%v", vendorID, deviceID)
+	return GPUInfo{Family: family, GPUVendor: vendor, ID: ID}
+}
+
 // getGPUInfos returns the GPU family name for the host.
-// TODO(ddmail): Support returning multiple mali/qualcomm GPUs.
+// TODO(ddmail): Support returning multiple mali/Qualcomm GPUs.
 func getGPUInfos() ([]GPUInfo, error) {
 	// Check for mali or panfrost
 	hasMali, errMali := hasMaliGPUEnabled()
@@ -187,23 +200,23 @@ func getGPUInfos() ([]GPUInfo, error) {
 			return nil, errors.Errorf("unexpected opengl renderer for mali: %v", renderer)
 		}
 		gpuFamily := strings.ToLower(renderer)
-		// Fill in GPU_Vendor for qualcomm and mediatek.
+		// Fill in GPU_Vendor for Qualcomm and Mediatek.
 		socFamily, err := getCPUSOCFamily()
 		if err == nil {
 			if socFamily == socQualcomm {
-				return []GPUInfo{{Family: gpuFamily, GPUVendor: vendorQualcomm}}, nil
+				return []GPUInfo{getGPUInfoFromFamilyAndVendor(gpuFamily, vendorQualcomm)}, nil
 			}
 			if socFamily == socMediaTek {
-				return []GPUInfo{{Family: gpuFamily, GPUVendor: vendorMediatek}}, nil
+				return []GPUInfo{getGPUInfoFromFamilyAndVendor(gpuFamily, vendorMediatek)}, nil
 			}
 			if socFamily == socRockchip {
-				return []GPUInfo{{Family: gpuFamily, GPUVendor: vendorRockchip}}, nil
+				return []GPUInfo{getGPUInfoFromFamilyAndVendor(gpuFamily, vendorRockchip)}, nil
 			}
 		}
-		return []GPUInfo{{Family: gpuFamily, GPUVendor: vendorUnknown}}, nil
+		return []GPUInfo{getGPUInfoFromFamilyAndVendor(gpuFamily, vendorUnknown)}, nil
 	}
 
-	// Check for qualcomm, rogue
+	// Check for Qualcomm, Rogue
 	socFamily, err := getCPUSOCFamily()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to determine CPU SOC family")
@@ -214,10 +227,10 @@ func getGPUInfos() ([]GPUInfo, error) {
 			return nil, errors.Wrap(err, "failed to get ARM SOC information")
 		}
 		if family == socQualcomm {
-			return []GPUInfo{{Family: name, GPUVendor: vendorQualcomm}}, nil
+			return []GPUInfo{getGPUInfoFromFamilyAndVendor(name, vendorQualcomm)}, nil
 		} else if family == socMediaTek && name == "mt8173" {
 			// For old mediaTek board, it has rogue driver instead of mali.
-			return []GPUInfo{{Family: "rogue", GPUVendor: vendorMediatek}}, nil
+			return []GPUInfo{getGPUInfoFromFamilyAndVendor("rogue", vendorMediatek)}, nil
 		} else {
 			return nil, errors.Errorf("not recognizing Qualcomm or Mediatek device: %v", family)
 		}
@@ -247,7 +260,7 @@ func getGPUInfos() ([]GPUInfo, error) {
 	}
 	renderer = strings.ToLower(renderer)
 	if strings.Contains(renderer, "llvmpipe") || strings.Contains(renderer, "software") {
-		return []GPUInfo{{Family: renderer, GPUVendor: vendorSoftware}}, nil
+		return []GPUInfo{getGPUInfoFromFamilyAndVendor(renderer, vendorSoftware)}, nil
 	}
 	return nil, errors.Errorf("unknown opengl renderer: %v", renderer)
 }
