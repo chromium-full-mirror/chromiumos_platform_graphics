@@ -37,9 +37,8 @@ const (
 	ApitraceW32 = "d3dretrace32.exe"
 	// ApitraceW64 keeps track of the 64 bit binary for d3dretrace.
 	ApitraceW64 = "d3dretrace64.exe"
-	steamDir    = "/home/chronos/home/chronos/.steam/steam/steamapps/common/"
-	slr         = steamDir + "SteamLinuxRuntime_soldier/"
-	proton      = steamDir + "Proton 7.0/"
+	slr         = "SteamLinuxRuntime_sniper/"
+	proton      = "Proton 8.0/"
 )
 
 var configs = map[guestType]map[string]ReplayAppConfig{
