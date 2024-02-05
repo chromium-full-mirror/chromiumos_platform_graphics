@@ -7,6 +7,3 @@ graphics.OpenclCts.api_get_sampler_info_compatibility:
 graphics.OpenclCts.basic_parameter_types:
   expectation: FAIL
   since_build: R120-15639.0.0
-graphics.OpenclCts.computeinfo_conformance_version:
-  expectation: FAIL
-  since_build: R123-15755.0.0

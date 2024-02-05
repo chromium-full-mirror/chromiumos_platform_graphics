@@ -22,9 +22,6 @@ graphics.OpenclCts.c11_atomics_atomic_flag:
 graphics.OpenclCts.compiler_options_build_macro:
   expectation: FAIL
   since_build: R122-15706.0.0
-graphics.OpenclCts.computeinfo_conformance_version:
-  expectation: FAIL
-  since_build: R123-15755.0.0
 graphics.OpenclCts.half_roundtrip:
   expectation: FAIL
   since_build: R110-15241.0.0
