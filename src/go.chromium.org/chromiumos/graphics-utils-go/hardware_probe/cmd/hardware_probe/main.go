@@ -379,13 +379,10 @@ func getLabels(hardware hardwareResult, software softwareResult) labels {
 	if software.OpenGLES != nil {
 		result["GPUOpenGLESVersion"] = software.OpenGLES.String()
 	}
-	// TODO: parse the following field via edid. Ask display team to help fill this in.
-	// result["DisplayPanelName"] = "unknown"
-	// result["DisplayResolution"] = "unknown"
-	// result["DisplayRefreshRate"] = "unknown"
-	// result["DisplayPresentVRR"] = "unknown"
-	// result["DisplayPresentPSR"] = "unknown"
-	// result["DisplayPresentHDR"] = "unknown"
+	if len(hardware.ConnectedDisplays) > 0 {
+		// TODO: Long term support multiple displays. Right now there is at most one display per device in the lab
+		combineMap(result, hardware.ConnectedDisplays[0].Labels("Display"))
+	}
 
 	// Infra only supports snake case string with `^[a-z][a-z0-9_]*(/[a-z][a-z0-9_]*)*$`
 	var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")

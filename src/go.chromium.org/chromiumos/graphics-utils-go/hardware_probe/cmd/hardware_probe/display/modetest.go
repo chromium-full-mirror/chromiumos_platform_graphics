@@ -14,6 +14,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"go.chromium.org/chromiumos/graphics-utils-go/hardware_probe/cmd/hardware_probe/util"
 )
 
 const (
@@ -94,11 +96,64 @@ type Mode struct {
 	Preferred  bool
 }
 
-// Display described by a tuple of connector, encoder, and CRTC.
+// Display described by a connector and its possible encoders.
 type Display struct {
-	Connector *Connector // The display's connector.
-	Encoder   *Encoder   // The encoder matching the ID provided by the connector (if found).
-	Crtc      *Crtc      // The CRTC matching the ID provided by the encoder (if found).
+	Connector *Connector       // The display's connector.
+	Encoders  []DisplayEncoder // The encoders matching the ID provided by the connector (if found).
+}
+
+// Labels extracts relevant values into a key:value map for label reporting.
+func (d Display) Labels(keyPrefix string) map[string]string {
+	m := make(map[string]string)
+
+	m[keyPrefix+"PanelName"] = "unknown"
+	if strings.Contains(d.Connector.Name, "eDP") {
+		m[keyPrefix+"PanelName"] = fmt.Sprintf("%v %v", d.Connector.Edid.ManufacturerName, d.Connector.Edid.ModelNumber)
+	}
+
+	m[keyPrefix+"Resolution"] = fmt.Sprintf("%vx%v", d.Connector.Height, d.Connector.Width)
+	for _, mode := range d.Connector.Modes {
+		if !mode.Preferred {
+			continue
+		}
+		m[keyPrefix+"Resolution"] = fmt.Sprintf("%vx%v", mode.HDisplay, mode.VDisplay)
+	}
+
+	m[keyPrefix+"RefreshRate"] = "0.00"
+	for _, mode := range d.Connector.Modes {
+		if !mode.Preferred {
+			continue
+		}
+		m[keyPrefix+"RefreshRate"] = fmt.Sprintf("%.2f", mode.Refresh)
+	}
+
+	m[keyPrefix+"PresentVRR"] = "vrr unsupported"
+	if d.Connector.VrrCapable {
+		m[keyPrefix+"PresentVRR"] = "vrr supported"
+	}
+
+	// TODO: parse the following field via edid. Ask display team to help fill this in.
+	m[keyPrefix+"PresentPSR"] = "psr unsupported"
+	if file, err := util.GetValidKernelDriverDebugFile([]string{"i915_edp_psr_status"}); err == nil {
+		if content, err := os.ReadFile(file); err == nil {
+			re := regexp.MustCompile(`Sink support: yes`)
+			if match := re.FindSubmatch(content); match != nil {
+				m[keyPrefix+"PresentPSR"] = "psr supported"
+			}
+		}
+	}
+
+	m[keyPrefix+"PresentHDR"] = "hdr unsupported"
+	if d.Connector.Edid.HDRBlock {
+		m[keyPrefix+"PresentHDR"] = "hdr supported"
+	}
+	return m
+}
+
+// DisplayEncoder described by a tuple of Encoder and Crtc.
+type DisplayEncoder struct {
+	Encoder *Encoder `json:"Encoder,omitempty"` // The encoder matching the ID provided by the connector (if found).
+	Crtc    *Crtc    `json:"Crtc,omitempty"`    // The CRTC matching the ID provided by the encoder (if found).
 }
 
 // asBits converts an unsigned int value to 16 bit binary.
@@ -494,20 +549,22 @@ func ModetestConnectedDisplays(ctx context.Context) ([]Display, error) {
 		if !connector.Connected {
 			continue
 		}
-		encoder, exists := encoderMap[connector.EncoderID]
-		if !exists {
-			fmt.Fprintf(os.Stderr, "encoder[%v] used in connector[%v] is not found\n", connector.EncoderID, connector.Name)
-			continue
-		}
-		crtc, exists := crtcMap[encoder.CrtcID]
-		if !exists {
-			fmt.Fprintf(os.Stderr, "crtc[%v] for encoder[%v] is not found\n", encoder.CrtcID, encoder.EncoderID)
-			continue
+
+		displayEncoders := []DisplayEncoder{}
+		for _, encoderID := range connector.Encoders {
+			if _, ok := encoderMap[encoderID]; !ok {
+				continue
+			}
+			encoder := encoderMap[encoderID]
+			crtc := crtcMap[encoder.CrtcID]
+			displayEncoders = append(displayEncoders, DisplayEncoder{
+				Encoder: encoder,
+				Crtc:    crtc,
+			})
 		}
 		displays = append(displays, Display{
 			Connector: connector,
-			Encoder:   encoder,
-			Crtc:      crtc,
+			Encoders:  displayEncoders,
 		})
 	}
 	return displays, nil
