@@ -22,6 +22,7 @@ static bool test_position() {
   XSelectInput(d, w, ExposureMask | KeyPressMask);
 
   XMapWindow(d, w);
+  utils_x11_flush(d);
 
   bool success = true;
   for (int i = 0; i < 5; i++) {

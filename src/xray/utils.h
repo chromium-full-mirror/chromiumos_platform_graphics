@@ -9,6 +9,10 @@
 
 #include "./includes.h"
 
+#define _NET_WM_STATE_REMOVE  0
+#define _NET_WM_STATE_ADD 1
+#define _NET_WM_STATE_TOGGLE  2
+
 bool utils_x11_flush(Display * d);
 bool utils_check_dimensions(Display * d, Window w, int width, int height);
 bool utils_check_dimensions_at_least(Display * d, Window w, int width,

@@ -27,12 +27,15 @@ static bool test_net_wm_state_fullscreen() {
       (unsigned char *)atoms, 1);
 
   XMapWindow(d, w);
-
   utils_x11_flush(d);
 
-  XCloseDisplay(d);
+  // Check that the created window is now the size of the display.
+  XWindowAttributes win_attr;
+  XGetWindowAttributes(d, DefaultRootWindow(d), &win_attr);
+  bool success = utils_check_dimensions(d, w, win_attr.width, win_attr.height);
 
-  return true;
+  XCloseDisplay(d);
+  return success;
 }
 
 ADD_TEST(test_net_wm_state_fullscreen);
