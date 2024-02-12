@@ -1,9 +1,9 @@
-graphics.OpenclCts.api_get_sampler_info:
+graphics.OpenclCts.api_release_during_execute:
   expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.api_get_sampler_info_compatibility:
+  since_build: R123-15774.0.0
+graphics.OpenclCts.basic_vload_local:
   expectation: FAIL
-  since_build: R123-15755.0.0
+  since_build: R123-15774.0.0
 graphics.OpenclCts.c11_atomics_atomic_flag:
   expectation: FAIL
   since_build: R123-15755.0.0

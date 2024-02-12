@@ -1,9 +1,3 @@
-graphics.OpenclCts.api_get_sampler_info:
-  expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.api_get_sampler_info_compatibility:
-  expectation: FAIL
-  since_build: R123-15755.0.0
 graphics.OpenclCts.bruteforce_fmax:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -199,9 +193,6 @@ graphics.OpenclCts.image_streams_2darray_cl_unsigned_int32:
 graphics.OpenclCts.image_streams_2darray_cl_unsigned_int8:
   expectation: FAIL
   since_build: R123-15755.0.0
-graphics.OpenclCts.integer_ops_long_compare:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.integer_ops_long_logic:
   expectation: FAIL
   since_build: R110-15241.0.0

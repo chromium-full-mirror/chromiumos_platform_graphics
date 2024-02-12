@@ -1,9 +1,3 @@
-graphics.OpenclCts.api_get_sampler_info:
-  expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.api_get_sampler_info_compatibility:
-  expectation: FAIL
-  since_build: R123-15755.0.0
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R114-15432.0.0

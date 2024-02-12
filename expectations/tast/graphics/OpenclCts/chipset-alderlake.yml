@@ -1,6 +1,1 @@
-graphics.OpenclCts.api_get_sampler_info:
-  expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.api_get_sampler_info_compatibility:
-  expectation: FAIL
-  since_build: R123-15755.0.0
+{}

@@ -1,9 +1,3 @@
-graphics.OpenclCts.api_get_sampler_info:
-  expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.api_get_sampler_info_compatibility:
-  expectation: FAIL
-  since_build: R123-15755.0.0
 graphics.OpenclCts.bruteforce_acos:
   expectation: FAIL
   since_build: R123-15766.0.0
@@ -304,6 +298,9 @@ graphics.OpenclCts.cl_copy_images_1darray_cl_unsigned_int32:
 graphics.OpenclCts.cl_copy_images_1darray_cl_unsigned_int8:
   expectation: FAIL
   since_build: R123-15766.0.0
+graphics.OpenclCts.cl_copy_images_2d_cl_snorm_int16:
+  expectation: FAIL
+  since_build: R123-15770.0.0
 graphics.OpenclCts.cl_copy_images_3dto2d_cl_unorm_int8:
   expectation: FAIL
   since_build: R123-15766.0.0
@@ -319,6 +316,9 @@ graphics.OpenclCts.cl_fill_images_1darray_cl_unorm_int8:
 graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int8:
   expectation: FAIL
   since_build: R123-15766.0.0
+graphics.OpenclCts.cl_get_info_2d_cl_float:
+  expectation: FAIL
+  since_build: R123-15770.0.0
 graphics.OpenclCts.cl_get_info_2d_cl_signed_int16:
   expectation: FAIL
   since_build: R123-15766.0.0
@@ -358,9 +358,9 @@ graphics.OpenclCts.image_streams_3d_cl_unorm_int8:
 graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.mem_host_flags_mem_host_read_only_image:
+graphics.OpenclCts.mem_host_flags_mem_host_write_only_image:
   expectation: FAIL
-  since_build: R123-15766.0.0
+  since_build: R123-15770.0.0
 graphics.OpenclCts.thread_dimensions_full_3d_explicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0

@@ -17,12 +17,6 @@ graphics.OpenclCts.api_get_kernel_arg_info:
   expectation: FAIL
   tickets:
   - b/227134903
-graphics.OpenclCts.api_get_sampler_info:
-  expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.api_get_sampler_info_compatibility:
-  expectation: FAIL
-  since_build: R123-15755.0.0
 graphics.OpenclCts.api_kernel_arg_multi_setup_random:
   expectation: FAIL
   since_build: R110-15241.0.0
