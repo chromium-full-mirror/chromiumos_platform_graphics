@@ -2,7 +2,7 @@ APPNAME = xray
 SOURCES = $(shell find . -type f -name '*.cc' |xargs)
 HEADERS = $(shell find . -type f -name '*.h' |xargs)
 
-COPT = -Wall -Wsign-compare -Wpointer-arith -Wcast-qual -Wcast-align
+COPT = -Wall -Wextra -Werror -Wsign-compare -Wpointer-arith -Wcast-qual -Wcast-align
 
 CXX = c++ -std=c++11
 OPT = -O0 -g3 $(INCLUDES) $(COPT)

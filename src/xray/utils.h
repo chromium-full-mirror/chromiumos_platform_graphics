@@ -14,6 +14,8 @@
 #define _NET_WM_STATE_TOGGLE  2
 
 void utils_set_verbose_logs(bool enabled);
+Window utils_create_simple_window(Display *d, int x, int y,
+    int width, int height, int border_width);
 bool utils_x11_flush(Display * d);
 bool utils_check_dimensions(Display * d, Window w, int width, int height);
 bool utils_check_dimensions_at_least(Display * d, Window w, int width,

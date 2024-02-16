@@ -21,6 +21,20 @@ void log_rect(std::string detail, int x, int y, int xx, int yy) {
   }
 }
 
+Window utils_create_simple_window(Display *d, int x, int y,
+    int width, int height, int border_width) {
+  if (d == nullptr) {
+    return 0;
+  }
+  int s = DefaultScreen(d);
+  Window w = XCreateSimpleWindow(d, RootWindow(d, s), x, y, width, height,
+      border_width, BlackPixel(d, s), WhitePixel(d, s));
+  XSelectInput(d, w, ExposureMask | KeyPressMask);
+  XMapWindow(d, w);
+  utils_x11_flush(d);
+  return w;
+}
+
 bool utils_x11_flush(Display *d) {
   XEvent e;
 
