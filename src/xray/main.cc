@@ -6,6 +6,7 @@
 
 
 #include "./tests.h"
+#include "./utils.h"
 
 int main(int argc, char *argv[]) {
   bool list_all_tests = false;
@@ -17,6 +18,8 @@ int main(int argc, char *argv[]) {
     if (arg == "--list-all") {
       list_all_tests = true;
       break;
+    } else if (arg == "--verbose") {
+      utils_set_verbose_logs(true);
     } else if (test_list.find(arg) != test_list.end()) {
       requested_tests.push_back(test_list.find(arg)->second);
     } else {

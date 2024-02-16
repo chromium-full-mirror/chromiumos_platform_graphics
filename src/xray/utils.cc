@@ -6,6 +6,21 @@
 
 #include "utils.h"  // NOLINT(build/include_directory)
 
+#include <string>
+
+static bool global_verbose = false;
+
+void utils_set_verbose_logs(bool enabled) {
+  global_verbose = enabled;
+}
+
+void log_rect(std::string detail, int x, int y, int xx, int yy) {
+  if (global_verbose) {
+    std::cout << "  Expected " << detail << ": (" << x << ", " << y
+        << "), got: (" << xx << ", " << yy << ")" << std::endl;
+  }
+}
+
 bool utils_x11_flush(Display *d) {
   XEvent e;
 
@@ -28,6 +43,8 @@ bool utils_check_dimensions_at_least(Display *d, Window w, int width,
   XWindowAttributes win_attr;
 
   XGetWindowAttributes(d, w, &win_attr);
+  log_rect("width, height greater than", width, height, win_attr.width,
+      win_attr.height);
 
   return (width <= win_attr.width) && (height <= win_attr.height);
 }
@@ -37,6 +54,8 @@ bool utils_check_dimensions_at_most(Display *d, Window w, int width,
   XWindowAttributes win_attr;
 
   XGetWindowAttributes(d, w, &win_attr);
+  log_rect("width, height less than", width, height, win_attr.width,
+      win_attr.height);
 
   return (width >= win_attr.width) && (height >= win_attr.height);
 }
@@ -45,8 +64,9 @@ bool utils_check_dimensions(Display *d, Window w, int width, int height) {
   XWindowAttributes win_attr;
 
   XGetWindowAttributes(d, w, &win_attr);
+  log_rect("width, height equal", width, height, win_attr.width,
+      win_attr.height);
 
-  printf("%d %d %d %d\n", width, win_attr.width, height, win_attr.height);
   return (width == win_attr.width) && (height == win_attr.height);
 }
 
@@ -56,6 +76,7 @@ bool utils_check_position(Display *d, Window w, int screen, int x, int y) {
   Window child;
 
   XTranslateCoordinates(d, w, root, 0, 0, &xx, &yy, &child);
+  log_rect("xpos, ypos equal", x, y, xx, yy);
 
   return (x == xx) && (y == yy);
 }

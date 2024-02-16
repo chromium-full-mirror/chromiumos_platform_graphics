@@ -13,6 +13,7 @@
 #define _NET_WM_STATE_ADD 1
 #define _NET_WM_STATE_TOGGLE  2
 
+void utils_set_verbose_logs(bool enabled);
 bool utils_x11_flush(Display * d);
 bool utils_check_dimensions(Display * d, Window w, int width, int height);
 bool utils_check_dimensions_at_least(Display * d, Window w, int width,
