@@ -1,6 +1,3 @@
-graphics.OpenclCts.api_release_during_execute:
-  expectation: FAIL
-  since_build: R123-15774.0.0
 graphics.OpenclCts.basic_vload_local:
   expectation: FAIL
   since_build: R123-15774.0.0

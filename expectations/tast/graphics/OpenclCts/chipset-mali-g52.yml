@@ -1,3 +1,9 @@
+graphics.OpenclCts.basic_local_arg_def:
+  expectation: FAIL
+  since_build: R123-15784.0.0
+graphics.OpenclCts.basic_local_kernel_scope:
+  expectation: FAIL
+  since_build: R123-15784.0.0
 graphics.OpenclCts.bruteforce_acos:
   expectation: FAIL
   since_build: R123-15766.0.0
@@ -286,6 +292,18 @@ graphics.OpenclCts.contractions_contractions_float_6:
 graphics.OpenclCts.contractions_contractions_float_7:
   expectation: FAIL
   since_build: R109-15232.0.0
+graphics.OpenclCts.conversions_char_sat_rtn_uint:
+  expectation: FAIL
+  since_build: R123-15784.0.0
+graphics.OpenclCts.conversions_long_rtn_uint:
+  expectation: FAIL
+  since_build: R123-15784.0.0
+graphics.OpenclCts.conversions_long_rtp_int:
+  expectation: FAIL
+  since_build: R123-15784.0.0
+graphics.OpenclCts.conversions_long_sat_rtp_uint:
+  expectation: FAIL
+  since_build: R123-15784.0.0
 graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R109-15232.0.0

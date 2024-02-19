@@ -27,81 +27,9 @@ graphics.OpenclCts.api_null_buffer_arg:
   expectation: FAIL
   tickets:
   - b/227134903
-graphics.OpenclCts.api_queue_hint:
-  expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.api_queue_properties:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.api_release_during_execute:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.api_release_kernel_order:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.api_repeated_setup_cleanup:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.api_retain_mem_object_set_kernel_arg:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.api_set_kernel_arg_by_index:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.api_set_kernel_arg_constant:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.api_set_kernel_arg_struct_array:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.api_sub_group_dispatch:
   expectation: FAIL
   since_build: R123-15755.0.0
-graphics.OpenclCts.api_zero_sized_enqueue:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_add:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_add_index:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_add_index_bin:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_and:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_cmpxchg:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_dec:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_inc:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_max:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_min:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_or:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_sub:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_xchg:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.atomics_atomic_xor:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_arraycopy:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.basic_astype:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -117,84 +45,15 @@ graphics.OpenclCts.basic_async_strided_copy_global_to_local:
 graphics.OpenclCts.basic_async_strided_copy_local_to_global:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_barrier:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_constant:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_constant_source:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_createkernelsinprogram:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_enqueued_local_size:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.basic_explicit_s2v:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_fp2int:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_fpmath:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_get_global_offset:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_get_linear_ids:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_global_linear_id:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_global_work_offsets:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.basic_hiloeo:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_hostptr:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_if:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_image_multipass_float_coord:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_image_multipass_integer_coord:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_image_param:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.basic_image_r8:
   expectation: FAIL
   since_build: R117-15527.0.0
-graphics.OpenclCts.basic_imagedim_non_pow2:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_imagedim_pow2:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_imagenpot:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_int2fp:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_intmath_int:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_intmath_int2:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_intmath_int4:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.basic_intmath_long:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -204,12 +63,6 @@ graphics.OpenclCts.basic_intmath_long2:
 graphics.OpenclCts.basic_intmath_long4:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_kernel_call_kernel_function:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_kernel_limit_constants:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.basic_kernel_memory_alignment_constant:
   expectation: FAIL
   tickets:
@@ -232,27 +85,6 @@ graphics.OpenclCts.basic_kernel_numeric_constants:
 graphics.OpenclCts.basic_kernel_preprocessor_macros:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_local_arg_def:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_local_kernel_def:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_local_kernel_scope:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_local_linear_id:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_loop:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_mri_multiple:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_mri_one:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.basic_parameter_types:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -280,15 +112,6 @@ graphics.OpenclCts.basic_readimage_fp32:
 graphics.OpenclCts.basic_readimage_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_rw_image_access_qualifier:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_sizeof:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_vec_type_hint:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.basic_vector_creation:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -316,12 +139,6 @@ graphics.OpenclCts.basic_vstore_local:
 graphics.OpenclCts.basic_vstore_private:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_wg_barrier:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.basic_work_item_functions:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.basic_writeimage:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -331,51 +148,6 @@ graphics.OpenclCts.basic_writeimage_fp32:
 graphics.OpenclCts.basic_writeimage_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_acos:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_acosh:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_acospi:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_add:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_asin:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_asinh:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_asinpi:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_assignment:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_atan:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_atan2:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_atan2pi:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_atanh:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_atanpi:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_cbrt:
-  expectation: FAIL
-  since_build: R123-15766.0.0
-graphics.OpenclCts.bruteforce_ceil:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.buffers_buffer_fill_char:
   expectation: FAIL
   since_build: R110-15241.0.0

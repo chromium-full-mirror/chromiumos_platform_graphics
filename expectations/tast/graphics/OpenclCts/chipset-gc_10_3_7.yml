@@ -1,3 +1,1 @@
-graphics.OpenclCts.api_release_during_execute:
-  expectation: FAIL
-  since_build: R123-15774.0.0
+{}
