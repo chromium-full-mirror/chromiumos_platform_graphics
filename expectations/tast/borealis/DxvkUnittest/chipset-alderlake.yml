@@ -1,12 +1,4 @@
-borealis.DxvkUnittest.basiccompute_addnumbers:
-  expectation: FAIL
-  tickets:
-  - b/272791071
 borealis.DxvkUnittest.geometryshader_basicshader:
-  expectation: FAIL
-  tickets:
-  - b/272791071
-borealis.DxvkUnittest.query_occlusion:
   expectation: FAIL
   tickets:
   - b/272791071
