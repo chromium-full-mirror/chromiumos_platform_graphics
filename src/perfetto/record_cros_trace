@@ -83,6 +83,9 @@ for (( i = 0; i < num_args; i++ )); do
     cat="${args[${i}]}"
     if [[ "${cat}" == chrome.* ]]; then
       chrome_disabled_categories+="\\\"${cat#"chrome."}\\\","
+      # Chrome uses "track_event" after client library migration.
+      # Remove the chrome. prefix and add to |disabled_categories|.
+      disabled_categories+=("${cat#"chrome."}")
     else
       disabled_categories+=("${cat}")
     fi
@@ -99,6 +102,9 @@ for (( i = 0; i < num_args; i++ )); do
     cat="${args[${i}]}"
     if [[ "${cat}" == chrome.* ]]; then
       chrome_categories+="\\\"${cat#"chrome."}\\\","
+      # Chrome uses "track_event" after client library migration.
+      # Remove the chrome. prefix and add to |categories|.
+      categories+=("${cat#"chrome."}")
     else
       categories+=("${cat}")
     fi
@@ -267,11 +273,19 @@ do
        "${config_filepath}"
 done
 
+# Enable Chrome metadata.
+echo "      enabled_categories: \"__metadata\"" >> "${config_filepath}"
+
 for (( i = 0; i < ${#disabled_categories[@]}; i++ ));
 do
   echo "      disabled_categories: \"${disabled_categories[${i}]}\"" >> \
        "${config_filepath}"
 done
+
+# If |disabled_categories| is empty, add disabled_categories: "*".
+if [[ ${#disabled_categories[@]} -eq 0 ]]; then
+  echo "      disabled_categories: \"*\"" >> "${config_filepath}"
+fi
 
 cat >>"${config_filepath}" <<EOL
     }
