@@ -1,2 +1,0 @@
-dEQP-VK.dynamic_rendering.primary_cmd_buff.basic.2_secondary_cmdbuffers_resuming
-dEQP-VK.dynamic_rendering.primary_cmd_buff.basic.contents_primary_secondary_cmdbuffers_resuming
