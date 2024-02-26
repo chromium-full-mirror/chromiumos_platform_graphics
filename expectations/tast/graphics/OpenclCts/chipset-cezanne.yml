@@ -1,3 +1,24 @@
+graphics.OpenclCts.basic_vector_creation:
+  expectation: FAIL
+  since_build: R124-15793.0.0
+graphics.OpenclCts.basic_vector_swizzle:
+  expectation: FAIL
+  since_build: R124-15793.0.0
 graphics.OpenclCts.c11_atomics_atomic_flag:
   expectation: FAIL
   since_build: R123-15755.0.0
+graphics.OpenclCts.relationals_shuffle_array_cast:
+  expectation: FAIL
+  since_build: R124-15793.0.0
+graphics.OpenclCts.relationals_shuffle_built_in:
+  expectation: FAIL
+  since_build: R124-15793.0.0
+graphics.OpenclCts.relationals_shuffle_built_in_dual_input:
+  expectation: FAIL
+  since_build: R124-15793.0.0
+graphics.OpenclCts.relationals_shuffle_copy:
+  expectation: FAIL
+  since_build: R124-15793.0.0
+graphics.OpenclCts.relationals_shuffle_function_call:
+  expectation: FAIL
+  since_build: R124-15793.0.0
