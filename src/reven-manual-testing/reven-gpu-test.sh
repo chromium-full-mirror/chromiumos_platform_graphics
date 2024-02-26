@@ -4,7 +4,7 @@
 # found in the LICENSE file.
 
 RESULTS="/tmp/graphics/results"
-DOWNLOADS="/home/chronos/user/Downloads"
+DOWNLOADS="/home/chronos/user/MyFiles/Downloads"
 rm -rf "${RESULTS}"
 mkdir -p "${RESULTS}"
 DEQP="/usr/local/deqp"
