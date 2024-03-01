@@ -1,0 +1,6 @@
+# Benchy dependencies:
+google-cloud-bigquery
+protobuf
+
+# Build dependencies for local packages installed by setup_benchy.sh:
+wheel

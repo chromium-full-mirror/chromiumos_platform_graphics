@@ -21,8 +21,8 @@ echo "Entering Python venv in ${VENV}."
 source "${VENV}/bin/activate"
 
 echo "Installing/updating Python dependencies."
-pip3 install --upgrade google-cloud-bigquery \
-  protobuf \
+pip3 install --require-hashes -r requirements.txt
+pip3 install --no-deps --no-index --no-build-isolation \
   ../../../../../src/config/python \
   ../results_database
 
