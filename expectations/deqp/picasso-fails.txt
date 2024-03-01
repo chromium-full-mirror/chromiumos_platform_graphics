@@ -1,13 +1,1 @@
 # picasso boards: zork
-
-dEQP-VK.api.version_check.entry_points,Fail
-dEQP-VK.dynamic_rendering.primary_cmd_buff.random.seed3_tessellation,Fail
-dEQP-VK.dynamic_rendering.primary_cmd_buff.random.seed46_geometry,Fail
-dEQP-VK.dynamic_rendering.primary_cmd_buff.random.seed49_tessellation,Fail
-dEQP-VK.dynamic_rendering.primary_cmd_buff.random.seed50_geometry,Fail
-dEQP-VK.dynamic_rendering.primary_cmd_buff.random.seed52_geometry,Fail
-dEQP-VK.dynamic_rendering.primary_cmd_buff.random.seed59_geometry,Fail
-dEQP-VK.dynamic_rendering.primary_cmd_buff.random.seed65_tessellation,Fail
-dEQP-VK.dynamic_rendering.primary_cmd_buff.random.seed6_geometry,Fail
-dEQP-VK.dynamic_rendering.primary_cmd_buff.random.seed81_tessellation,Fail
-dEQP-VK.dynamic_rendering.primary_cmd_buff.random.seed8_tessellation,Fail

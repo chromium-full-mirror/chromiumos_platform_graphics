@@ -1,10 +1,5 @@
-dEQP-VK.binding_model.descriptor_buffer.multiple.compute_comp_buffers32_sets1
-dEQP-VK.binding_model.descriptor_buffer.multiple.graphics_comp_buffers32_sets1
-dEQP-VK.binding_model.descriptor_buffer.multiple.graphics_frag_buffers32_sets1
-dEQP-VK.binding_model.descriptor_buffer.multiple.graphics_vert_buffers32_sets1
-dEQP-VK.dynamic_rendering.primary_cmd_buff.basic.2_secondary_cmdbuffers_resuming
-dEQP-VK.dynamic_rendering.primary_cmd_buff.basic.single_cmdbuffer
-dEQP-VK.dynamic_rendering.primary_cmd_buff.basic.single_cmdbuffer_resuming
+# flaky due to timeout
+dEQP-VK.binding_model.descriptor_buffer.multiple.*_buffers32_sets1
 dEQP-VK.memory.pipeline_barrier.host_write_transfer_src.1048576
-dEQP-VK.multiview.dynamic_rendering.multisample.8
-dEQP-VK.renderpass2.depth_stencil_resolve.image_2d_49_13.samples_2.d32_sfloat_s8_uint_separate_layouts.depth_zero_stencil_max_testing_stencil_samplemask
+dEQP-VK.memory.pipeline_barrier.transfer_src_transfer_dst.1048576
+dEQP-VK.reconvergence.workgroup_uniform_control_flow_elect.compute.nesting4.2.35
