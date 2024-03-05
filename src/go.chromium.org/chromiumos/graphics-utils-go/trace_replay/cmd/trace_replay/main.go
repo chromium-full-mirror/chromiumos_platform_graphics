@@ -441,11 +441,11 @@ func listFiles(path string) (map[string]uint64, error) {
 // This work-around prints out the average fps of each trace, which in turn can be then picked up
 // by the regex and saved in results-chart.json for analysis.
 func copyD3dBinaries(ctx context.Context) error {
-	exitCode, _, stderr := runCommand(ctx, nil, "cp", "apitrace-10.0-win32/bin/d3dretrace.exe", flags.ApitraceW32)
+	exitCode, _, stderr := runCommand(ctx, nil, "cp", "/opt/win_tools/apitrace/i386/d3dretrace.exe", flags.ApitraceW32)
 	if exitCode != 0 {
 		return errors.New("failed to copy d3dretrace32. Exit code  %d. %s", exitCode, stderr)
 	}
-	exitCode, _, stderr = runCommand(ctx, nil, "cp", "apitrace-10.0-win64/bin/d3dretrace.exe", flags.ApitraceW64)
+	exitCode, _, stderr = runCommand(ctx, nil, "cp", "/opt/win_tools/apitrace/x86_64/d3dretrace.exe", flags.ApitraceW64)
 	if exitCode != 0 {
 		return errors.New("failed to copy d3dretrace64. Exit code : %d. %s", exitCode, stderr)
 	}
