@@ -1,0 +1,28 @@
+borealis.Xray.net_active_window:
+  expectation: FAIL
+  tickets:
+  - b/328633745
+borealis.Xray.net_moveresize_window:
+  expectation: FAIL
+  tickets:
+  - b/328633434
+borealis.Xray.net_wm_state_above:
+  expectation: FAIL
+  tickets:
+  - b/328638779
+borealis.Xray.net_wm_state_below:
+  expectation: FAIL
+  tickets:
+  - b/328638779
+borealis.Xray.net_wm_state_maximized:
+  expectation: FAIL
+  tickets:
+  - b/328654347
+borealis.Xray.net_wm_state_skip_taskbar:
+  expectation: FAIL
+  tickets:
+  - b/328654722
+borealis.Xray.position:
+  expectation: FAIL
+  tickets:
+  - b/325311899
