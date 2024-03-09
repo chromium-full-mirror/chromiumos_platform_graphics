@@ -1,5 +1,6 @@
 # https://gitlab.freedesktop.org/mesa/mesa/-/issues/6357
 dEQP-VK.compute.zero_initialize_workgroup_memory.max_workgroup_memory.128
+dEQP-VK.compute.pipeline.zero_initialize_workgroup_memory.max_workgroup_memory.128
 
 # https://gitlab.freedesktop.org/mesa/mesa/-/issues/6172
 dEQP-VK.memory_model.message_passing.core11
