@@ -4,6 +4,12 @@ graphics.OpenclCts.allocations_multiple_1_buffer:
 graphics.OpenclCts.allocations_multiple_1_buffer_non_blocking:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.allocations_multiple_1_image2d_read:
+  expectation: FAIL
+  since_build: R124-15808.0.0
+graphics.OpenclCts.allocations_multiple_1_image2d_write_non_blocking:
+  expectation: FAIL
+  since_build: R124-15808.0.0
 graphics.OpenclCts.allocations_single_1_buffer:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -13,6 +19,9 @@ graphics.OpenclCts.allocations_single_1_buffer_non_blocking:
 graphics.OpenclCts.allocations_single_1_image2d_read:
   expectation: FAIL
   since_build: R120-15656.0.0
+graphics.OpenclCts.allocations_single_1_image2d_read_non_blocking:
+  expectation: FAIL
+  since_build: R124-15808.0.0
 graphics.OpenclCts.api_get_kernel_arg_info:
   expectation: FAIL
   tickets:
