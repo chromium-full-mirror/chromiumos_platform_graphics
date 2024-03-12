@@ -1,4 +1,14 @@
-# broxton/apollolake boards: coral
+# broxton/apollolake boards: coral, pyro, reef, snappy
+
+# b/329299317
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image1DArrayShadow_fragment,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image1DArrayShadow_vertex,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image1DShadow_fragment,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image1DShadow_vertex,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image2DArrayShadow_fragment,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image2DArrayShadow_vertex,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image2DShadow_fragment,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image2DShadow_vertex,Fail
 
 # https://gitlab.freedesktop.org/mesa/mesa/-/issues/2833
 dEQP-VK.rasterization.interpolation_multisample_16_bit.lines_wide,Fail
