@@ -1,3 +1,10 @@
+# Board: kukui, jacuzzi
+
+# Became flaky in M124 b/329303679
+dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_pot.compare_greater.repeat_mirrored_repeat
+dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.size_pot.repeat_mirrored_repeat
+dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.size_pot.repeat_mirrored_repeat
+
 # Times out at 60 seconds
 dEQP-VK.ssbo.phys.layout.random.16bit.scalar.13
 dEQP-VK.api.device_init.create_instance_device_intentional_alloc_fail
