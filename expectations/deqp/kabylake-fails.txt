@@ -1,5 +1,6 @@
 # kabylake boards: atlas, eve fizz, kalista, nami, nautilus, nocturn, poppy, rammus, soraka
 # cometlake boards: drallion, hatch, puff
+# whiskeylake boards: sarien
 
 # Appears to be a test bug. See
 # https://gitlab.khronos.org/Tracker/vk-gl-cts/-/issues/4996 and
