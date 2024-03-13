@@ -1,7 +1,2 @@
 # https://gitlab.freedesktop.org/mesa/mesa/-/issues/4641
 dEQP-VK.ssbo.phys.layout.random.16bit.scalar.13
-
-dEQP-VK.binding_model.descriptorset_random.sets8.constant.ubolimitlow.sbolimithigh.imglimithigh.iublimithigh.uab.frag.0
-dEQP-VK.binding_model.descriptorset_random.sets8.unifindexed.ubolimitlow.sbolimithigh.imglimithigh.iublimitlow.uab.frag.0
-dEQP-VK.binding_model.descriptorset_random.sets8.unifindexed.ubolimitlow.sbolimithigh.imglimithigh.iublimithigh.uab.frag.0
-dEQP-VK.binding_model.descriptorset_random.sets8.unifindexed.ubolimitlow.sbolimithigh.imglimithigh.noiub.uab.frag.0
