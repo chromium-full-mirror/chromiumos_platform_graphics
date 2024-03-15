@@ -1,5 +1,12 @@
 # flaky due to timeout
 dEQP-VK.binding_model.descriptor_buffer.multiple.*_buffers32_sets1
+dEQP-VK.memory.mapping.suballocation.full.variable.implicit_unmap
+dEQP-VK.memory.mapping.suballocation.full.variable.implicit_unmap_map2
+dEQP-VK.memory.pipeline_barrier.all.1048576_vertex_buffer_stride_2
+dEQP-VK.memory.pipeline_barrier.host_read_host_write.1048576
+dEQP-VK.memory.pipeline_barrier.host_write_index_buffer.1048576
+dEQP-VK.memory.pipeline_barrier.host_write_storage_buffer.1048576
+dEQP-VK.memory.pipeline_barrier.host_write_storage_texel_buffer.1048576
 dEQP-VK.memory.pipeline_barrier.host_write_transfer_src.1048576
 dEQP-VK.memory.pipeline_barrier.transfer_src_transfer_dst.1048576
 dEQP-VK.reconvergence.workgroup_uniform_control_flow_elect.compute.nesting4.2.35

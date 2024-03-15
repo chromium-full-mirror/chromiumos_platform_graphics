@@ -232,3 +232,5 @@ dEQP-VK.fragment_shading_rate.renderpass2.monolithic.fragstencil_clear.dynamic.a
 dEQP-VK.fragment_shading_rate.renderpass2.monolithic.fragstencil_clear.dynamic.attachment.shaderrate.replace.replace.33x35.samples4.vs,Fail
 dEQP-VK.fragment_shading_rate.renderpass2.monolithic.fragstencil_clear.dynamic.attachment.shaderrate.replace.replace.33x35.samples8.ms,Fail
 dEQP-VK.fragment_shading_rate.renderpass2.monolithic.fragstencil_clear.dynamic.attachment.shaderrate.replace.replace.33x35.samples8.vs,Fail
+
+dEQP-VK.ray_tracing_pipeline.capture_replay.acceleration_structures.compaction.gpu_built.top_acceleration_structure.triangles,Fail

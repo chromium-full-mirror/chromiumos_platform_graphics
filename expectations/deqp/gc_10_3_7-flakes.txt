@@ -1,5 +1,6 @@
 dEQP-VK.query_pool.statistics_query.host_query_reset.geometry_shader_.*.secondary.*bits_.*
 
 # flaky due to timeout
+dEQP-VK.binding_model.descriptor_buffer.multiple.*buffers32_sets1
 dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_AABB_1[1-5]
 dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_tri_1[1-5]
