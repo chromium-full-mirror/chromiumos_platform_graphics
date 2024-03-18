@@ -406,6 +406,9 @@ graphics.OpenclCts.cl_fill_images_1darray_cl_snorm_int16:
 graphics.OpenclCts.cl_fill_images_1darray_cl_snorm_int8:
   expectation: FAIL
   since_build: R123-15774.0.0
+graphics.OpenclCts.cl_fill_images_1darray_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R124-15813.0.0
 graphics.OpenclCts.cl_fill_images_1darray_cl_unsigned_int8:
   expectation: FAIL
   since_build: R123-15774.0.0
@@ -527,9 +530,6 @@ graphics.OpenclCts.conversions_uchar_int:
   expectation: FAIL
   since_build: R124-15805.0.0
 graphics.OpenclCts.conversions_uchar_rtz_int:
-  expectation: FAIL
-  since_build: R124-15805.0.0
-graphics.OpenclCts.conversions_uchar_sat_rtz_uint:
   expectation: FAIL
   since_build: R124-15805.0.0
 graphics.OpenclCts.conversions_ulong_rte_uint:
