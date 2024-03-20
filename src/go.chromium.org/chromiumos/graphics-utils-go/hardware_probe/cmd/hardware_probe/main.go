@@ -213,7 +213,7 @@ func getLargestDisk() (Disk, error) {
 }
 
 type labels struct {
-	LabelsReporting interface{} `json:"LabelsReporting,omitempty"`
+	LabelsReporting  interface{} `json:"LabelsReporting,omitempty"`
 	LabelsScheduling interface{} `json:"LabelsScheduling,omitempty"`
 }
 
@@ -367,10 +367,10 @@ func getLabels(hardware hardwareResult, software softwareResult) labels {
 	result["PlatformMemorySize"] = fmt.Sprintf("%v", hardware.Memory)
 	// We sorted GPUInfos by bootVGA flag, this is the one comes by default when booting.
 	// Assume it is the integrated GPU.
-	combineMap(result, hardware.GPUInfos[0].Labels("GPU"))
+	combineMap(result, hardware.GPUInfos[0].Labels("Gpu"))
 	if len(hardware.GPUInfos) > 1 {
 		// TODO: Support 3+ GPUs.
-		combineMap(result, hardware.GPUInfos[1].Labels("dGPU"))
+		combineMap(result, hardware.GPUInfos[1].Labels("dGpu"))
 	}
 	// Software properties.
 	if software.VulkanAPIVersion != nil {
@@ -379,7 +379,28 @@ func getLabels(hardware hardwareResult, software softwareResult) labels {
 	if software.OpenGLES != nil {
 		result["GPUOpenGLESVersion"] = software.OpenGLES.String()
 	}
-	return labels{LabelsReporting: result}
+	// TODO: parse the following field via edid. Ask display team to help fill this in.
+	// result["DisplayPanelName"] = "unknown"
+	// result["DisplayResolution"] = "unknown"
+	// result["DisplayRefreshRate"] = "unknown"
+	// result["DisplayPresentVRR"] = "unknown"
+	// result["DisplayPresentPSR"] = "unknown"
+	// result["DisplayPresentHDR"] = "unknown"
+
+	// Infra only supports snake case string with `^[a-z][a-z0-9_]*(/[a-z][a-z0-9_]*)*$`
+	var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+	var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+	toSnakeCase := func(str string) string {
+		snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
+		snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+		return strings.ToLower(snake)
+	}
+	snakeResult := make(map[string]string)
+	for k, v := range result {
+		snakeResult[toSnakeCase(k)] = v
+	}
+
+	return labels{LabelsReporting: snakeResult}
 }
 
 func main() {
