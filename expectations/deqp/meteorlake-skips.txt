@@ -10,5 +10,6 @@ dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_AABB_14
 dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_AABB_15
 dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_tri_14
 dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_tri_15
+dEQP-VK.subgroups.ballot_broadcast.compute.subgroupbroadcast_dvec4_requiredsubgroupsize32
 dEQP-VK.subgroups.ballot_broadcast.mesh.subgroupbroadcast_dvec4_requiredsubgroupsize32_mesh
 dEQP-VK.subgroups.ballot_broadcast.mesh.subgroupbroadcast_dvec4_requiredsubgroupsize32_task
