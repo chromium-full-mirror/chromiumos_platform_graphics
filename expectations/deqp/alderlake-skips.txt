@@ -1,0 +1,2 @@
+# Sporadic GPU hangs. See https://gitlab.freedesktop.org/mesa/mesa/-/issues/10247
+dEQP-VK.protected_memory.attachment.clear_op.secondary.random.clear_*
