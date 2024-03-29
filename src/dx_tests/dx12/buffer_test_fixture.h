@@ -31,11 +31,14 @@ class buffer_test
       const std::function<void(ID3D12Device*, ID3D12CommandQueue*,
                                ID3D12CommandAllocator*, ID3D12Resource*)>& function) {
     HRESULT hr = S_OK;
-    DXPointer<ID3D12Debug> debug_controller;
-    hr = D3D12GetDebugInterface(
-        __uuidof(ID3D12Debug), reinterpret_cast<void**>(&debug_controller.get()));
-    ASSERT_EQ(S_OK, hr);
-    debug_controller->EnableDebugLayer();
+
+    // TODO(renatopereyra): Re-enable if Proton/VKD3D-Proton ever support DX12 debug layers
+    //
+    // DXPointer<ID3D12Debug> debug_controller;
+    // hr = D3D12GetDebugInterface(
+    //     __uuidof(ID3D12Debug), reinterpret_cast<void**>(&debug_controller.get()));
+    // ASSERT_EQ(S_OK, hr);
+    // debug_controller->EnableDebugLayer();
 
     DXPointer<ID3D12Device2> device;
     hr = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_0,

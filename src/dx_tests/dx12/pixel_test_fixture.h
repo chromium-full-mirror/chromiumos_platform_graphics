@@ -150,11 +150,13 @@ public:
   {
     HRESULT hr = S_OK;
 
-    DXPointer<ID3D12Debug> debug_controller;
-    hr = D3D12GetDebugInterface(
-        __uuidof(ID3D12Debug), reinterpret_cast<void **>(&debug_controller.get()));
-    ASSERT_EQ(S_OK, hr);
-    debug_controller->EnableDebugLayer();
+    // TODO(renatopereyra): Re-enable if Proton/VKD3D-Proton ever support DX12 debug layers
+    //
+    // DXPointer<ID3D12Debug> debug_controller;
+    // hr = D3D12GetDebugInterface(
+    //     __uuidof(ID3D12Debug), reinterpret_cast<void **>(&debug_controller.get()));
+    // ASSERT_EQ(S_OK, hr);
+    // debug_controller->EnableDebugLayer();
 
     DXPointer<IDXGIFactory2> factory;
     hr = CreateDXGIFactory(__uuidof(IDXGIFactory2),
