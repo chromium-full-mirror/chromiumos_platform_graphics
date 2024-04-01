@@ -22,12 +22,6 @@ video.PlatformDecoding.vaapi_hevc_main_bug_239927523:
   - b/239927523
   comments: "For the test-vectors listed below the decoder outputs frames that should not be outputted. In almost all cases, these frames have a NAL unit type of RASL_*. Additionally, when this bug occurs, there will be additional distorted frames outputted. We find that this distortion does not impact other frames."
   since_build: R108-15183.70.0
-video.PlatformDecoding.vaapi_hevc_main_bug_239936640:
-  expectation: FAIL
-  tickets:
-  - b/239936640
-  comments: "In these test vectors, the output hashes differ from those that were expected for large portions of the video (e.g., first half of video). When looking at the PNGs for these frames, it is clear that they are distorted."
-  since_build: R108-15183.70.0
 video.PlatformDecoding.vaapi_hevc_main_bug_241727534:
   expectation: FAIL
   tickets:
