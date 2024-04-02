@@ -14,6 +14,11 @@ void utils_set_verbose_logs(bool enabled) {
   global_verbose = enabled;
 }
 
+void print_on_verbose(const char * str) {
+  if (global_verbose)
+    std::cout << str << std::endl;
+}
+
 void log_rect(std::string detail, int x, int y, int xx, int yy) {
   if (global_verbose) {
     std::cout << "  Expected " << detail << ": (" << x << ", " << y
@@ -21,6 +26,7 @@ void log_rect(std::string detail, int x, int y, int xx, int yy) {
   }
 }
 
+// This function creates a window then immediately maps it then flushes.
 Window utils_create_simple_window(Display *d, int x, int y,
     int width, int height, int border_width) {
   if (d == nullptr) {

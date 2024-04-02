@@ -14,6 +14,7 @@
 #define _NET_WM_STATE_TOGGLE  2
 
 void utils_set_verbose_logs(bool enabled);
+void print_on_verbose(const char *);
 Window utils_create_simple_window(Display *d, int x, int y,
     int width, int height, int border_width);
 bool utils_x11_flush(Display * d);
