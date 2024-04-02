@@ -1,7 +1,10 @@
 # Board: kukui, jacuzzi
 
 # Became flaky in M124 b/329303679
+dEQP-GLES31.functional.texture.gather.offset_dynamic.implementation_offset.2d.rgba8.size_pot.repeat_mirrored_repeat
+dEQP-GLES31.functional.texture.gather.offset_dynamic.min_required_offset.2d.depth32f.size_pot.compare_less.repeat_mirrored_repeat
 dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_pot.compare_greater.repeat_mirrored_repeat
+dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.depth32f.size_pot.compare_less.repeat_mirrored_repeat
 dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d.rgba8.size_pot.repeat_mirrored_repeat
 dEQP-GLES31.functional.texture.gather.offset.implementation_offset.2d_array.rgba8.size_pot.repeat_mirrored_repeat
 
