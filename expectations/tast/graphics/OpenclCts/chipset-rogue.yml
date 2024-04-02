@@ -712,9 +712,6 @@ graphics.OpenclCts.cl_copy_images_3dto2d_cl_signed_int16:
 graphics.OpenclCts.cl_copy_images_3dto2d_cl_signed_int32:
   expectation: FAIL
   since_build: R124-15793.0.0
-graphics.OpenclCts.cl_copy_images_3dto2d_cl_signed_int8:
-  expectation: FAIL
-  since_build: R125-15825.0.0
 graphics.OpenclCts.cl_copy_images_3dto2d_cl_unsigned_int16:
   expectation: FAIL
   since_build: R123-15783.0.0
