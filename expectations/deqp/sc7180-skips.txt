@@ -1,3 +1,5 @@
+# Boards: trogdor, strongbad
+
 # The flush_finish tests throw warnings when behavior doesn't match
 # their expectations, except that tiling GPUs don't behave the way they
 # expect in their timing setup so the tests take exceptionally long
