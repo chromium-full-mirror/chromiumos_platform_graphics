@@ -18,3 +18,27 @@ tast.borealis.Dx12Unittest.getcopyablefootprintstestsuite_getcopyablefootprintst
   expectation: FAIL
   tickets:
   - b/331963854
+tast.borealis.Dx12Unittest.rootconstants_basicvertexfragment:
+  expectation: FAIL
+  tickets:
+  - b/332729216
+tast.borealis.Dx12Unittest.srv_basicvertexandfragment:
+  expectation: FAIL
+  tickets:
+  - b/332729216
+tast.borealis.Dx12Unittest.srv_basicvertexandfragmentindescriptorheap:
+  expectation: FAIL
+  tickets:
+  - b/332729216
+tast.borealis.Dx12Unittest.tesselation_basic:
+  expectation: FAIL
+  tickets:
+  - b/332729216
+tast.borealis.Dx12Unittest.tiledresources_tailmips:
+  expectation: FAIL
+  tickets:
+  - b/332729216
+tast.borealis.Dx12Unittest.tiledresources_tailmips1:
+  expectation: FAIL
+  tickets:
+  - b/332729216

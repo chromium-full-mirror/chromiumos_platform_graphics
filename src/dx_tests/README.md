@@ -20,6 +20,8 @@ GOOGLERS: Execution and builds on corp Windows devices may be blocked by corp se
 ## Regenerate Prebuilt Shaders
 This is necessary whenever the DXVK shader hashing library is updated.
 
+NOTE: DX12 unit tests do not support prebuilt shaders.
+
 1. Copy fxc.exe from the Windows SDK (C:\Program Files (x86)\Windows Kits\10\bin\<version>\x64) to the directory where DxvkUnitTestApp.exe is output.
 2. Run DxvkUnitTestApp.exe with the `-regenerate-prebuilt-shader-binaries` command line option.
 
