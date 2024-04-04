@@ -4,8 +4,11 @@
  * found in the LICENSE file.
  */
 
+#include <X11/X.h>
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <cstddef>
+#include <cstring>
 #include <sstream>
 
 #include "./tests.h"
@@ -245,69 +248,91 @@ ADD_TEST(test_net_moveresize_window);
 // intercept that message and should send a message to Exo signaling that this
 // window, or its parent, should be the focused window (ready to receive
 // keyboard input).
+// BUT only the Steam app is allowed to self activate for security reasons.
+// This test asserts that a non-steam window cannot self-activate.
 static bool test_net_active_window() {
   Display *d = XOpenDisplay(NULL);
-  Window w = utils_create_simple_window(d, 200, 300, 200, 200, 1);
   int s = DefaultScreen(d);
+  Window w1 = utils_create_simple_window(d, 200, 300, 200, 200, 1);
+  // Create a new window so w1 isn't active by default.
+  Window w2 = utils_create_simple_window(d, 200, 300, 400, 400, 1);
 
   Atom message_type = XInternAtom(d, "_NET_ACTIVE_WINDOW", False);
-
   XEvent ev;
   ev.type = ClientMessage;
-  ev.xclient.window = w;
+  ev.xclient.window = w1;
   ev.xclient.send_event = True;
   ev.xclient.message_type = message_type;
   ev.xclient.format = 32;
   ev.xclient.data.l[0] = 1;
-  ev.xclient.data.l[1] = 0;
-  ev.xclient.data.l[2] = w;
 
   bool success = true;
   if (!XSendEvent(d, RootWindow(d, s), False, SubstructureNotifyMask, &ev))
     success &= false;
-
   utils_x11_flush(d);
-  Atom type_return;
-  int format_return;
-  uint64_t nitems_return;
-  uint64_t bytes_after_return;
-  unsigned char *data;
 
-  XGetWindowProperty(
-      d,
-      RootWindow(d, s),
-      message_type,
-      0,
-      1,
-      False,
-      XA_WINDOW,
-      &type_return,          // should be XA_WINDOW
-      &format_return,
-      &nitems_return,
-      &bytes_after_return,
-      &data);                // should be non-null)
-
-  std::ostringstream logs;
-  if (data != nullptr && type_return == XA_WINDOW) {
-    Window win = reinterpret_cast<Window*>(data)[0];
-    logs << "  Active Window Check" << ", "
-        << "root: " << RootWindow(d, s) << ", "
-        << "active window: " << win << ", "
-        << "window:" << w << std::endl;
-
-    success &= (win == w);
-    XFree(data);
-  } else {
+  Window focused_window;
+  int revert_to;
+  XGetInputFocus(d, &focused_window, &revert_to);
+  // Normal (non steam) borealis windows are not allowed to self-activate
+  // so this test fails if w1 regains focus.
+  if (w1 == focused_window || w2 != focused_window)
     success &= false;
-  }
 
   utils_x11_flush(d);
-
   XCloseDisplay(d);
 
-  if (!success)
-    std::cout << logs.str();
   return success;
 }
 
 ADD_TEST(test_net_active_window);
+
+// Test _NET_ACTIVE_WINDOW. This test is nearly identical to
+// test_net_active_window() except it spoofs the Steam app, which should allow
+// the window to self-activate.
+static bool test_net_active_window_steam() {
+  Display *d = XOpenDisplay(NULL);
+  int s = DefaultScreen(d);
+  Window w1 = XCreateSimpleWindow(d, RootWindow(d, s), 200, 300, 200, 200,
+      1, BlackPixel(d, s), WhitePixel(d, s));
+
+  // Use Steam game ID before mapping window to allow self-activation.
+  int32_t appID = 769;
+  // char name[] = "Steam";
+  XChangeProperty(d, w1, XInternAtom(d, "STEAM_GAME", False), XA_CARDINAL,
+      32, PropModeReplace, (unsigned char *) &appID, 1L);
+  XMapWindow(d, w1);
+  utils_x11_flush(d);
+
+  // Create a new window so w1 isn't active by default.
+  Window w2 = utils_create_simple_window(d, 200, 300, 400, 400, 1);
+
+  Atom message_type = XInternAtom(d, "_NET_ACTIVE_WINDOW", False);
+  XEvent ev;
+  ev.type = ClientMessage;
+  ev.xclient.window = w1;
+  ev.xclient.send_event = True;
+  ev.xclient.message_type = message_type;
+  ev.xclient.format = 32;
+  ev.xclient.data.l[0] = 1;
+
+  bool success = true;
+  if (!XSendEvent(d, RootWindow(d, s), False, SubstructureNotifyMask, &ev))
+    success &= false;
+  utils_x11_flush(d);
+
+  Window focused_window;
+  int revert_to;
+  XGetInputFocus(d, &focused_window, &revert_to);
+  // Normal (non steam) borealis windows are not allowed to self-activate
+  // so we expect w1 to be the active window.
+  if (w1 != focused_window || w2 == focused_window)
+    success &= false;
+
+  utils_x11_flush(d);
+  XCloseDisplay(d);
+
+  return success;
+}
+
+ADD_TEST(test_net_active_window_steam);
