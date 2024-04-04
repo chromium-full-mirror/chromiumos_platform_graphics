@@ -2,43 +2,39 @@ borealis.Dx12Unittest.fencetest_closeoriginaleventhandlebeforefencecompletion:
   expectation: FAIL
   tickets:
   - b/331964532
-tast.borealis.Dx12Unittest.getcopyablefootprintstestsuite_getcopyablefootprintstest_positivetests_1:
+borealis.Dx12Unittest.getcopyablefootprintstestsuite_getcopyablefootprintstest_positivetests_1:
   expectation: FAIL
   tickets:
   - b/331963854
-tast.borealis.Dx12Unittest.getcopyablefootprintstestsuite_getcopyablefootprintstest_positivetests_2:
+borealis.Dx12Unittest.getcopyablefootprintstestsuite_getcopyablefootprintstest_positivetests_2:
   expectation: FAIL
   tickets:
   - b/331963854
-tast.borealis.Dx12Unittest.getcopyablefootprintstestsuite_getcopyablefootprintstest_positivetests_5:
+borealis.Dx12Unittest.getcopyablefootprintstestsuite_getcopyablefootprintstest_positivetests_5:
   expectation: FAIL
   tickets:
   - b/331963854
-tast.borealis.Dx12Unittest.getcopyablefootprintstestsuite_getcopyablefootprintstest_positivetests_9:
-  expectation: FAIL
-  tickets:
-  - b/331963854
-tast.borealis.Dx12Unittest.rootconstants_basicvertexfragment:
+borealis.Dx12Unittest.rootconstants_basicvertexfragment:
   expectation: FAIL
   tickets:
   - b/332729216
-tast.borealis.Dx12Unittest.srv_basicvertexandfragment:
+borealis.Dx12Unittest.srv_basicvertexandfragment:
   expectation: FAIL
   tickets:
   - b/332729216
-tast.borealis.Dx12Unittest.srv_basicvertexandfragmentindescriptorheap:
+borealis.Dx12Unittest.srv_basicvertexandfragmentindescriptorheap:
   expectation: FAIL
   tickets:
   - b/332729216
-tast.borealis.Dx12Unittest.tesselation_basic:
+borealis.Dx12Unittest.tesselation_basic:
   expectation: FAIL
   tickets:
   - b/332729216
-tast.borealis.Dx12Unittest.tiledresources_tailmips:
+borealis.Dx12Unittest.tiledresources_tailmips:
   expectation: FAIL
   tickets:
   - b/332729216
-tast.borealis.Dx12Unittest.tiledresources_tailmips1:
+borealis.Dx12Unittest.tiledresources_tailmips1:
   expectation: FAIL
   tickets:
   - b/332729216
