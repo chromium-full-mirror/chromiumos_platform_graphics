@@ -487,6 +487,9 @@ graphics.OpenclCts.cl_fill_images_3d_cl_snorm_int8:
 graphics.OpenclCts.cl_fill_images_3d_cl_unorm_int16:
   expectation: FAIL
   since_build: R123-15784.0.0
+graphics.OpenclCts.cl_fill_images_3d_cl_unorm_int8:
+  expectation: FAIL
+  since_build: R125-15840.0.0
 graphics.OpenclCts.cl_fill_images_3d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R123-15766.0.0

@@ -388,6 +388,9 @@ graphics.OpenclCts.cl_copy_images_1d_cl_snorm_int16:
 graphics.OpenclCts.cl_copy_images_1d_cl_snorm_int8:
   expectation: FAIL
   since_build: R123-15766.0.0
+graphics.OpenclCts.cl_copy_images_1d_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R125-15840.0.0
 graphics.OpenclCts.cl_copy_images_1d_cl_unorm_int8:
   expectation: FAIL
   since_build: R123-15766.0.0
@@ -697,6 +700,9 @@ graphics.OpenclCts.cl_copy_images_3d_cl_unorm_short_565:
 graphics.OpenclCts.cl_copy_images_3d_cl_unsigned_int16:
   expectation: FAIL
   since_build: R123-15766.0.0
+graphics.OpenclCts.cl_copy_images_3d_cl_unsigned_int32:
+  expectation: FAIL
+  since_build: R125-15840.0.0
 graphics.OpenclCts.cl_copy_images_3d_cl_unsigned_int8:
   expectation: FAIL
   since_build: R123-15770.0.0
@@ -940,9 +946,6 @@ graphics.OpenclCts.cl_fill_images_3d_cl_unsigned_int8:
 graphics.OpenclCts.commonfns_degrees:
   expectation: FAIL
   since_build: R123-15766.0.0
-graphics.OpenclCts.compiler_options_build_macro_existence:
-  expectation: FAIL
-  since_build: R125-15825.0.0
 graphics.OpenclCts.contractions_contractions_float_0:
   expectation: FAIL
   since_build: R110-15241.0.0

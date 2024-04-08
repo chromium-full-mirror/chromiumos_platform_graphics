@@ -7,6 +7,9 @@ graphics.OpenclCts.allocations_multiple_1_buffer_non_blocking:
 graphics.OpenclCts.allocations_multiple_1_image2d_read:
   expectation: FAIL
   since_build: R124-15808.0.0
+graphics.OpenclCts.allocations_multiple_1_image2d_write:
+  expectation: FAIL
+  since_build: R125-15844.0.0
 graphics.OpenclCts.allocations_single_1_buffer:
   expectation: FAIL
   since_build: R110-15241.0.0
