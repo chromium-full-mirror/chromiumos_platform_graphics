@@ -365,12 +365,15 @@ func getLabels(hardware hardwareResult, software softwareResult) labels {
 	result["PlatformCPUVendor"] = hardware.CPUFamily.String()
 	result["PlatformDiskSize"] = fmt.Sprintf("%v", hardware.Disk.SizeGb)
 	result["PlatformMemorySize"] = fmt.Sprintf("%v", hardware.Memory)
-	// We sorted GPUInfos by bootVGA flag, this is the one comes by default when booting.
-	// Assume it is the integrated GPU.
-	combineMap(result, hardware.GPUInfos[0].Labels("Gpu"))
-	if len(hardware.GPUInfos) > 1 {
-		// TODO: Support 3+ GPUs.
-		combineMap(result, hardware.GPUInfos[1].Labels("dGpu"))
+	for i, info := range hardware.GPUInfos {
+		// We sorted GPUInfos by bootVGA flag, this is the one comes by default when booting.
+		// Assume it is the integrated GPU.
+		prefix := "Gpu"
+		if i >= 1 {
+			// TODO: Support 3+ GPUs.
+			prefix = "dGpu"
+		}
+		combineMap(result, info.Labels(prefix))
 	}
 	// Software properties.
 	if software.VulkanAPIVersion != nil {

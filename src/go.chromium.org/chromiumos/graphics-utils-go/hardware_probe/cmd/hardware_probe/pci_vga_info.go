@@ -125,7 +125,7 @@ func mapPCINameToGPUInfo(name, deviceID string) (GPUInfo, error) {
 		deviceID := strings.ToLower(deviceID)
 		gpuName, ok := intelMap[deviceID]
 		if !ok {
-			return GPUInfo{}, fmt.Errorf("no matching device id (%v) in Intel pci id map", deviceID)
+			return GPUInfo{}, fmt.Errorf("no matching device id (%v) in Intel pci id map, please update src/platform/graphics/.../hardware_probe/.../intel_pci_ids.go", deviceID)
 		}
 		return GPUInfo{Family: gpuName, GPUVendor: vendorIntel}, nil
 	} else if strings.Contains(name, nvidiaVGAString) {
