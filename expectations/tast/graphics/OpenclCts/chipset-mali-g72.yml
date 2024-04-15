@@ -397,6 +397,9 @@ graphics.OpenclCts.image_streams_3d_cl_unorm_int8:
 graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.mem_host_flags_mem_host_read_only_buffer:
+  expectation: FAIL
+  since_build: R125-15847.0.0
 graphics.OpenclCts.mem_host_flags_mem_host_read_only_image:
   expectation: FAIL
   since_build: R125-15840.0.0

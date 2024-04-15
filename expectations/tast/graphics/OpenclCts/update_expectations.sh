@@ -13,8 +13,8 @@ CREATE_EXPECTATIONS="${SCRIPT_DIR}/../../create_expectations_from_stainless.go"
 
 declare -A all_chipsets
 #ARM
-all_chipsets[mali-g57]="asurada|cherry"
-all_chipsets[mali-g52]="corsola"
+all_chipsets[mali-g57]="asurada|cherry|geralt"
+all_chipsets[mali-g52]="corsola|staryu"
 all_chipsets[mali-g72]="jacuzzi|kukui"
 # Intel
 all_chipsets[kabylake]="atlas|eve|fizz|kalista|nami|nautilus|nocturne|rammus"
@@ -25,6 +25,7 @@ all_chipsets[cometlake]="drallion|hatch|puff"
 all_chipsets[geminilake]="octopus"
 all_chipsets[tigerlake]="volteer"
 all_chipsets[meteorlake]="rex"
+all_chipsets[whiskeylake]="sarien"
 # Qualcomm
 all_chipsets[sc7180]="strongbad|trogdor"
 all_chipsets[sc7280]="herobrine"

@@ -1,0 +1,294 @@
+graphics.OpenclCts.allocations_multiple_1_buffer:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.allocations_multiple_1_buffer_non_blocking:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.allocations_multiple_1_image2d_read:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.allocations_multiple_1_image2d_read_non_blocking:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.allocations_multiple_1_image2d_write:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.allocations_multiple_1_image2d_write_non_blocking:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.allocations_single_1_buffer:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.allocations_single_1_buffer_non_blocking:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.allocations_single_1_image2d_read:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.allocations_single_1_image2d_read_non_blocking:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.allocations_single_1_image2d_write:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.allocations_single_1_image2d_write_non_blocking:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.api_kernel_arg_changes:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.api_kernel_arg_multi_setup_random:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.api_sub_group_dispatch:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_add:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_add_index:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_add_index_bin:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_and:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_cmpxchg:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_dec:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_inc:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_max:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_min:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_or:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_sub:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_xchg:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.atomics_atomic_xor:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_astype:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_async_copy_global_to_local:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_async_copy_local_to_global:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_async_strided_copy_global_to_local:
+  expectation: FAIL
+  since_build: R125-15851.0.0
+graphics.OpenclCts.basic_async_strided_copy_local_to_global:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_barrier:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_get_global_offset:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_get_linear_ids:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_global_work_offsets:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_imagedim_non_pow2:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_imagenpot:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_prefetch:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.basic_wg_barrier:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.bruteforce_half_powr:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.buffers_buffer_map_read_char:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.buffers_buffer_map_read_float:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.buffers_buffer_map_read_int:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.buffers_buffer_map_read_long:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.buffers_buffer_map_read_short:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.buffers_buffer_map_read_struct:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.buffers_buffer_map_read_uchar:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.buffers_buffer_map_read_uint:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.buffers_buffer_map_read_ulong:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.buffers_buffer_map_read_ushort:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_compare_exchange_strong:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_compare_exchange_weak:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_exchange:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_fence:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_fetch_add:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_fetch_and:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_fetch_max:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_fetch_min:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_fetch_or:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_fetch_orand:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_fetch_sub:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_fetch_xor:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_fetch_xor2:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_flag:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_init:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_load:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.c11_atomics_atomic_store:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_callbacks:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_callbacks_simultaneous:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_event_enqueue_barrier_with_event_list:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_event_enqueue_marker:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_event_enqueue_marker_with_event_list:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_event_finish_execute:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_event_flush:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_event_get_execute_status:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_event_get_info:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_event_release_before_done:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_event_wait_for_execute:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.events_userevents_multithreaded:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.geometrics_geom_cross:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.geometrics_geom_distance:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.geometrics_geom_dot:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.geometrics_geom_fast_distance:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.geometrics_geom_fast_length:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.geometrics_geom_fast_normalize:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.geometrics_geom_length:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.geometrics_geom_normalize:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_1d_atomics:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_1d_barriers:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_1d_basic:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_2d_atomics:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_2d_barriers:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_2d_basic:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_3d_atomics:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_3d_barriers:
+  expectation: FAIL
+  since_build: R125-15847.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_3d_basic:
+  expectation: FAIL
+  since_build: R125-15847.0.0
