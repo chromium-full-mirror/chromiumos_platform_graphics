@@ -45,6 +45,7 @@ dEQP-VK.image.texel_view_compatible.compute.basic.2d_image.image_load.astc_6x5_u
 dEQP-VK.image.texel_view_compatible.compute.extended.2d_image.image_store.bc7_unorm_block.r32g32b32a32_sint,Fail
 dEQP-VK.info.device_mandatory_features,Fail
 dEQP-VK.memory.mapping.dedicated_alloc.buffer.full.variable.implicit_unmap,Timeout
+dEQP-VK.memory.mapping.dedicated_alloc.image.full.variable.implicit_unmap,Timeout
 dEQP-VK.memory.mapping.suballocation.full.variable.implicit_unmap,Timeout
 dEQP-VK.memory_model.write_after_read.ext.u32.coherent.atomic_atomic.atomicrmw.queuefamily.payload_local.buffer.guard_nonlocal.workgroup.comp,Fail
 dEQP-VK.memory_model.write_after_read.ext.u32.coherent.atomic_atomic.atomicrmw.subgroup.payload_local.image.guard_local.physbuffer.comp,Fail
