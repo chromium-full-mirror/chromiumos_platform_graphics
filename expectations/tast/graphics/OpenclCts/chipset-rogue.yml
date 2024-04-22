@@ -997,6 +997,9 @@ graphics.OpenclCts.conversions_float_rtn_long:
 graphics.OpenclCts.conversions_float_rtn_uint:
   expectation: FAIL
   since_build: R117-15527.0.0
+graphics.OpenclCts.conversions_float_rtp_float:
+  expectation: FAIL
+  since_build: R126-15855.0.0
 graphics.OpenclCts.conversions_float_rtz_int:
   expectation: FAIL
   since_build: R117-15527.0.0
@@ -1160,6 +1163,9 @@ graphics.OpenclCts.relationals_relational_islessgreater:
 graphics.OpenclCts.thread_dimensions_full_2d_explicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.thread_dimensions_full_2d_implicit_local:
+  expectation: FAIL
+  since_build: R126-15855.0.0
 graphics.OpenclCts.thread_dimensions_full_3d_explicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0
