@@ -195,6 +195,8 @@ func getIntelPCIIDMap() map[string]string {
 		"0x46d0": "alderlake",
 		"0x46d1": "alderlake",
 		"0x46d2": "alderlake",
+		"0x46d3": "alderlake",
+		"0x46d4": "alderlake",
 		"0x4e51": "jasperlake",
 		"0x4e55": "jasperlake",
 		"0x4e57": "jasperlake",
