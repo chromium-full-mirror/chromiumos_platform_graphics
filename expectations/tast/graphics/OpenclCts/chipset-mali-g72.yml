@@ -406,9 +406,9 @@ graphics.OpenclCts.mem_host_flags_mem_host_read_only_image:
 graphics.OpenclCts.mem_host_flags_mem_host_write_only_buffer:
   expectation: FAIL
   since_build: R125-15833.0.0
-graphics.OpenclCts.mem_host_flags_mem_host_write_only_image:
+graphics.OpenclCts.multiples_context_multiple_contexts_same_device:
   expectation: FAIL
-  since_build: R123-15770.0.0
+  since_build: R126-15864.0.0
 graphics.OpenclCts.thread_dimensions_full_3d_explicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0

@@ -316,6 +316,9 @@ graphics.OpenclCts.buffers_sub_buffers_read_write:
 graphics.OpenclCts.compiler_features_macro:
   expectation: FAIL
   since_build: R123-15755.0.0
+graphics.OpenclCts.compiler_options_build_macro:
+  expectation: FAIL
+  since_build: R126-15864.0.0
 graphics.OpenclCts.conversions_char_char:
   expectation: FAIL
   since_build: R110-15241.0.0
