@@ -167,7 +167,7 @@ func getMemory() (Memory, error) {
 			if err != nil {
 				return 0, errors.Wrapf(err, "failed to parse %v", text)
 			}
-			// meminfo reported kB is 2^10 bytes not 10^3.
+			// meminfo reported kB is actually kilibytes not kilobytes.
 			return val << 10, nil
 		}
 		return 0, fmt.Errorf("MemTotal not found; got: %v", string(b))
@@ -177,7 +177,7 @@ func getMemory() (Memory, error) {
 	}
 	// memoryBytes reported by /proc/meminfo is less than actual installed memory.
 	// We report it by rounding to the nearest Gb.
-	return Memory((memoryBytes + 1<<29) >> 30), nil
+	return Memory((memoryBytes + 1<<30 - 1) >> 30), nil
 }
 
 type Disk struct {
