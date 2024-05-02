@@ -23,7 +23,8 @@ bool utils_check_dimensions_at_least(Display * d, Window w, int width,
     int height);
 bool utils_check_dimensions_at_most(Display * d, Window w, int width,
     int height);
-bool utils_check_position(Display * d, Window w, int screen, int x, int y);
+bool utils_check_position(Display * d, Window w, int screen, int x, int y,
+        int epsilon = 0);
 bool utils_check_mapped(Display * d, Window w);
 bool utils_check_unmapped(Display * d, Window w);
 

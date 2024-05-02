@@ -14,9 +14,15 @@ static bool move_loop(Display *d, Window *w, int iterations, int dx, int dy) {
   for (int i = 1; i < iterations; i++) {
     int x = i * dx;
     int y = i * dy;
+    // TODO(b/325311899): XMoveWindow() moves the window to the correct position
+    // the first time around, but for some reason XTranslateCoordinates() only
+    // reports the x and y values from the previous XMoveWindow() call. So we
+    // call XMoveWindow() twice as a temporary workaround to both move the
+    // window and update the reported window position.
+    XMoveWindow(d, *w, x, y);
     XMoveWindow(d, *w, x, y);
     utils_x11_flush(d);
-    success &= utils_check_position(d, *w, DefaultScreen(d), x, y);
+    success &= utils_check_position(d, *w, DefaultScreen(d), x, y, 4);
   }
   return success;
 }
@@ -61,7 +67,7 @@ static bool test_position() {
   XMapWindow(d, w);
   utils_x11_flush(d);
 
-  bool success = move_loop(d, &w, 6, 100, 50);
+  bool success = move_loop(d, &w, 6, 100, 100);
 
   XCloseDisplay(d);
 

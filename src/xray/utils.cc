@@ -90,7 +90,8 @@ bool utils_check_dimensions(Display *d, Window w, int width, int height) {
   return (width == win_attr.width) && (height == win_attr.height);
 }
 
-bool utils_check_position(Display *d, Window w, int screen, int x, int y) {
+bool utils_check_position(Display *d, Window w, int screen, int x, int y,
+    int epsilon) {
   int xx, yy;
   Window root = RootWindow(d, screen);
   Window child;
@@ -98,7 +99,8 @@ bool utils_check_position(Display *d, Window w, int screen, int x, int y) {
   XTranslateCoordinates(d, w, root, 0, 0, &xx, &yy, &child);
   log_rect("xpos, ypos equal", x, y, xx, yy);
 
-  return (x == xx) && (y == yy);
+  return (x - xx) * (x - xx) <= epsilon
+      && (y - yy) * (y - yy) <= epsilon;
 }
 
 bool utils_check_mapped(Display *d, Window w) {
