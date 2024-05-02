@@ -14,26 +14,10 @@ borealis.Xray.min_size_hints_verify_xwayland:
   expectation: FAIL
   tickets:
   - b/328509880
-borealis.Xray.net_moveresize_window:
-  expectation: FAIL
-  tickets:
-  - b/328509880
 borealis.Xray.net_moveresize_window_verify_xwayland:
   expectation: FAIL
   tickets:
-  - b/328509880
-borealis.Xray.net_wm_state_above:
-  expectation: FAIL
-  tickets:
-  - b/328638779
-borealis.Xray.net_wm_state_below:
-  expectation: PASS
-  tickets:
-  - b/328638779
-borealis.Xray.net_wm_state_skip_taskbar:
-  expectation: PASS
-  tickets:
-  - b/328654722
+  - b/328633434
 borealis.Xray.position:
   expectation: FAIL
   tickets:
@@ -41,12 +25,12 @@ borealis.Xray.position:
 borealis.Xray.set_mode_xf86vm_verify_exo:
   expectation: FAIL
   tickets:
-  - b/328509880
+  - b/331836194
 borealis.Xray.set_mode_xrandr_verify_exo:
   expectation: FAIL
   tickets:
-  - b/328509880
+  - b/331836194
 borealis.Xray.unmap_remap_verify_xwayland:
   expectation: FAIL
   tickets:
-  - b/328509880
+  - b/338293173
