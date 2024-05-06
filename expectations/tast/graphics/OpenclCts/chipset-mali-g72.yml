@@ -352,6 +352,9 @@ graphics.OpenclCts.cl_fill_images_2d_cl_unorm_int8:
 graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int8:
   expectation: FAIL
   since_build: R123-15766.0.0
+graphics.OpenclCts.cl_get_info_2d_cl_signed_int16:
+  expectation: FAIL
+  since_build: R126-15869.0.0
 graphics.OpenclCts.cl_get_info_2d_cl_signed_int32:
   expectation: FAIL
   since_build: R125-15833.0.0
@@ -409,6 +412,9 @@ graphics.OpenclCts.mem_host_flags_mem_host_write_only_buffer:
 graphics.OpenclCts.multiples_context_multiple_contexts_same_device:
   expectation: FAIL
   since_build: R126-15864.0.0
+graphics.OpenclCts.multiples_hundred_queues:
+  expectation: FAIL
+  since_build: R126-15869.0.0
 graphics.OpenclCts.thread_dimensions_full_3d_explicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0

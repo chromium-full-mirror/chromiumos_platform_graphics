@@ -1169,6 +1169,9 @@ graphics.OpenclCts.thread_dimensions_full_2d_implicit_local:
 graphics.OpenclCts.thread_dimensions_full_3d_explicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.thread_dimensions_full_3d_implicit_local:
+  expectation: FAIL
+  since_build: R126-15869.0.0
 graphics.OpenclCts.thread_dimensions_quick_2d_implicit_local:
   expectation: FAIL
   since_build: R124-15793.0.0

@@ -298,6 +298,9 @@ graphics.OpenclCts.cl_copy_images_1d_cl_unorm_int16:
 graphics.OpenclCts.cl_copy_images_1d_cl_unorm_int8:
   expectation: FAIL
   since_build: R125-15847.0.0
+graphics.OpenclCts.cl_copy_images_1d_cl_unorm_short_565:
+  expectation: FAIL
+  since_build: R126-15871.0.0
 graphics.OpenclCts.cl_copy_images_1d_cl_unsigned_int16:
   expectation: FAIL
   since_build: R125-15847.0.0
@@ -376,6 +379,9 @@ graphics.OpenclCts.cl_copy_images_2d_cl_unsigned_int32:
 graphics.OpenclCts.cl_copy_images_2d_cl_unsigned_int8:
   expectation: FAIL
   since_build: R125-15847.0.0
+graphics.OpenclCts.cl_copy_images_2darrayto2d_cl_half_float:
+  expectation: FAIL
+  since_build: R126-15871.0.0
 graphics.OpenclCts.cl_copy_images_2darrayto2d_cl_signed_int16:
   expectation: FAIL
   since_build: R126-15864.0.0
@@ -523,6 +529,9 @@ graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int32:
 graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int8:
   expectation: FAIL
   since_build: R125-15847.0.0
+graphics.OpenclCts.cl_fill_images_2darray_cl_unsigned_int8:
+  expectation: FAIL
+  since_build: R126-15871.0.0
 graphics.OpenclCts.contractions_contractions_float_0:
   expectation: FAIL
   since_build: R109-15232.0.0
