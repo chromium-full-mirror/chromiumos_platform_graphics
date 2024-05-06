@@ -178,6 +178,16 @@ BOOLEAN EFIAPI VmPerfInitialize(
         Print(L"WARNING: Log output will not be available.\n");
     }
 
+    /*
+    * Check and see if we can use raw disk support
+    * A warning isn't necessary as raw disk support isn't necessary for
+    * most tests. A test should check if this was properly initialized
+    * first if it requires support.
+    */
+    if (!VmPerfRawDiskInit(Ctx)) {
+        Print(L"Raw disk support is not available.\n");
+    }
+
     Ctx->ApBootCodePage = BASE_1MB - 1;
     Ctx->ApTriggerPage = BASE_1MB - 1;
     Ctx->ApRealModeWorkPage = BASE_1MB - 1;

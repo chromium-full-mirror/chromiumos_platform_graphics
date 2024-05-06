@@ -12,6 +12,9 @@
 #include <IdentityPtLib.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/SimpleFileSystem.h>
+#include <Protocol/PartitionInfo.h>
+#include <Protocol/BlockIo.h>
+#include <Protocol/BlockIo2.h>
 
 /*
 * Defines the maximum number of 'remote' cores. Cores which
@@ -218,6 +221,48 @@ typedef struct {
 } VM_PERF_CPU_INFORMATION;
 
 typedef struct {
+    /*
+    * The block size (in bytes) in the disk.
+    * Accesses are made in even multiples of this value.
+    */
+    UINTN       BlockSize;
+
+    /*
+    * Size of the raw disk in blocks (bytes = BlockSize * RawDiskSizeInBlocks)
+    */
+    EFI_LBA     RawDiskSizeInBlocks;
+
+    /*
+    * The required alignment for the read/write buffer used for accessing
+    * the disk. 0 or 1 means no alignment restrictions.
+    *
+    * The UEFI spec refers to this as IoAlign.
+    */
+    UINTN       BufferAlign;
+
+    /* Indicates if the selected partition for raw disk access is read only */
+    BOOLEAN     ReadOnly;
+
+    /* Indicates if write caching will be used on write accesses to this disk */
+    BOOLEAN     WriteCaching;
+
+    /* Indicates if disk accesses can be done asynchronously */
+    BOOLEAN     AsyncCapable;
+} VM_PERF_RAW_DISK_INFORMATION;
+
+typedef struct {
+    BOOLEAN     IsAvailable;
+    BOOLEAN     UsingBlockIo2;
+    EFI_BLOCK_IO2_PROTOCOL *BlockIo2;
+    EFI_BLOCK_IO_PROTOCOL *BlockIo;
+    EFI_HANDLE BlockDeviceHandle;
+    EFI_LBA     StartingLBA;
+    EFI_LBA     EndingLBA;
+    EFI_EVENT   RawDiskEvent;
+    EFI_BLOCK_IO2_TOKEN Token;
+} VM_PERF_RAW_DISK;
+
+typedef struct {
     /* The APIC ID of this core */
     UINT32                  ApicId;
 
@@ -361,6 +406,9 @@ typedef struct {
 
     /* Instance of the CPU information structure */
     VM_PERF_CPU_INFORMATION     CpuInformation;
+
+    /* Instance of the raw disk access structure */
+    VM_PERF_RAW_DISK            RawDisk;
 }   VM_PERF_EVAL_CTX;
 
 /**
@@ -737,5 +785,29 @@ VOID EFIAPI VmPerfGetCpuInformation(
 VOID EFIAPI VmPerfLogCpuInformation(
     VM_PERF_EVAL_CTX *Ctx
 );
+
+BOOLEAN EFIAPI VmPerfReadRawDisk(
+    VM_PERF_EVAL_CTX *Ctx,
+    EFI_LBA LbaStart,
+    UINTN BlockCount,
+    VOID *Buffer
+);
+
+BOOLEAN EFIAPI VmPerfWriteRawDisk(
+    VM_PERF_EVAL_CTX *Ctx,
+    EFI_LBA LbaStart,
+    UINTN BlockCount,
+    VOID *Buffer
+);
+
+BOOLEAN EFIAPI VmPerfCheckRawDiskStatus(
+    VM_PERF_EVAL_CTX *Ctx
+);
+
+BOOLEAN EFIAPI VmPerfGetRawDiskInformation(
+    VM_PERF_EVAL_CTX *Ctx,
+    VM_PERF_RAW_DISK_INFORMATION *RawDiskInformation
+);
+
 
 #endif      /* __VM_PERF_EVAL_LIB_H__ */

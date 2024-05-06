@@ -22,6 +22,7 @@
    VmPerfFileStream.c
    VmPerfLogging.c
    VmPerfOptionsParse.c
+   VmPerfRawDisk.c
    ApBoot/ApIsr.c
    ApBoot/ApApic.c
 

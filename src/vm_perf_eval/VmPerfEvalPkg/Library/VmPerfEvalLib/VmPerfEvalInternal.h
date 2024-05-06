@@ -89,3 +89,11 @@ BOOLEAN VmPerfLoggingInit(
 VOID VmPerfLoggingShutdown(
     IN VM_PERF_EVAL_CTX *Ctx
 );
+
+BOOLEAN VmPerfRawDiskInit(
+    IN VM_PERF_EVAL_CTX *Ctx
+);
+
+VOID VmPerfRawDiskShutdown(
+    IN VM_PERF_EVAL_CTX *Ctx
+);
