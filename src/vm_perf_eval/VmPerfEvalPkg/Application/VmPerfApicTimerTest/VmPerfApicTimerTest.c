@@ -28,6 +28,19 @@
 
 APIC_TIMER_CSTATE_INFO gCStateInfo;
 APIC_TIMER_TEST_GLOBAL_PARAMS gOptions;
+EFI_PHYSICAL_ADDRESS gDiskBufferAddress;
+VM_PERF_RAW_DISK_INFORMATION gRawDiskInformation;
+
+UINT64 gCurrentBlock = 0;
+UINTN gLastReadBlockCount = 0;
+
+
+/*
+* We use this timer event to time the 1 second intervals between
+* passes.
+*/
+EFI_EVENT   gTimerEvent;
+
 
 VOID
 EFIAPI
@@ -403,6 +416,44 @@ UefiMain (
             ( (1ULL << gOptions.CoreCount) -1);
     }
 
+    /* Set up disk access information as needed */
+    if (gOptions.EnableDiskAccesses) {
+        /* Allocate the disk buffer memory */
+        Status = SystemTable->BootServices->AllocatePages(
+            AllocateAnyPages, EfiLoaderData,
+            EFI_SIZE_TO_PAGES(gOptions.DiskBufferSize),
+            &gDiskBufferAddress
+        );
+
+        if (Status != EFI_SUCCESS) {
+            VmPerfLog(&Ctx, 0, L"Failed to allocate disk buffer memory\n");
+            SystemTable->BootServices->Stall(DEFAULT_DELAY);
+            return EFI_SUCCESS;
+        }
+
+        if (!VmPerfGetRawDiskInformation(&Ctx, &gRawDiskInformation)) {
+            VmPerfLog(&Ctx, 0, L"Failed to retrieve raw disk information.\n");
+            SystemTable->BootServices->Stall(DEFAULT_DELAY);
+            return EFI_SUCCESS;
+        }
+    }
+
+    /* Create an timer event (to throttle remote core polling) */
+    Status = SystemTable->BootServices->CreateEvent(
+        EVT_TIMER,
+        TPL_CALLBACK,
+        NULL, NULL,
+        &gTimerEvent
+    );
+
+    if (Status != EFI_SUCCESS) {
+        VmPerfLog(&Ctx, 0, L"Failed to create timer event for async timing.\n");
+        SystemTable->BootServices->Stall(DEFAULT_DELAY);
+        return EFI_SUCCESS;
+    } else {
+        VmPerfLog(&Ctx, 0, L"Timer successfully allocated.\n");
+    }
+
     /*
     * Retrieve an estimated number of physical address bits based on the
     * EFI memory map.
@@ -436,6 +487,36 @@ UefiMain (
 
     PollTimeoutInSeconds = gOptions.PollLoopTimeoutInMinutes * 60;
 
+    Status = SystemTable->BootServices->SetTimer(
+        gTimerEvent, TimerRelative, 10000000
+    );
+
+    if (Status != EFI_SUCCESS) {
+        VmPerfLog(&Ctx, 0, L"Failed to set Timer Event.\n");
+        SystemTable->BootServices->Stall(DEFAULT_DELAY);
+        return FALSE;
+    }
+
+    if (gOptions.EnableDiskAccesses) {
+        /* Kick off the first access */
+        UINTN BlockCountToRead =
+            gOptions.DiskBufferSize / gRawDiskInformation.BlockSize;
+        BlockCountToRead =
+            (BlockCountToRead > gRawDiskInformation.RawDiskSizeInBlocks) ?
+            gRawDiskInformation.RawDiskSizeInBlocks : BlockCountToRead;
+
+        gLastReadBlockCount = BlockCountToRead;
+        if (!VmPerfReadRawDisk(
+            &Ctx, gCurrentBlock, BlockCountToRead,
+            (void *)gDiskBufferAddress
+        ))
+        {
+            VmPerfLog(&Ctx, 0, L"Raw read failed.\n");
+            SystemTable->BootServices->Stall(DEFAULT_DELAY);
+            return FALSE;
+        }
+    }
+
     /*
     * Continue until
     * 1. PollTimeoutInSeconds is > 0
@@ -444,11 +525,52 @@ UefiMain (
     * cores)
     */
     while (!PollDone && PollTimeoutInSeconds > 0 && !PollError) {
-        SystemTable->BootServices->Stall(1000000);
-        PollDone = RemoteCorePollPass(
-            &Ctx, SystemTable,
-            CoreServiceMask, &PollError);
-        PollTimeoutInSeconds--;
+        /* We don't want to wait here as we want to keep the main CPU loaded */
+        if (SystemTable->BootServices->CheckEvent(gTimerEvent) == EFI_SUCCESS) {
+            PollDone = RemoteCorePollPass(
+                &Ctx, SystemTable,
+                CoreServiceMask, &PollError);
+            PollTimeoutInSeconds--;
+
+            /* Reset the event */
+            Status = SystemTable->BootServices->SetTimer(
+                gTimerEvent, TimerRelative, 10000000
+            );
+        }
+
+        if (gOptions.EnableDiskAccesses) {
+            if (VmPerfCheckRawDiskStatus(&Ctx)) {
+                /* Kick off next read */
+                UINT64 MaxBlockReadSize;
+
+                gCurrentBlock += gLastReadBlockCount;
+
+                if (gCurrentBlock >= gRawDiskInformation.RawDiskSizeInBlocks) {
+                    gCurrentBlock = 0;
+                }
+
+                MaxBlockReadSize = gRawDiskInformation.RawDiskSizeInBlocks -
+                                        gCurrentBlock;
+
+                /* Initiate the read */
+                BOOLEAN ReadSucceeded = VmPerfReadRawDisk(&Ctx, gCurrentBlock,
+                    (gOptions.DiskBufferSize /
+                     gRawDiskInformation.BlockSize) > MaxBlockReadSize ?
+                    MaxBlockReadSize :
+                    (gOptions.DiskBufferSize / gRawDiskInformation.BlockSize),
+                    (void *)gDiskBufferAddress  );
+
+                if (!ReadSucceeded) {
+                    VmPerfLog(&Ctx, 0, L"Raw read failed.\n");
+                    SystemTable->BootServices->Stall(DEFAULT_DELAY);
+                    return FALSE;
+                }
+            } else {
+                VmPerfLog(&Ctx, 0, L"Raw read failed.\n");
+                SystemTable->BootServices->Stall(DEFAULT_DELAY);
+                return FALSE;
+            }
+        }
     }
 
     /* Dump results only when all cores have finished the test */

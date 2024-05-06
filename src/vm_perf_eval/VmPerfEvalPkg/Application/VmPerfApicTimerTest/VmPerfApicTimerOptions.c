@@ -28,6 +28,8 @@
 #define OPTION_POLL_TIMEOUT     "PollLoopTimeout"
 #define OPTION_CORE_TRIGGER_MODE "CoreTriggerMode"
 #define OPTION_RESET_AT_TEST_END    "ResetAtTestEnd"
+#define OPTION_ENABLE_DISK_ACCESS "EnableDiskAccesses"
+#define OPTION_DISK_BUFFER_SIZE   "DiskBufferSize"
 
 /*
 * Our default test item, used when none are specified in the options
@@ -102,6 +104,21 @@ VmPerfSetGlobalOptionsDefault(
     GlobalOptions->TestItemArrayShouldBeFreed = FALSE;
     GlobalOptions->CoreTriggerMode = 0;
     GlobalOptions->ResetSystemAtTestEnd = TRUE;
+    GlobalOptions->EnableDiskAccesses = FALSE;
+
+    /*
+    * The default buffer size is a compromise between a having enough "runway"
+    * to keep the disk busy and the memory footprint of the test.
+    *
+    * Given a typical 512 byte block size, this leaves us with 131072 blocks.
+    * We don't want the amount of time spent servicing the disk requests
+    * to be too short as we will have difficulty seeing the effect they have
+    * on the vCPU's. We also don't want this buffer to be too big as it
+    * does affect the memory footprint of the test.
+    *
+    * A default of 64MiB serves as a good starting point.
+    */
+    GlobalOptions->DiskBufferSize = 64 * 1048576;
 }
 
 static
@@ -337,7 +354,7 @@ VmPerfApicTimerGetGlobalOptions(
     BOOLEAN OptionsLoaded = FALSE;
     UINT32 ItemsFound;
     APIC_TIMER_TEST_ITEM *Items;
-    UINTN ResetFlag;
+    UINTN GenericFlag;
 
     /* Reset to known defaults */
     VmPerfSetGlobalOptionsDefault(GlobalOptions);
@@ -380,19 +397,35 @@ VmPerfApicTimerGetGlobalOptions(
             &GlobalOptions->PollLoopTimeoutInMinutes
         );
 
-        ResetFlag = 1;
+        /* Fetch the Boolean reset at end flag */
+        GenericFlag = 1;
         VmPerfGetOptionUintn(
             Ctx,
             OPTION_RESET_AT_TEST_END,
-            &ResetFlag
+            &GenericFlag
         );
-        GlobalOptions->ResetSystemAtTestEnd = (ResetFlag) ? TRUE : FALSE;
+        GlobalOptions->ResetSystemAtTestEnd = (GenericFlag) ? TRUE : FALSE;
 
         VmPerfGetOptionUintn(
             Ctx,
             OPTION_CORE_TRIGGER_MODE,
             &GlobalOptions->CoreTriggerMode
         );
+
+        VmPerfGetOptionUintn(
+            Ctx,
+            OPTION_DISK_BUFFER_SIZE,
+            &GlobalOptions->DiskBufferSize
+        );
+
+        /* Enable disk access flag */
+        GenericFlag = 0;
+        VmPerfGetOptionUintn(
+            Ctx,
+            OPTION_ENABLE_DISK_ACCESS,
+            &GenericFlag
+        );
+        GlobalOptions->EnableDiskAccesses = (GenericFlag) ? TRUE : FALSE;
     }
 
     Vret = TRUE;

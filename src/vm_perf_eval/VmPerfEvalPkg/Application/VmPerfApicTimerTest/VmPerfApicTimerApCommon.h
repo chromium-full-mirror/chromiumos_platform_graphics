@@ -210,6 +210,17 @@ typedef struct {
     UINTN                   CoreTriggerMode;
 
     /*
+    * Enable the disk access by the main processor.
+    * This can be used to excercise the VirtIO block device
+    * to see how they interact with virtualized CPUs.
+    */
+    BOOLEAN                 EnableDiskAccesses;
+    /*
+    * The size of the memory buffer used for disk accesses.
+    */
+    UINTN                   DiskBufferSize;
+
+    /*
     * Determines what to do at the end of the test
     * There are two options here:
     * 1. Request a power off
