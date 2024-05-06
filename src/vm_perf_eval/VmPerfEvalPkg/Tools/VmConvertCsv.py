@@ -98,6 +98,29 @@ def convert_header_row(header_row, ticks_multiplier):
         converted_row.append(header_name)
     return converted_row
 
+def fixup_data_row(data_row):
+    """Corrects rows which have a negative ReceiveTsc-DesiredTsc
+
+    This would imply that the event was received before the desired time.
+    If this type of event occured, the row will have its DesiredToReceive
+    value forced to 0.
+
+    Args:
+        data_row: Original data row
+
+    Returns:
+        Modified row if the even occured, unmodified row is otherwise
+    """
+    returned_row = data_row.copy()
+
+    if data_row['DesiredTsc'] > data_row[' ReceiveTsc']:
+        returned_row[' DesiredToReceive'] = 0
+        print('Issue found')
+        print(data_row)
+        print(returned_row)
+
+    return returned_row
+
 def convert_data_point(value, header_name, tsc_frequency, ticks_multiplier):
     """Converts a single point data point from TSC ticks into real time
 
@@ -135,10 +158,12 @@ def convert_data_row(data_row, tsc_frequency, ticks_multiplier):
     """
     converted_row = []
 
+    this_data_row = fixup_data_row(data_row)
+
     # The incoming row is expected to come from a DictReader
-    for _, header_field in enumerate(data_row):
+    for _, header_field in enumerate(this_data_row):
         value = convert_data_point(
-            data_row[header_field], header_field, tsc_frequency, ticks_multiplier)
+            this_data_row[header_field], header_field, tsc_frequency, ticks_multiplier)
         converted_row.append(value)
 
     return converted_row
@@ -233,7 +258,8 @@ def calculate_stats_on_file(file, cpuinfo_tuple, ticks_multiplier):
     with open(file, encoding='utf-8') as csvfile:
         csvreader = csv.DictReader(csvfile)
         for _, input_row in enumerate(csvreader):
-            for field, value in input_row.items():
+            this_input_row = fixup_data_row(input_row)
+            for field, value in this_input_row.items():
                 if field.strip() in value_dict:
                     value_dict[field.strip()].append(
                         convert_data_point(value, field, cpuinfo_tuple[1], ticks_multiplier))
@@ -247,14 +273,14 @@ def calculate_stats_on_file(file, cpuinfo_tuple, ticks_multiplier):
     # For each array in the value dictionary (indexed by the column name), calculate
     # the statistics
     for names, value_array in value_dict.items():
-        percentile_99 = numpy.percentile(value_array, 99)
-        percentile_95 = numpy.percentile(value_array, 95)
-        percentile_90 = numpy.percentile(value_array, 90)
-        min_value = numpy.min(value_array)
-        max_value = numpy.max(value_array)
-        std_dev = numpy.std(value_array)
-        median = numpy.median(value_array)
-        mean_value = numpy.mean(value_array)
+        percentile_99 = numpy.percentile(value_array[1:], 99)
+        percentile_95 = numpy.percentile(value_array[1:], 95)
+        percentile_90 = numpy.percentile(value_array[1:], 90)
+        min_value = numpy.min(value_array[1:])
+        max_value = numpy.max(value_array[1:])
+        std_dev = numpy.std(value_array[1:])
+        median = numpy.median(value_array[1:])
+        mean_value = numpy.mean(value_array[1:])
 
         # Limit these to 4 digits after the decimal point
         # to keep things clean in the statistics CSV file.
