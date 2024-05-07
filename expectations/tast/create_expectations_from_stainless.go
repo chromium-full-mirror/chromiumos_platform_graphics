@@ -73,6 +73,10 @@ var deleteTests bool
 var offlineEdit bool // This is a derived option. It equals deleteTests || editTests.
 
 // Query options
+var gpuFamilies stringSlice
+var gpuFamiliesRegex string
+var excludeGpuFamilies stringSlice
+var excludeGpuFamiliesRegex string
 var boards stringSlice
 var boardRegex string
 var excludeBoards stringSlice
@@ -133,6 +137,10 @@ func init() {
 				"\t--edit_tests: Perform an offline edit of tickets or comments for specified tests. Requires --input. Optional.\n"+
 				"\t--delete_tests: Perform an offline deletion of expectations for specified tests. Requires --input. Optional.\n"+
 				"\nTest result query options:\n"+
+				"\t--gpu_family: GPU family to query for expectations. Not a regular expresion. For multiple families, use multiple arguments. Optional\n"+
+				"\t--gpu_family_regex: Regular expression for GPU families to match. Optional\n"+
+				"\t--exclude_gpu_family: GPU family to exclude from results. Not a regular expression. For multiple families, use multiple arguments. Optional\n"+
+				"\t--exclude_gpu_family_regex: Regular expression for GPU families to exclude from results. Optional\n"+
 				"\t--board: Board to query for expectations. Not a regular expression. For multiple boards, use multiple arguments Optional\n"+
 				"\t--board_regex: Regular expression for boards to match. Optional\n"+
 				"\t--exclude_board: Board to exclude from results. Not a regular expression. For multiple boards, use multiple arguments Optional\n"+
@@ -164,6 +172,10 @@ func init() {
 	flag.BoolVar(&haltOnFlakes, "halt_on_flakes", haltOnFlakes, "If specified, halt when a test has both passes and fails.")
 	flag.BoolVar(&editTests, "edit_tests", editTests, "Perform an offline edit of tickets or comments for specified tests.")
 	flag.BoolVar(&deleteTests, "delete_tests", deleteTests, "Perform an offline deletion of expectations for matching tests.")
+	flag.Var(&gpuFamilies, "gpu_family", "GPU family to query for expectations. Not a regular expresion. For multiple families, use multiple arguments")
+	flag.StringVar(&gpuFamiliesRegex, "gpu_family_regex", "", "Regular expression for GPU families to match")
+	flag.Var(&excludeGpuFamilies, "exclude_gpu_family", "GPU family to exclude from results. Not a regular expression. For multiple families, use multiple arguments")
+	flag.StringVar(&excludeGpuFamiliesRegex, "exclude_gpu_family_regex", "", "Regular expression for GPU families to exclude from results")
 	flag.Var(&boards, "board", "board to query for expectations. Not a regular expression. For multiple boards, use multiple arguments")
 	flag.StringVar(&boardRegex, "board_regex", "", "regular expression for boards to match")
 	flag.Var(&excludeBoards, "exclude_board", "board to exclude for expectations. Not a regular expression. For multiple boards, use multiple arguments")
@@ -231,6 +243,16 @@ func createTestResultsQueryString() (string, error) {
 			"  queued_time BETWEEN \"%s 00:00:00 UTC\" AND \"%s 00:00:00 UTC\"\n"+
 			"  AND (suite IS NULL OR NOT REGEXP_CONTAINS(suite, r\"^(au$|paygen_au)\"))\n"+
 			"  AND job_name NOT LIKE \"git_%%\"", testResultsDatabase, fromDate, toDate)
+
+	// GPU family
+	if len(gpuFamiliesRegex) > 0 {
+		queryString = addQueryCriteria(queryString, "gpu_family", gpuFamiliesRegex)
+	}
+
+	// Exclude GPU family
+	if len(excludeGpuFamiliesRegex) > 0 {
+		queryString = addExcludeCriteria(queryString, "gpu_family", excludeGpuFamiliesRegex)
+	}
 
 	// Board
 	if len(boardRegex) > 0 {
@@ -389,6 +411,28 @@ func processArguments() error {
 		sort.Strings(tickets)
 	}
 
+	// GPU family
+	if len(gpuFamilies) > 0 && len(gpuFamiliesRegex) > 0 {
+		return errors.New("cannot specify --gpu_family and --gpu_family_regex")
+	}
+	if len(gpuFamilies) > 0 {
+		gpuFamiliesRegex, err = buildRegexStringFromList(gpuFamilies, "gpu_family", `^[a-z0-9\-_]+$`, true)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Exclude GPU family
+	if len(excludeGpuFamilies) > 0 && len(excludeGpuFamiliesRegex) > 0 {
+		return errors.New("cannot specify --exclude_gpu_family and --exclude_gpu_family_regex")
+	}
+	if len(excludeGpuFamilies) > 0 {
+		excludeGpuFamiliesRegex, err = buildRegexStringFromList(excludeGpuFamilies, "exclude_gpu_family", `^[a-z0-9\-_]+$`, true)
+		if err != nil {
+			return err
+		}
+	}
+
 	// Board
 	if len(boards) > 0 && len(boardRegex) > 0 {
 		return errors.New("cannot specify --board and --board_regex")
@@ -516,8 +560,8 @@ func processArguments() error {
 		if len(input) == 0 {
 			return errors.New("if 'delete_tests' or 'edit_tests' is specified, then 'input' must be specified")
 		}
-		if len(boardRegex) > 0 || len(excludeBoardRegex) > 0 || len(buildRegex) > 0 || len(modelRegex) > 0 || len(excludeModelRegex) > 0 || len(reasonRegex) > 0 || len(excludeReasonRegex) > 0 {
-			return errors.New("if one of 'delete_tests' or 'edit_tests' is specified, then 'board', 'boardRegex', 'excludeBoard', 'excludeBoardRegex', 'build', 'buildRegex', 'model', 'modelRegex', 'exclude_model', 'exclude_model_regex', 'reason', reason_regex', 'exclude_reason', 'exclude_reason_regex' must be unspecified")
+		if len(boardRegex) > 0 || len(excludeBoardRegex) > 0 || len(buildRegex) > 0 || len(modelRegex) > 0 || len(excludeModelRegex) > 0 || len(reasonRegex) > 0 || len(excludeReasonRegex) > 0 || len(gpuFamiliesRegex) > 0 || len(excludeGpuFamiliesRegex) > 0 {
+			return errors.New("if one of 'delete_tests' or 'edit_tests' is specified, then 'gpuFamily', 'gpuFamilyRegex', 'excludeGpuFamily', 'excludeGpuFamilyRegex', 'board', 'boardRegex', 'excludeBoard', 'excludeBoardRegex', 'build', 'buildRegex', 'model', 'modelRegex', 'exclude_model', 'exclude_model_regex', 'reason', reason_regex', 'exclude_reason', 'exclude_reason_regex' must be unspecified")
 		}
 	}
 

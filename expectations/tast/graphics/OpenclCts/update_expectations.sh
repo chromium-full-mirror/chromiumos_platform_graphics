@@ -11,56 +11,48 @@ set -xe
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 CREATE_EXPECTATIONS="${SCRIPT_DIR}/../../create_expectations_from_stainless.go"
 
-declare -A all_chipsets
-#ARM
-all_chipsets[mali-g57]="asurada|cherry|geralt"
-all_chipsets[mali-g52]="corsola|staryu"
-all_chipsets[mali-g72]="jacuzzi|kukui"
-# Intel
-all_chipsets[kabylake]="atlas|eve|fizz|kalista|nami|nautilus|nocturne|rammus"
-all_chipsets[kabylake]+="|soraka"
-all_chipsets[alderlake]="brask|brya|nissa"
-all_chipsets[jasperlake]="dedede|keeby"
-all_chipsets[cometlake]="drallion|hatch|puff"
-all_chipsets[geminilake]="octopus"
-all_chipsets[tigerlake]="volteer"
-all_chipsets[meteorlake]="rex"
-all_chipsets[whiskeylake]="sarien"
-# Qualcomm
-all_chipsets[sc7180]="strongbad|trogdor"
-all_chipsets[sc7280]="herobrine"
-# AMD
-all_chipsets[picasso]="zork"
-all_chipsets[stoney]="grunt"
-all_chipsets[cezanne]="guybrush"
-all_chipsets[gc_10_3_7]="skyrim"
-# Imagination
-all_chipsets[rogue]="elm|hana"
+chipsets=(
+    # ARM
+    "mali-g57"
+    "mali-g52"
+    "mali-g72"
+    # Intel
+    "kabylake"
+    "kabylake"
+    "alderlake"
+    "jasperlake"
+    "cometlake"
+    "geminilake"
+    "tigerlake"
+    "meteorlake"
+    "whiskeylake"
+    # Qualcomm
+    "sc7180"
+    "sc7280"
+    # AMD
+    "picasso"
+    "stoney"
+    "cezanne"
+    "gc_10_3_7"
+    # Imagination
+    "rogue"
+)
 
-declare -A exclude_models
-exclude_models[alderlake]="pujjoteen15w"
-
-if [ "$2" == "all" ]
+if [ "$2" != "all" ]
 then
-    IFS=" " read -r -a chipsets <<< "${!all_chipsets[@]}"
-else
-    IFS=" " read -r -a chipsets <<< "$2"
+   chipsets=("$2")
 fi
 
-for chipset_id in "${!chipsets[@]}"
+for chipset in "${chipsets[@]}"
 do
-    chipset="${chipsets[${chipset_id}]}"
-    board_regex="^(${all_chipsets[${chipset}]})$"
-    exclude_model_regex="^(${exclude_models[${chipset}]})$"
-
     touch "chipset-${chipset}.yml"
     ~/chromiumos/src/platform/tast/tools/go.sh \
         run \
         "${CREATE_EXPECTATIONS}" \
         --input "chipset-${chipset}.yml" \
         --update_input \
-        --board_regex "${board_regex}" \
-        --exclude_model_regex "${exclude_model_regex}" \
+        --gpu_family "${chipset}" \
+        --exclude_board_regex "-kernelnext$" \
         --exclude_reason_regex \
         "deadline exceeded|exit status 127|[Ll]ost SSH connection|GPU hang" \
         --test_regex "OpenclCts" \
