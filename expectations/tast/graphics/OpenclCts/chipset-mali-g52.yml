@@ -337,6 +337,9 @@ graphics.OpenclCts.cl_copy_images_1darray_cl_unorm_int16:
 graphics.OpenclCts.cl_copy_images_1darray_cl_unorm_int8:
   expectation: FAIL
   since_build: R125-15847.0.0
+graphics.OpenclCts.cl_copy_images_1darray_cl_unorm_short_565:
+  expectation: FAIL
+  since_build: R126-15879.0.0
 graphics.OpenclCts.cl_copy_images_1darray_cl_unsigned_int16:
   expectation: FAIL
   since_build: R125-15847.0.0
