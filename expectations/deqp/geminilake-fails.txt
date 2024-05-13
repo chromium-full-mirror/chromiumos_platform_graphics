@@ -1,4 +1,5 @@
 # geminilake boards: octopus
+# apollolake boards: coral, reef
 
 # Appears to be a test bug. See
 # https://gitlab.khronos.org/Tracker/vk-gl-cts/-/issues/4996 and
