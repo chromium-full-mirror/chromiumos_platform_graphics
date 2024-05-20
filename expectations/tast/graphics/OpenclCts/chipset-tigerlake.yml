@@ -1,6 +1,3 @@
 graphics.OpenclCts.api_kernel_arg_changes:
   expectation: FAIL
   since_build: R120-15656.0.0
-graphics.OpenclCts.compiler_options_build_macro_existence:
-  expectation: FAIL
-  since_build: R126-15864.0.0
