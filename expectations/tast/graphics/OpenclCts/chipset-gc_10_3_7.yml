@@ -1,3 +1,1 @@
-graphics.OpenclCts.compiler_options_include_directory:
-  expectation: FAIL
-  since_build: R126-15864.0.0
+{}
