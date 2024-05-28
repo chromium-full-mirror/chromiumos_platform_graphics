@@ -1,2 +1,16 @@
+# Board: elm/hana
+
 dEQP-GLES2.functional.shaders.function.global_variable_aliasing_fragment,Fail
 dEQP-GLES2.functional.shaders.function.global_variable_aliasing_vertex,Fail
+
+# failures since R116-15479.0.0, b/343272393
+dEQP-GLES3.functional.shaders.function.global_variable_aliasing_fragment,Fail
+dEQP-GLES3.functional.shaders.function.global_variable_aliasing_vertex,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image1DArrayShadow_fragment,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image1DArrayShadow_vertex,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image1DShadow_fragment,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image1DShadow_vertex,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image2DArrayShadow_fragment,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image2DArrayShadow_vertex,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image2DShadow_fragment,Fail
+dEQP-GLES3.functional.shaders.keywords.allowed_keywords.image2DShadow_vertex,Fail
