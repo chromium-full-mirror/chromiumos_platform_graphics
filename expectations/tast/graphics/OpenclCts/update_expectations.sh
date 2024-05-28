@@ -17,14 +17,14 @@ chipsets=(
     "mali-g52"
     "mali-g72"
     # Intel
-    "kabylake"
-    "kabylake"
     "alderlake"
-    "jasperlake"
     "cometlake"
     "geminilake"
-    "tigerlake"
+    "jasperlake"
+    "kabylake"
     "meteorlake"
+    "raptorlake"
+    "tigerlake"
     "whiskeylake"
     # Qualcomm
     "sc7180"
