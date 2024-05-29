@@ -61,14 +61,16 @@ declare -A in_branch=()
 
 # Look at all commits since last uprev
 for sha in $(git log --reverse --format=%H "${last_uprev_sha}"..); do
-    upstream_sha=$(git show -s --format=%B "${sha}" | awk '/cherry picked from commit / {print $5}')
-    upstream_sha=${upstream_sha%%)}
+    mapfile -t upstream_shas < <(git show -s --format=%B "${sha}" | awk '/cherry picked from commit / {print $5}')
 
-    if [[ -z "${upstream_sha}" ]]; then
+    if [[ "${#upstream_shas[@]}" -eq 0 ]]; then
         einfo "${sha} lists no upstream sha"
         no_upstream+=("${sha}")
         continue
     fi
+
+    upstream_sha="${upstream_shas[0]}"
+    upstream_sha=${upstream_sha%%)}
 
     # Get the full hash, in case it was truncated in the commit message
     if ! git cat-file -e "${upstream_sha}" 2>/dev/null; then
