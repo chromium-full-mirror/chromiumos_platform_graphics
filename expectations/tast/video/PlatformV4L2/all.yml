@@ -1,0 +1,7 @@
+video.PlatformV4L2.decoder:
+  expectation: FAIL
+  tickets:
+  - b/343484124
+  comments: Has been failing since time immemorial.
+  since_build: R124-15792.0.0
+  failure_pattern: "Total for mtk-vcodec-dec device /dev/video-dec0: 47, Succeeded: 46, Failed: 1, Warnings: 0"
