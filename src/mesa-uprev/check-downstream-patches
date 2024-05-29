@@ -102,8 +102,13 @@ for sha in $(git log --reverse --format=%H "${last_uprev_sha}"..); do
         einfo "Has not been cherry picked to ${upstream_branch}"
         not_in_branch[${sha}]=${upstream_sha}
     else
-        einfo "Has been cherry picked to ${upstream_branch} as ${cherrypicked_sha}"
-        in_branch[${sha}]="${upstream_sha}:${cherrypicked_sha}"
+        in_tag=$(git tag --contains "${cherrypicked_sha}" --list "${upstream}/${tag}")
+        if [[ -n "${in_tag}" ]]; then
+                einfo "Has been cherry picked to ${upstream_branch} as ${cherrypicked_sha} and is in ${tag}"
+        else
+                einfo "Has been cherry picked to ${upstream_branch} as ${cherrypicked_sha} and is not in ${tag}"
+                in_branch[${sha}]="${upstream_sha}:${cherrypicked_sha}"
+        fi
     fi
 
     eoutdent
