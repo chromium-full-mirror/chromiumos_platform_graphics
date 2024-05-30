@@ -20,6 +20,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -56,6 +57,9 @@ func (v *stringSlice) Set(s string) error {
 }
 
 // Command line options are stored in the following file scoped variables
+
+// SQL option
+var rawQuery bool
 
 // Input and output options
 var input string
@@ -125,6 +129,8 @@ func init() {
 			"create_expectations_from_stainless updates a test expectations file "+
 				"using results stored in stainless. Usage requires Google Cloud "+
 				"Platform credentials. See README.md for prerequisites.\n"+
+				"\nQuery options:\n",
+				"\n--rawQuery: If specified, query the database without yaml editting. Optional\n"+
 				"\nInput and output options:\n"+
 				"\t--input: Path to YAML file to load. If \"-\", read from standard input. Optional\n"+
 				"\t--output: Path to YAML file to write. May equal <input>. If not specified or set to \"-\", write to standard output. Optional\n"+
@@ -162,6 +168,8 @@ func init() {
 				"\t--color: Colorize output log\n"+
 				"\t--no_color: Do not colorize output log\n", excludeReasonRegexDefault)
 	}
+
+	flag.BoolVar(&rawQuery, "rawQuery", rawQuery, "If specified, output the result of the query.")
 
 	flag.StringVar(&input, "input", "", "Path to YAML file to load. If \"-\", read from standard input.")
 	flag.StringVar(&output, "output", "", "Path to YAML file to write. If not specified or set to \"-\", write to standard output.")
@@ -225,25 +233,27 @@ func addExcludeCriteria(query, dimension, regex string) string {
 // createTestResultsQueryString creates a query for the stainless database
 // using the program's command line arguments.
 func createTestResultsQueryString() (string, error) {
-	queryString := fmt.Sprintf(
-		"SELECT\n"+
-			"  IFNULL(test, \"-\") AS `row`,\n"+
-			"  \"*\" AS `col`,\n"+
-			"  SUM(IF(status IN (\"PASS\"), 1, 0)) AS pass,\n"+
-			"  SUM(IF(status IN (\"WARN\"), 1, 0)) AS warn,\n"+
-			"  SUM(IF(status IN (\"FAIL\", \"ERROR\", \"ABORT\") AND NOT REGEXP_CONTAINS(failure_reason, \"Test passed! Consider removing FAIL expectation\"), 1, 0)) AS `fail`,\n"+
-			"  SUM(IF(status IN (\"FAIL\", \"ERROR\", \"ABORT\") AND REGEXP_CONTAINS(failure_reason, \"Test passed! Consider removing FAIL expectation\"), 1, 0)) AS `unexpected_pass`,\n"+
-			"  SUM(IF(status NOT IN (\"GOOD\", \"WARN\", \"FAIL\", \"ERROR\", \"ABORT\", \"NOT_RUN\"),\n"+
-			"         1, 0)) AS other,\n"+
-			"  SUM(IF(status IN (\"NOT_RUN\"), 1, 0)) AS notrun,\n"+
-			"  MIN(IFNULL(IF(REGEXP_CONTAINS(image, \"-release-\"), REGEXP_EXTRACT(build, \"R[^-]*-[^-]*\"), build), \"-\")) AS `first_build`,\n"+
-			"FROM\n"+
-			"  `%s`\n"+
-			"WHERE\n"+
-			"  queued_time BETWEEN \"%s 00:00:00 UTC\" AND \"%s 00:00:00 UTC\"\n"+
-			"  AND (suite IS NULL OR NOT REGEXP_CONTAINS(suite, r\"^(au$|paygen_au)\"))\n"+
-			"  AND job_name NOT LIKE \"git_%%\"", testResultsDatabase, fromDate, toDate)
-
+	var queryString string
+	if rawQuery {
+		queryString = "SELECT * EXCEPT(bot_dimensions)\n"
+	} else {
+		queryString = `SELECT
+  IFNULL(test, "-") AS row,
+  "*" AS col,
+  SUM(IF(status IN ("PASS"), 1, 0)) AS pass,
+  SUM(IF(status IN ("WARN"), 1, 0)) AS warn,
+  SUM(IF(status IN ("FAIL", "ERROR", "ABORT") AND NOT REGEXP_CONTAINS(failure_reason, "Test passed! Consider removing FAIL expectation"), 1, 0)) AS fail,
+  SUM(IF(status IN ("FAIL", "ERROR", "ABORT") AND REGEXP_CONTAINS(failure_reason, "Test passed! Consider removing FAIL expectation"), 1, 0)) AS unexpected_pass,
+  SUM(IF(status NOT IN ("GOOD", "WARN", "FAIL", "ERROR", "ABORT", "NOT_RUN"), 1, 0)) AS other,
+  SUM(IF(status IN ("NOT_RUN"), 1, 0)) AS notrun,
+  MIN(IFNULL(IF(REGEXP_CONTAINS(image, "-release-"), REGEXP_EXTRACT(build, "R[^-]*-[^-]*"), build), "-")) AS first_build`
+	}
+	queryString += fmt.Sprintf(`
+FROM %s
+WHERE
+  queued_time BETWEEN "%s 00:00:00 UTC" AND "%s 00:00:00 UTC"
+  AND (suite IS NULL OR NOT REGEXP_CONTAINS(suite, r"^(au$|paygen_au)"))
+  AND job_name NOT LIKE "git_%%"`, testResultsDatabase, fromDate, toDate)
 	// GPU family
 	if len(gpuFamiliesRegex) > 0 {
 		queryString = addQueryCriteria(queryString, "gpu_family", gpuFamiliesRegex)
@@ -297,12 +307,14 @@ func createTestResultsQueryString() (string, error) {
 		queryString = addQueryCriteria(queryString, "test", testRegex)
 	}
 
-	queryString = queryString + "\nGROUP BY\n  `row`, `col`\nORDER BY row\n;"
+	if !rawQuery {
+		queryString += "\nGROUP BY\n  `row`, `col`\nORDER BY row\n;"
+	}
 	return queryString, nil
 }
 
-// runQuery performs a query and calls |handleRow| for each row.
-func runQuery(query, projectID string, handleRow func(map[string]bigquery.Value) error) error {
+// runQuery performs a query and calls |handler.handle| for each row.
+func runQuery(query, projectID string, handler SQLHandler) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
@@ -331,7 +343,7 @@ func runQuery(query, projectID string, handleRow func(map[string]bigquery.Value)
 			return err
 		}
 
-		err = handleRow(r)
+		err = handler.handle(r)
 		if err != nil {
 			return err
 		}
@@ -631,103 +643,123 @@ func countTrueArgs(bools ...bool) int {
 	return count
 }
 
-// editExpectations updates the elements in 'e' based on command line options.
-func editExpectationsFromStainless(exp map[string]expectations.Expectation) error {
+// runAndProcessLabResults fetchs results from the lab and process it with SQLHandler.
+func runAndProcessLabResults(handler SQLHandler) error {
 	queryString, err := createTestResultsQueryString()
 	if err != nil {
 		return err
 	}
+	return runQuery(queryString, stainlessProjectID, handler)
+}
 
-	// Creates a closure to update exp from the stainless database.
-	updateExpectationsFromQueryResult := func(r map[string]bigquery.Value) error {
-		testName, hasRow := r["row"].(string)
-		if hasRow {
-			// A test result can be have at most one of the following states:
-			// pass, fail, or unexpected_pass
-			// unexpected_pass happens when the test fails, but the reason
-			// is "Test passed! Consider removing FAIL expectation". I.e
-			// there is a test expectation that is no longer needed.
-			pass := r["pass"].(int64) > 0
-			fail := r["fail"].(int64) > 0
-			unexpectedPass := r["unexpected_pass"].(int64) > 0
-			sinceBuild := r["first_build"].(string)
+// SQLHandler interface defines how to process an SQL result and output the results.
+type SQLHandler interface {
+	// handle handles an entry of the SQL result.
+	handle(r map[string]bigquery.Value) error
+	// output outputs the processed results.
+	output() error
+}
 
-			if countTrueArgs(pass, fail, unexpectedPass) == 0 {
-				// This ignore tests that didn't run.
-				fmt.Fprintf(os.Stderr, colorYellow+"Test "+colorYellowBold+"%s"+colorYellow+" had no passing or failing results. Skipping.\n"+colorReset, testName)
-				return nil
-			}
+type rawHandler struct {
+	results []map[string]bigquery.Value
+}
 
-			if countTrueArgs(pass, fail, unexpectedPass) > 1 {
-				// There were different types of test results in the query.
-				if haltOnFlakes {
-					return errors.Errorf("test %s has both passes and fails. Halting due to --halt_on_flakes flag. Please adjust the query range", testName)
-				}
+func (y *rawHandler) handle(r map[string]bigquery.Value) error {
+	y.results = append(y.results, r)
+	return nil
+}
 
-				// There is no clear determination for what to do with the expectations file.
-				// This skips updating the file.
-				colorPass := colorYellow
-				colorFail := colorYellow
-				colorUnexpectedPass := colorYellow
-				if pass {
-					colorPass = colorGreenBold
-				}
-				if fail {
-					colorFail = colorRedBold
-				}
-				if unexpectedPass {
-					colorUnexpectedPass = colorMagentaBold
-				}
-				fmt.Fprintf(os.Stderr, colorYellow+"Test "+colorYellowBold+"%s"+colorYellow+" had "+colorPass+"%d pass, "+colorFail+"%d fail, "+colorUnexpectedPass+"and %d unexpected pass"+colorYellow+" results. Skipping.\n"+colorReset,
-					testName, r["pass"], r["fail"], r["unexpected_pass"])
-				return nil
-			}
+func (y *rawHandler) output() error {
+	out, err := json.MarshalIndent(y.results, "", "    ")
+	if err != nil {
+		return errors.Wrap(err, "failed to marshal")
+	}
+	fmt.Println(string(out))
+	return nil
+}
 
-			yamlTestName := strings.TrimPrefix(testName, "tast.")
-			if _, ok := exp[yamlTestName]; ok {
-				// There is an existing expectation that may need to be updated.
-				if unexpectedPass {
-					// Test is failing, but the fail reason is:
-					// "Test passed! Consider removing FAIL expectation"
-					// This particular error message is generated by the
-					// expectations package when there is a FAIL expectation
-					// but the test passes.
-					//
-					// For this case, the FAIL expectation should be deleted.
-					fmt.Fprintf(os.Stderr, colorGreen+"Deleting expectation for "+colorGreenBold+"%s"+colorGreen+" since the test passes.\n"+colorReset, testName)
-					delete(exp, yamlTestName)
-				}
-			} else if fail {
-				// The test only has failures - create an expectation and update exp
-				fmt.Fprintf(os.Stderr, colorRed+"Building "+colorRedBold+"%s"+colorRed+" expectation for "+colorRedBold+"%s"+colorRed+"\n"+colorReset, expectations.ExpectFailure, testName)
-				exp[yamlTestName] = expectations.Expectation{
-					Expectation: expectations.ExpectFailure,
-					Tickets:     tickets,
-					Comments:    comments,
-					SinceBuild:  sinceBuild,
-				}
-			}
-		}
+type yamlHandler struct {
+	exp map[string]expectations.Expectation
+}
+
+func (y *yamlHandler) handle(r map[string]bigquery.Value) error {
+	testName, hasRow := r["row"].(string)
+	if !hasRow {
 		return nil
 	}
 
-	// Runs the query and updates the exp structure.
-	return runQuery(queryString, stainlessProjectID, updateExpectationsFromQueryResult)
-}
+	// A test result can be have at most one of the following states:
+	// pass, fail, or unexpected_pass
+	// unexpected_pass happens when the test fails, but the reason
+	// is "Test passed! Consider removing FAIL expectation". I.e
+	// there is a test expectation that is no longer needed.
+	pass := r["pass"].(int64) > 0
+	fail := r["fail"].(int64) > 0
+	unexpectedPass := r["unexpected_pass"].(int64) > 0
+	sinceBuild := r["first_build"].(string)
 
-func main() {
-	flag.Parse()
-
-	err := processArguments()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error with options: %v\n", err)
-		os.Exit(1)
+	if countTrueArgs(pass, fail, unexpectedPass) == 0 {
+		// This ignore tests that didn't run.
+		fmt.Fprintf(os.Stderr, colorYellow+"Test "+colorYellowBold+"%s"+colorYellow+" had no passing or failing results. Skipping.\n"+colorReset, testName)
+		return nil
 	}
 
-	yamlExpectations := make(map[string]expectations.Expectation)
+	if countTrueArgs(pass, fail, unexpectedPass) > 1 {
+		// There were different types of test results in the query.
+		if haltOnFlakes {
+			return errors.Errorf("test %s has both passes and fails. Halting due to --halt_on_flakes flag. Please adjust the query range", testName)
+		}
 
-	// Loads expectations from the specified file. This lets us update
-	// any existing expectations.
+		// There is no clear determination for what to do with the expectations file.
+		// This skips updating the file.
+		colorPass := colorYellow
+		colorFail := colorYellow
+		colorUnexpectedPass := colorYellow
+		if pass {
+			colorPass = colorGreenBold
+		}
+		if fail {
+			colorFail = colorRedBold
+		}
+		if unexpectedPass {
+			colorUnexpectedPass = colorMagentaBold
+		}
+		fmt.Fprintf(os.Stderr, colorYellow+"Test "+colorYellowBold+"%s"+colorYellow+" had "+colorPass+"%d pass, "+colorFail+"%d fail, "+colorUnexpectedPass+"and %d unexpected pass"+colorYellow+" results. Skipping.\n"+colorReset,
+			testName, r["pass"], r["fail"], r["unexpected_pass"])
+		return nil
+	}
+
+	yamlTestName := strings.TrimPrefix(testName, "tast.")
+	if _, ok := y.exp[yamlTestName]; ok {
+		// There is an existing expectation that may need to be updated.
+		if unexpectedPass {
+			// Test is failing, but the fail reason is:
+			// "Test passed! Consider removing FAIL expectation"
+			// This particular error message is generated by the
+			// expectations package when there is a FAIL expectation
+			// but the test passes.
+			//
+			// For this case, the FAIL expectation should be deleted.
+			fmt.Fprintf(os.Stderr, colorGreen+"Deleting expectation for "+colorGreenBold+"%s"+colorGreen+" since the test passes.\n"+colorReset, testName)
+			delete(y.exp, yamlTestName)
+		}
+	} else if fail {
+		// The test only has failures - create an expectation and update exp
+		fmt.Fprintf(os.Stderr, colorRed+"Building "+colorRedBold+"%s"+colorRed+" expectation for "+colorRedBold+"%s"+colorRed+"\n"+colorReset, expectations.ExpectFailure, testName)
+		y.exp[yamlTestName] = expectations.Expectation{
+			Expectation: expectations.ExpectFailure,
+			Tickets:     tickets,
+			Comments:    comments,
+			SinceBuild:  sinceBuild,
+		}
+	}
+	return nil
+}
+
+func (y *yamlHandler) configure() error {
+	var err error
+	// Loads expectations from the specified file.
+	// This lets us update any existing expectations.
 	if len(input) > 0 {
 		var contents []byte
 		// If the input is "-" then it is read from standard input
@@ -738,52 +770,41 @@ func main() {
 			contents, err = os.ReadFile(input)
 		}
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-			os.Exit(1)
+			return errors.Wrap(err, "failed to load yaml")
 		}
-		err = yaml.Unmarshal(contents, &yamlExpectations)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-			os.Exit(1)
+		if err := yaml.Unmarshal(contents, &y.exp); err != nil {
+			return errors.Wrap(err, "failed to unmarshal yaml")
 		}
 	}
-
 	if offlineEdit {
 		re, err := regexp.Compile(testRegex)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Invalid test name regular expression %v\n", err)
-			os.Exit(1)
+			return errors.Wrap(err, "invalid test name regular expression")
 		}
-
 		fmt.Fprintf(os.Stderr, "Performing an offline edit of the YAML file. Stainless will not be queried.\n")
 		if deleteTests {
-			deleteTestExpectations(yamlExpectations, re)
+			deleteTestExpectations(y.exp, re)
 		}
 		if editTests {
-			editTestExpectations(yamlExpectations, re)
-		}
-	} else {
-		fmt.Fprintf(os.Stderr, "Querying Stainless for test results.\n")
-		if err := editExpectationsFromStainless(yamlExpectations); err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-			os.Exit(1)
+			editTestExpectations(y.exp, re)
 		}
 	}
+	return nil
+}
 
+func (y *yamlHandler) output() error {
 	// Copy expectations to MapSlice and sort them
 	mapSliceExp := yaml.MapSlice{}
-	for testName, expectation := range yamlExpectations {
+	for testName, expectation := range y.exp {
 		mapSliceExp = append(mapSliceExp, yaml.MapItem{testName, expectation})
 	}
 	sort.Slice(mapSliceExp, func(i, j int) bool {
 		return mapSliceExp[i].Key.(string) < mapSliceExp[j].Key.(string)
 	})
-
 	// Writes the updated YAML
 	contents, err := yaml.Marshal(mapSliceExp)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
+		return errors.Wrap(err, "failed to marshal")
 	}
 	if output == "-" || len(output) == 0 {
 		os.Stdout.Write(contents)
@@ -796,6 +817,45 @@ func main() {
 		}
 		os.WriteFile(output, contents, fileMode)
 	}
+	return nil
+}
 
-	os.Exit(0)
+func main() {
+	flag.Parse()
+
+	if err := processArguments(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error with options: %v\n", err)
+		os.Exit(1)
+	}
+
+	var handler SQLHandler
+	if rawQuery {
+		// Perform raw query.
+		handler = &rawHandler{}
+		if err := runAndProcessLabResults(handler); err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		// Perform yaml query.
+		yamlExpectations := make(map[string]expectations.Expectation)
+		yamlHandle := yamlHandler{exp: yamlExpectations}
+		handler = &yamlHandle
+		if err := yamlHandle.configure(); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to configure yamlHandler %v\n", err)
+			os.Exit(1)
+		}
+		if !offlineEdit {
+			fmt.Fprintf(os.Stderr, "Querying Stainless for test results.\n")
+			if err := runAndProcessLabResults(handler); err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+				os.Exit(1)
+			}
+		}
+	}
+	if err := handler.output(); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+	return
 }
