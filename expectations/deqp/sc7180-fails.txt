@@ -1,11 +1,5 @@
 # Board: trogdor, strongbad
+dEQP-VK.renderpass2.suballocation.multisample_resolve.layers_6.r32g32_sfloat.samples_4_resolve_level_4,Crash
 dEQP-VK.binding_model.descriptor_buffer.basic.limits,Fail
 dEQP-VK.dynamic_rendering.primary_cmd_buff.basic.partial_binding_depth_stencil,Fail
 dEQP-VK.info.device_mandatory_features,Fail
-dEQP-VK.memory.mapping.dedicated_alloc.buffer.full.variable.implicit_unmap,Timeout
-dEQP-VK.memory.mapping.dedicated_alloc.image.full.variable.implicit_unmap,Timeout
-dEQP-VK.memory.mapping.suballocation.full.variable.implicit_unmap,Timeout
-dEQP-VK.pipeline.monolithic.render_to_image.core.2d_array.huge.width_height_layers.r8g8b8a8_unorm_d24_unorm_s8_uint,Fail
-dEQP-VK.pipeline.monolithic.render_to_image.core.2d_array.huge.width_height_layers.r8g8b8a8_unorm,Fail
-dEQP-VK.pipeline.pipeline_library.render_to_image.core.2d_array.huge.width_height_layers.r8g8b8a8_unorm_d16_unorm,Fail
-dEQP-VK.pipeline.pipeline_library.render_to_image.core.2d_array.huge.width_height_layers.r8g8b8a8_unorm,Fail

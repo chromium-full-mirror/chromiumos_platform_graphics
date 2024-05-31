@@ -6,3 +6,10 @@
 # while just wasting developer time.  Not required to be warnings-free
 # for conformance.
 dEQP-GLES.*.functional.flush_finish.*
+
+# Intermittant timeouts:
+dEQP-VK.memory.mapping.dedicated_alloc.image.full.variable.implicit_unmap_map2
+dEQP-VK.memory.mapping.dedicated_alloc.image.full.variable.implicit_unmap
+dEQP-VK.memory.mapping.dedicated_alloc.buffer.full.variable.implicit_unmap_map2
+dEQP-VK.memory.mapping.dedicated_alloc.buffer.full.variable.implicit_unmap
+dEQP-VK.memory.mapping.suballocation.full.variable.implicit_unmap
