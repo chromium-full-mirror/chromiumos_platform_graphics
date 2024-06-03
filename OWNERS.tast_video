@@ -3,9 +3,11 @@
 # The tast ownership should be narrow to ensure no tests are added or
 # deleted without knowldedge.
 
-davidriley@chromium.org
+andrescj@google.com
+hiroh@chromium.org
 ihf@google.com
 jchinlee@google.com
-msturner@google.com
-olv@google.com
+mcasas@google.com
+nhebert@chromium.org
+pmolinalopez@google.com
 pwang@chromium.org
