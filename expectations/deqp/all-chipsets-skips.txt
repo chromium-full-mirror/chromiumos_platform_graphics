@@ -10,3 +10,13 @@ dEQP-GLES.*.accuracy.*
 # Fails whenever a Vulkan driver exposes an extension deqp is not aware of,
 # which happens often when a driver is newer than deqp. Just skip it.
 dEQP-VK.info.device_extensions
+
+# These tests are invalid and have been removed from 1.3.8.3
+dEQP-VK.pipeline.fast_linked_library.misc.unused_shader_stages
+dEQP-VK.pipeline.fast_linked_library.misc.unused_shader_stages_include_geom
+dEQP-VK.pipeline.fast_linked_library.misc.unused_shader_stages_include_tess
+dEQP-VK.pipeline.fast_linked_library.misc.unused_shader_stages_include_tess_include_geom
+dEQP-VK.pipeline.pipeline_library.misc.unused_shader_stages
+dEQP-VK.pipeline.pipeline_library.misc.unused_shader_stages_include_geom
+dEQP-VK.pipeline.pipeline_library.misc.unused_shader_stages_include_tess
+dEQP-VK.pipeline.pipeline_library.misc.unused_shader_stages_include_tess_include_geom
