@@ -403,12 +403,26 @@ func getLabels(hardware hardwareResult, software softwareResult) labels {
 	return labels{LabelsReporting: snakeResult}
 }
 
+func countTrue(args []bool) int {
+	set := 0
+	for _, arg := range args {
+		if arg {
+			set += 1
+		}
+	}
+	return set
+}
+
 func main() {
 	software := flag.Bool("software", false, "If set, output only the software related fields")
 	hardware := flag.Bool("hardware", false, "If set, output only the hardware related fields")
 	labelsReporting := flag.Bool("labels-reporting", false, "If set, output gathered field for infra.")
 	outputFile := flag.String("output", "", "If set, output result to file.")
 	flag.Parse()
+
+	if countTrue([]bool{*software, *hardware, *labelsReporting}) > 1 {
+		fatal("Only one of software/hardware/labels-reporting argument can be set.")
+	}
 
 	var resultStruct interface{}
 	resultStruct = queryResult()
