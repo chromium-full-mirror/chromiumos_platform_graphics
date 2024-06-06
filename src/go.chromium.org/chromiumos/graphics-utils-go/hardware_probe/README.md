@@ -1,10 +1,10 @@
 # ChromeOS graphics hardware_probe utility
 
-This folder contains binaries to retrieve hardware information for graphics team to categories device hardware specs in ChromeOS.
+This folder contains binaries to retrieve information for graphics team to categories device hardware specs in ChromeOS.
 
 ## Overview
 
-In this directory, you will find a binary called hardware_probe, which tries to query the hardware features and return various field for efficiently testing our graphics stacks.
+In this directory, you can build a binary called `hardware_probe`, which tries to query features and return various field for efficiently testing our graphics stacks.
 
 ## How to build the tools
 
@@ -33,7 +33,7 @@ $ make
 $ /usr/local/graphics/hardware_probe
 
 # Or run locally after running `make`:
-$ ./hardware_probe
+$ ./bin/hardware_probe
 ```
 
 Example output:
@@ -48,8 +48,9 @@ $ ./hardware_probe
     },
     "GPU_Family": [
         {
-            "Family": "kabylake",
-            "GPUVendor": "intel"
+            "Family": "raptorlake",
+            "GPUVendor": "intel",
+            "ID": "intel:a7a1"
         }
     ],
     "Memory": 8,
@@ -57,32 +58,158 @@ $ ./hardware_probe
         {
             "BDF": "0000:00:02.0",
             "Class": "VGA compatible controller",
-            "Name": "Intel Corporation UHD Graphics 620 (rev 07)",
+            "Name": "Intel Corporation Raptor Lake-P [Iris Xe Graphics] (rev 04)",
             "VendorID": "0x8086",
-            "DeviceID": "0x5917",
+            "DeviceID": "0xa7a1",
             "BootVGA": true,
             "GPUInfo": {
-                "Family": "kabylake",
-                "GPUVendor": "intel"
+                "Family": "raptorlake",
+                "GPUVendor": "intel",
+                "ID": "intel:a7a1"
             }
         }
-    ]
+    ],
+"ConnectedDisplays": [
+        {
+            "Connector": {
+                "ConnectorID": 236,
+                "EncoderID": 0,
+                "Connected": true,
+                "Name": "eDP-1",
+                "Width": 300,
+                "Height": 190,
+                "CountModes": 2,
+                "Encoders": [
+                    235
+                ],
+                "Modes": [
+                    {
+                        "Index": 0,
+                        "Name": "1920x1200",
+                        "Refresh": 60.03,
+                        "HDisplay": 1920,
+                        "HSyncStart": 1936,
+                        "HSyncEnd": 1952,
+                        "HTotal": 2104,
+                        "VDisplay": 1200,
+                        "VSyncStart": 1203,
+                        "VSyncEnd": 1217,
+                        "VTotal": 1236,
+                        "Preferred": true
+                    },
+                    {
+                        "Index": 1,
+                        "Name": "1920x1200",
+                        "Refresh": 48.02,
+                        "HDisplay": 1920,
+                        "HSyncStart": 1936,
+                        "HSyncEnd": 1952,
+                        "HTotal": 2104,
+                        "VDisplay": 1200,
+                        "VSyncStart": 1203,
+                        "VSyncEnd": 1217,
+                        "VTotal": 1236,
+                        "Preferred": false
+                    }
+                ],
+                "VrrCapable": true,
+                "Edid": {
+                    "ManufacturerName": "AUO",
+                    "ModelNumber": 29344,
+                    "VsyncRateMin": 48,
+                    "VsyncRateMax": 60,
+                    "HDRBlock": false,
+                    "Base64Bytes": "AP///////wAGr6ByAAAAAB4fAQSlHhN4AwAlqFVJnyUOUFQAAAABAQEBAQEBAQEBAQEBAQEB+jyAuHCwJEAQED4ALbwQAAAYyDCAuHCwJEAQED4ALbwQAAAYAAAA/QAwPEtLEAEKICAgICAgAAAA/gBCMTQwVUFOMDIuMiAKALgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+                }
+            },
+            "Encoders": [
+                {
+                    "Encoder": {
+                        "EncoderID": 235,
+                        "CrtcID": 0,
+                        "EncoderType": "TMDS",
+                        "PossibleCrtcs": 15,
+                        "PossibleClones": 1
+                    }
+                }
+            ]
+        }
+    ],
+    "OpenGLES": "3.2",
+    "OpenGLESPackage": {
+        "Name": "media-libs/mesa-iris",
+        "Version": "24.0.2",
+        "Revision": "152"
+    },
+    "VulkanAPIVersion": "1.3.274",
+    "VulkanPackage": {
+        "Name": "media-libs/mesa-iris",
+        "Version": "24.0.2",
+        "Revision": "152"
+    },
+    "ClvkPackage": {
+        "Name": "media-libs/clvk",
+        "Version": "0.0.1",
+        "Revision": "82"
+    },
+    "LabelsReporting": {
+        "display_panel_name": "AUO 29344",
+        "display_present_hdr": "hdr unsupported",
+        "display_present_psr": "psr supported",
+        "display_present_vrr": "vrr supported",
+        "display_refresh_rate": "60.03",
+        "display_resolution": "1920x1200",
+        "gpu_family": "raptorlake",
+        "gpu_id": "intel:a7a1",
+        "gpu_open_gles_version": "3.2",
+        "gpu_vendor": "intel",
+        "gpu_vulkan_version": "1.3.274",
+        "platform_cpu_vendor": "intel",
+        "platform_disk_size": "256",
+        "platform_memory_size": "8"
+    }
 }
 
+
+# Only print software related properties
 $ ./hardware_probe --software
 {
     "OpenGLES": "3.2",
     "OpenGLESPackage": {
-        "Name": "media-libs/mesa-amd",
-        "Version": "23.0.2",
-        "Revision": "169"
+        "Name": "media-libs/mesa-iris",
+        "Version": "24.0.2",
+        "Revision": "152"
     },
-    "VulkanAPIVersion": "1.3.255",
+    "VulkanAPIVersion": "1.3.274",
     "VulkanPackage": {
-        "Name": "media-libs/mesa-radv",
-        "Version": "23.2.1",
-        "Revision": "16"
+        "Name": "media-libs/mesa-iris",
+        "Version": "24.0.2",
+        "Revision": "152"
+    },
+    "ClvkPackage": {
+        "Name": "media-libs/clvk",
+        "Version": "0.0.1",
+        "Revision": "82"
     }
+}
+
+# Only print the gathered field for infra
+$ ./hardware_probe --labels-reporting
+{
+    "display_panel_name": "AUO 29344",
+    "display_present_hdr": "hdr unsupported",
+    "display_present_psr": "psr supported",
+    "display_present_vrr": "vrr supported",
+    "display_refresh_rate": "60.03",
+    "display_resolution": "1920x1200",
+    "gpu_family": "raptorlake",
+    "gpu_id": "intel:a7a1",
+    "gpu_open_gles_version": "3.2",
+    "gpu_vendor": "intel",
+    "gpu_vulkan_version": "1.3.274",
+    "platform_cpu_vendor": "intel",
+    "platform_disk_size": "256",
+    "platform_memory_size": "8"
 }
 ```
 
@@ -131,3 +258,15 @@ The following is the current supported name in CPU_SOC_Family
 - mediatek
 - qualcomm
 - rockchip
+
+## How to update the PCIID mapping
+
+Right now, we have four PCIID map in hardware_probe
+
+- amd_pci_ids.go
+- intel_pci_ids.go
+- nvidia_pci_ids.go
+- vm_pci_ids.go
+
+Most of them have comments in their headers indicating how to properly update
+the mappings from either the mesa/kernel repository.
