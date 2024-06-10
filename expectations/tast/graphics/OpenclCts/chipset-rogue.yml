@@ -961,12 +961,6 @@ graphics.OpenclCts.cl_fill_images_3d_cl_unsigned_int8:
 graphics.OpenclCts.commonfns_degrees:
   expectation: FAIL
   since_build: R123-15766.0.0
-graphics.OpenclCts.compiler_options_build_macro:
-  expectation: FAIL
-  since_build: R126-15884.0.0
-graphics.OpenclCts.compiler_options_build_macro_existence:
-  expectation: FAIL
-  since_build: R126-15884.0.0
 graphics.OpenclCts.contractions_contractions_float_0:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -1018,9 +1012,6 @@ graphics.OpenclCts.conversions_float_rtn_long:
 graphics.OpenclCts.conversions_float_rtn_uint:
   expectation: FAIL
   since_build: R117-15527.0.0
-graphics.OpenclCts.conversions_float_rtp_float:
-  expectation: FAIL
-  since_build: R126-15855.0.0
 graphics.OpenclCts.conversions_float_rtz_int:
   expectation: FAIL
   since_build: R117-15527.0.0
@@ -1036,18 +1027,6 @@ graphics.OpenclCts.conversions_float_uint:
 graphics.OpenclCts.conversions_float_ulong:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.conversions_int_rtp_long:
-  expectation: FAIL
-  since_build: R126-15884.0.0
-graphics.OpenclCts.conversions_int_rtp_uchar:
-  expectation: FAIL
-  since_build: R126-15884.0.0
-graphics.OpenclCts.conversions_int_rtp_ulong:
-  expectation: FAIL
-  since_build: R126-15884.0.0
-graphics.OpenclCts.conversions_int_rtz_long:
-  expectation: FAIL
-  since_build: R126-15884.0.0
 graphics.OpenclCts.geometrics_geom_normalize:
   expectation: FAIL
   since_build: R110-15241.0.0

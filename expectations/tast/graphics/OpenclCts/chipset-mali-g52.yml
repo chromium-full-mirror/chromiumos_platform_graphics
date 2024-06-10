@@ -529,6 +529,9 @@ graphics.OpenclCts.cl_fill_images_2d_cl_snorm_int8:
 graphics.OpenclCts.cl_fill_images_2d_cl_unorm_int16:
   expectation: FAIL
   since_build: R125-15847.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_unorm_int8:
+  expectation: FAIL
+  since_build: R127-15911.0.0
 graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int16:
   expectation: FAIL
   since_build: R126-15855.0.0
@@ -538,6 +541,9 @@ graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int32:
 graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int8:
   expectation: FAIL
   since_build: R125-15847.0.0
+graphics.OpenclCts.cl_fill_images_2darray_cl_half_float:
+  expectation: FAIL
+  since_build: R127-15911.0.0
 graphics.OpenclCts.cl_fill_images_2darray_cl_signed_int8:
   expectation: FAIL
   since_build: R127-15896.0.0

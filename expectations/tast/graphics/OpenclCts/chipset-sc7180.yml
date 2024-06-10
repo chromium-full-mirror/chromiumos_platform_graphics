@@ -7,9 +7,6 @@ graphics.OpenclCts.allocations_multiple_1_buffer_non_blocking:
 graphics.OpenclCts.allocations_multiple_1_image2d_read:
   expectation: FAIL
   since_build: R124-15808.0.0
-graphics.OpenclCts.allocations_multiple_1_image2d_write:
-  expectation: FAIL
-  since_build: R125-15844.0.0
 graphics.OpenclCts.allocations_single_1_buffer:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -22,12 +19,6 @@ graphics.OpenclCts.allocations_single_1_image2d_read:
 graphics.OpenclCts.allocations_single_1_image2d_read_non_blocking:
   expectation: FAIL
   since_build: R124-15808.0.0
-graphics.OpenclCts.allocations_single_1_image2d_write:
-  expectation: FAIL
-  since_build: R124-15821.0.0
-graphics.OpenclCts.allocations_single_1_image2d_write_non_blocking:
-  expectation: FAIL
-  since_build: R124-15821.0.0
 graphics.OpenclCts.api_get_kernel_arg_info:
   expectation: FAIL
   tickets:
@@ -319,9 +310,6 @@ graphics.OpenclCts.compiler_features_macro:
 graphics.OpenclCts.compiler_options_build_macro:
   expectation: FAIL
   since_build: R126-15864.0.0
-graphics.OpenclCts.compiler_options_build_macro_existence:
-  expectation: FAIL
-  since_build: R126-15871.0.0
 graphics.OpenclCts.compiler_options_include_directory:
   expectation: FAIL
   since_build: R126-15871.0.0
