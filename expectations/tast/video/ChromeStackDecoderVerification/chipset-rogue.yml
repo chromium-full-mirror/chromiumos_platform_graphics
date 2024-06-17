@@ -1,8 +1,8 @@
-tast.video.ChromeStackDecoderVerification.v4l2_flat_vp8_comprehensive:
+video.ChromeStackDecoderVerification.v4l2_flat_vp8_comprehensive:
   expectation: FAIL
   tickets:
   - b/303864839
   since_build: R122-15752.0.0
-  failure_pattern: "failed to validate: [vp80-00-comprehensive-002.ivf vp80-00-comprehensive-010.ivf vp80-00-comprehensive-013.ivf vp80-00-comprehensive-015.ivf]"
+  failure_pattern: "failed to validate: \\[vp80-00-comprehensive-002.ivf vp80-00-comprehensive-010.ivf vp80-00-comprehensive-013.ivf vp80-00-comprehensive-015.ivf\\]"
 
 
