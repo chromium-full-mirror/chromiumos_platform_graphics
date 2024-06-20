@@ -30,6 +30,10 @@ borealis.Dx12Unittest.tesselation_basic:
   expectation: FAIL
   tickets:
   - b/332729216
+borealis.Dx12Unittest.tiledresources_partialunsharedmapping:
+  expectation: FAIL
+  tickets:
+  - b/347647564
 borealis.Dx12Unittest.tiledresources_tailmips:
   expectation: FAIL
   tickets:
