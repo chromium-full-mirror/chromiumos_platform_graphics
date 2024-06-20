@@ -1,0 +1,5 @@
+# grunt
+
+# Generally slow, flaky on certain models.
+dEQP-GLES31.functional.atomic_counter.get.4_counters_100_calls_10_threads
+dEQP-GLES31.functional.atomic_counter.get.4_counters_100_calls_1_thread
