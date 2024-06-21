@@ -1,0 +1,9 @@
+# picasso boards: zork
+
+# Test is slow and tends to time out on slower models b/348687779
+dEQP-VK.reconvergence.subgroup_uniform_control_flow_ballot.compute.nesting4.2.35
+dEQP-VK.reconvergence.subgroup_uniform_control_flow_elect.compute.nesting4.2.35
+dEQP-VK.reconvergence.workgroup_uniform_control_flow_ballot.compute.nesting4.2.35
+
+# Test is also slow, like on grunt b/341410774
+dEQP-GLES31.functional.atomic_counter.get.4_counters_100_calls_10_threads
