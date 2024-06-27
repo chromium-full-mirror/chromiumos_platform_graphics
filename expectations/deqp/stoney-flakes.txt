@@ -1,7 +1,5 @@
 # flaky due to timeout
 dEQP-VK.binding_model.descriptor_buffer.multiple.*_buffers32_sets1
-dEQP-VK.memory.mapping.suballocation.full.variable.implicit_unmap
-dEQP-VK.memory.mapping.suballocation.full.variable.implicit_unmap_map2
 dEQP-VK.memory.pipeline_barrier.host_write_transfer_src.1048576
 dEQP-VK.memory.pipeline_barrier.transfer_src_transfer_dst.1048576
 
