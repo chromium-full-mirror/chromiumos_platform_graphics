@@ -1,0 +1,11 @@
+video.ChromeStackDecoderVerification.hevc_main_part_2:
+  expectation: FAIL
+  tickets:
+  - b/251179086
+  failure_pattern: "failed to validate: \\[DELTAQP_A_BRCM_4.hevc\\]"
+
+video.ChromeStackDecoderVerification.hevc_main_part_4:
+  expectation: FAIL
+  tickets:
+  - b/251179086
+  failure_pattern: "failed to validate: \\[TILES_B_Cisco_1.hevc\\]"
