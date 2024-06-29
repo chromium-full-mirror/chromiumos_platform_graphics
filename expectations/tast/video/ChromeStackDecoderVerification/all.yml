@@ -1,3 +1,57 @@
+video.ChromeStackDecoderVerification.hevc_files_from_bugs_239819547:
+  expectation: FAIL
+  tickets:
+  - b/239819547
+  failure_pattern: "failed to validate: \\[BUMPING_A_ericsson_1.hevc\\]"
+
+video.ChromeStackDecoderVerification.hevc_files_from_bugs_239927523:
+  expectation: FAIL
+  tickets:
+  - b/239927523
+  failure_pattern: "failed to validate: \\[RAP_B_Bossen_2.hevc\\]"
+
+video.ChromeStackDecoderVerification.hevc_files_from_bugs_241727534:
+  expectation: FAIL
+  tickets:
+  - b/241727534
+  failure_pattern: "failed to validate: \\[RPLM_B_qualcomm_4.hevc\\]"
+
+video.ChromeStackDecoderVerification.hevc_files_from_bugs_241731425:
+  expectation: FAIL
+  tickets:
+  - b/241731425
+  failure_pattern: "failed to validate: \\[VPSSPSPPS_A_MainConcept_1.hevc\\]"
+
+video.ChromeStackDecoderVerification.hevc_files_from_bugs_241731431:
+  expectation: FAIL
+  tickets:
+  - b/241731431
+  failure_pattern: "failed to validate: \\[RPS_D_ericsson_6.hevc\\]"
+
+video.ChromeStackDecoderVerification.hevc_files_from_bugs_241733687:
+  expectation: FAIL
+  tickets:
+  - b/241733687
+  failure_pattern: "failed to validate: \\[CONFWIN_A_Sony_1.hevc\\]"
+
+video.ChromeStackDecoderVerification.hevc_files_from_bugs_241772308:
+  expectation: FAIL
+  tickets:
+  - b/241772308
+  failure_pattern: "failed to validate: \\[NoOutPrior_A_Qualcomm_1.hevc\\]"
+
+video.ChromeStackDecoderVerification.hevc_files_from_bugs_241775056:
+  expectation: FAIL
+  tickets:
+  - b/241775056
+  failure_pattern: "failed to validate: \\[POC_A_Bossen_3.hevc\\]"
+
+video.ChromeStackDecoderVerification.hevc_files_from_bugs_242708185:
+  expectation: FAIL
+  tickets:
+  - b/242708185
+  failure_pattern: "failed to validate: \\[RPS_C_ericsson_5.hevc\\]"
+
 video.ChromeStackDecoderVerification.hevc_main_part_2:
   expectation: FAIL
   tickets:
