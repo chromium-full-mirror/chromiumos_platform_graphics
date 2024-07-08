@@ -5,4 +5,14 @@ video.ChromeStackDecoderVerification.v4l2_flat_vp8_comprehensive:
   since_build: R122-15752.0.0
   failure_pattern: "failed to validate: \\[vp80-00-comprehensive-002.ivf vp80-00-comprehensive-010.ivf vp80-00-comprehensive-013.ivf vp80-00-comprehensive-015.ivf\\]"
 
+video.ChromeStackDecoderVerification.vp9_0_group1_frm_resize:
+  expectation: FAIL
+  tickets:
+  - b/351900658
+  failure_pattern: "failed to validate: \\[crowd_run_256X144_fr15_bd8_frm_resize_l1.ivf grass_1_256X144_fr15_bd8_frm_resize_l1.ivf street1_1_256X144_fr15_bd8_frm_resize_l1.ivf crowd_run_384X192_fr30_bd8_frm_resize_l11.ivf grass_1_384X192_fr30_bd8_frm_resize_l11.ivf street1_1_384X192_fr30_bd8_frm_resize_l11.ivf\\] PostTest failed: Mediatek video error: vdec_vp9_decode\\(\\),887: \\[MTK_VCODEC\\]\\[ERROR\\]\\[800\\]: vpu_dec_start failed"
 
+video.ChromeStackDecoderVerification.vp9_0_group1_sub8x8_sf:
+  expectation: FAIL
+  tickets:
+  - b/351900658
+  failure_pattern: "failed to validate: \\[crowd_run_256X144_fr15_bd8_sub8x8_sf_l1.ivf grass_1_256X144_fr15_bd8_sub8x8_sf_l1.ivf street1_1_256X144_fr15_bd8_sub8x8_sf_l1.ivf crowd_run_384X192_fr30_bd8_sub8x8_sf_l11.ivf grass_1_384X192_fr30_bd8_sub8x8_sf_l11.ivf street1_1_384X192_fr30_bd8_sub8x8_sf_l11.ivf\\] PostTest failed: Mediatek video error: vdec_vp9_decode\\(\\),887: \\[MTK_VCODEC\\]\\[ERROR\\]\\[95\\]: vpu_dec_start failed"
