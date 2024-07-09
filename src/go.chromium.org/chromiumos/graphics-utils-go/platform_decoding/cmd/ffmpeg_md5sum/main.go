@@ -59,10 +59,16 @@ func parseHashes(stdout string) ([]string, error) {
 }
 
 // exitWithError dumps all output to the appropriate streams and exits with errcode 1.
-func exitWithError(stdout, stderr string, err error) {
-	fmt.Fprintf(os.Stdout, stdout)
-	fmt.Fprintf(os.Stderr, stderr)
-	fmt.Fprintf(os.Stderr, err.Error())
+func exitWithError(err error, stdout, stderr string) {
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+	}
+	if stdout != "" {
+		fmt.Fprintln(os.Stdout, stdout)
+	}
+	if stderr != "" {
+		fmt.Fprintln(os.Stderr, stderr)
+	}
 	os.Exit(1)
 }
 
@@ -99,24 +105,25 @@ func main() {
 	ctx := context.Background()
 	cmd := exec.CommandContext(ctx, ffmpegPath, args...)
 
-	fmt.Fprintf(os.Stderr, "Running `%s %s`\n", ffmpegPath, strings.Join(args, " "))
+	fmt.Printf("Running `%s %s`\n", ffmpegPath, strings.Join(args, " "))
 	var outbuf, errbuf bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &outbuf, &errbuf
 	err := cmd.Run()
-	stdout, stderr := outbuf.String(), errbuf.String()
+	stdout := strings.TrimSpace(outbuf.String())
+	stderr := strings.TrimSpace(errbuf.String())
 	if err != nil {
-		exitWithError(stdout, stderr, err)
+		exitWithError(err, stdout, stderr)
 	}
 
 	var hashes []string
 	if hashes, err = parseHashes(stdout); err != nil {
-		exitWithError(stdout, "", err)
+		exitWithError(err, stdout, "")
 	}
 
 	var f = os.Stdout
 	if len(outputPath) > 0 {
 		if f, err = os.Create(outputPath); err != nil {
-			exitWithError(stdout, "", err)
+			exitWithError(err, stdout, "")
 		}
 	}
 	f.WriteString(strings.Join(hashes, "\n"))

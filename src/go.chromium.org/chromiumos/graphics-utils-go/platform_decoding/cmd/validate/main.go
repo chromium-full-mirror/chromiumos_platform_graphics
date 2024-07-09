@@ -101,11 +101,17 @@ func runDecode(ctx context.Context, execPath string, args ...string) (stdout, st
 	return
 }
 
-// exitWithError dumps all output and exits with errcode 1.
-func exitWithError(stdout, stderr string, err error) {
-	fmt.Println(stdout)
-	fmt.Println(stderr)
-	fmt.Println(err.Error())
+// exitWithError dumps all output to the appropriate streams and exits with errcode 1.
+func exitWithError(err error, stdout, stderr string) {
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+	}
+	if stdout != "" {
+		fmt.Fprintln(os.Stdout, stdout)
+	}
+	if stderr != "" {
+		fmt.Fprintln(os.Stderr, stderr)
+	}
 	os.Exit(1)
 }
 
@@ -119,22 +125,23 @@ func main() {
 	fmt.Printf("Running `%s %s`\n", *execPtr, *argsPtr)
 	ctx := context.Background()
 	stdout, stderr, err := runDecode(ctx, *execPtr, strings.Fields(*argsPtr)...)
+	stdout, stderr = strings.TrimSpace(stdout), strings.TrimSpace(stderr)
 	if err != nil {
-		exitWithError(stdout, stderr, err)
+		exitWithError(err, stdout, stderr)
 	}
 
 	if *md5Ptr == "" {
 		if err := verifyContent(*metaPtr, stdout); err != nil {
-			exitWithError(stdout, stderr, err)
+			exitWithError(err, stdout, stderr)
 		}
 	} else {
 		md5Log, err := os.ReadFile(*md5Ptr)
 		if err != nil {
-			exitWithError(stdout, stderr, err)
+			exitWithError(err, stdout, stderr)
 		}
 
 		if err := verifyContent(*metaPtr, string(md5Log)); err != nil {
-			exitWithError(stdout, stderr, err)
+			exitWithError(err, stdout, stderr)
 		}
 	}
 
