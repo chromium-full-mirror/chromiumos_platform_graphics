@@ -1,3 +1,9 @@
+video.PlatformDecoding.vaapi_av1_files_from_bugs_346405213:
+  expectation: FAIL
+  tickets:
+  - b/352541577
+  since_build: R128-15942.0.0
+
 video.PlatformDecoding.ffmpeg_vaapi_hevc_files_from_bugs_241731425:
   expectation: FAIL
   tickets:
