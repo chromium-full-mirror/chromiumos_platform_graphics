@@ -10,6 +10,12 @@ video.ChromeStackDecoderVerification.hevc_files_from_bugs_239927523:
   - b/239927523
   failure_pattern: "failed to validate: \\[RAP_B_Bossen_2.hevc\\]"
 
+video.ChromeStackDecoderVerification.hevc_files_from_bugs_239936640:
+  expectation: FAIL
+  tickets:
+  - b/353308413
+  failure_pattern: "failed to validate: \\[SLIST_A_Sony_5.hevc SLIST_B_Sony_9.hevc SLIST_C_Sony_4.hevc SLIST_D_Sony_9.hevc\\]"
+
 video.ChromeStackDecoderVerification.hevc_files_from_bugs_241731425:
   expectation: FAIL
   tickets:
