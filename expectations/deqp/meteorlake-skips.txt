@@ -1,4 +1,8 @@
 # Timeout
+dEQP-VK.binding_model.descriptor_buffer.multiple.graphics_geom_buffers2_sets4
+dEQP-VK.binding_model.descriptor_buffer.multiple.graphics_geom_buffers2_sets4_imm_samplers
+dEQP-VK.graphicsfuzz.spv-stable-maze-flatten-copy-composite
+dEQP-VK.graphicsfuzz.spv-stable-pillars-volatile-nontemporal-store
 dEQP-VK.ray_tracing_pipeline.build.gpu.level_instances.aabbs_1048576_1_1
 dEQP-VK.ray_tracing_pipeline.build.gpu.level_instances.aabbs_65536_4_4
 dEQP-VK.ray_tracing_pipeline.build.gpu.level_instances.mixed_65536_4_4
@@ -6,8 +10,10 @@ dEQP-VK.ray_tracing_pipeline.build.gpu.level_instances.triangles_1048576_1_1
 dEQP-VK.ray_tracing_pipeline.build.gpu.level_instances.triangles_65536_4_4
 dEQP-VK.ray_tracing_pipeline.misc.maxrtinvocations_AABB
 dEQP-VK.ray_tracing_pipeline.misc.maxrtinvocations_tri
+dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_AABB_13
 dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_AABB_14
 dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_AABB_15
+dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_tri_13
 dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_tri_14
 dEQP-VK.ray_tracing_pipeline.misc.recursiveTraces_tri_15
 dEQP-VK.subgroups.ballot_broadcast.compute.subgroupbroadcast_dvec4_requiredsubgroupsize32
