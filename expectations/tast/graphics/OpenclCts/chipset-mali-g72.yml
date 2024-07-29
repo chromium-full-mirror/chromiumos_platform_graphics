@@ -52,6 +52,12 @@ graphics.OpenclCts.cl_copy_images_2d_cl_unsigned_int16:
 graphics.OpenclCts.cl_copy_images_2d_cl_unsigned_int32:
   expectation: FAIL
   since_build: R124-15805.0.0
+graphics.OpenclCts.cl_copy_images_3dto2d_cl_float:
+  expectation: FAIL
+  since_build: R129-15970.0.0
+graphics.OpenclCts.cl_copy_images_3dto2d_cl_signed_int16:
+  expectation: FAIL
+  since_build: R129-15970.0.0
 graphics.OpenclCts.cl_copy_images_3dto2d_cl_signed_int32:
   expectation: FAIL
   since_build: R124-15793.0.0
@@ -61,6 +67,9 @@ graphics.OpenclCts.cl_copy_images_3dto2d_cl_snorm_int8:
 graphics.OpenclCts.cl_copy_images_3dto2d_cl_unorm_int8:
   expectation: FAIL
   since_build: R123-15766.0.0
+graphics.OpenclCts.cl_copy_images_3dto2d_cl_unsigned_int32:
+  expectation: FAIL
+  since_build: R129-15970.0.0
 graphics.OpenclCts.cl_copy_images_3dto2darray_cl_signed_int32:
   expectation: FAIL
   since_build: R124-15805.0.0
@@ -118,6 +127,9 @@ graphics.OpenclCts.cl_get_info_2darray_cl_signed_int32:
 graphics.OpenclCts.cl_get_info_2darray_cl_snorm_int16:
   expectation: FAIL
   since_build: R128-15956.0.0
+graphics.OpenclCts.cl_get_info_2darray_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R129-15970.0.0
 graphics.OpenclCts.contractions_contractions_float_0:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -166,6 +178,9 @@ graphics.OpenclCts.kernel_image_methods_3d_cl_unsigned_int8:
 graphics.OpenclCts.mem_host_flags_mem_host_no_access_image:
   expectation: FAIL
   since_build: R128-15956.0.0
+graphics.OpenclCts.mem_host_flags_mem_host_no_access_subbuffer:
+  expectation: FAIL
+  since_build: R129-15970.0.0
 graphics.OpenclCts.mem_host_flags_mem_host_read_only_buffer:
   expectation: FAIL
   since_build: R125-15847.0.0

@@ -31,6 +31,9 @@ graphics.OpenclCts.cl_copy_images_1darray_cl_signed_int32:
 graphics.OpenclCts.cl_copy_images_1darray_cl_unsigned_int16:
   expectation: FAIL
   since_build: R123-15784.0.0
+graphics.OpenclCts.cl_copy_images_2d_cl_half_float:
+  expectation: FAIL
+  since_build: R129-15970.0.0
 graphics.OpenclCts.cl_copy_images_2d_cl_signed_int32:
   expectation: FAIL
   since_build: R124-15805.0.0
