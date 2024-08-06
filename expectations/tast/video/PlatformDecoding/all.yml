@@ -81,9 +81,3 @@ video.PlatformDecoding.vaapi_hevc_files_from_bugs_242708185:
   comments: "For the test vector RPS_C_ericsson_5.hevc the decoder fails because the SPS with id 0 does not exist in the stream."
   since_build: R108-15183.70.0
 
-video.PlatformDecoding.vaapi_h264_files_from_bugs_299320432:
-  expectation: FAIL
-  tickets:
-  - b/356921625
-  comments: "Failing due to an AMD GPU Error."
-  since_build: R128-15942.0.0
