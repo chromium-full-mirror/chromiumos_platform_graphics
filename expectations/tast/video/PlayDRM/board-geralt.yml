@@ -1,0 +1,118 @@
+video.PlayDRM.cencv1_h264_ctr:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv1_h264_ctr_inpvd:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv1_h264_multislice_ctr:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_av1_10bit_cbc:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_av1_10bit_ctr:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_av1_cbc:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_av1_ctr:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_h264_cbc:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_h264_cbc_inpvd:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_h264_cbc_then_ctr:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_h264_cbc_then_ctr_inpvd:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_h264_ctr:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_h264_ctr_inpvd:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_vp9_cbc:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_vp9_ctr:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_vp92_cbc:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
+
+video.PlayDRM.cencv3_vp92_ctr:
+  expectation: FAIL
+  tickets:
+  - b/356940950
+  since_build: R122-15702.0.0
+  comments: Geralt PlayDRM* tests are not expected to pass
