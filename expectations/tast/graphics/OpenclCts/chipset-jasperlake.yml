@@ -205,6 +205,9 @@ graphics.OpenclCts.c11_atomics_atomic_load:
 graphics.OpenclCts.c11_atomics_atomic_store:
   expectation: FAIL
   since_build: R123-15774.0.0
+graphics.OpenclCts.computeinfo_extended_versioning:
+  expectation: FAIL
+  since_build: R129-15982.0.0
 graphics.OpenclCts.events_callbacks:
   expectation: FAIL
   since_build: R125-15829.0.0

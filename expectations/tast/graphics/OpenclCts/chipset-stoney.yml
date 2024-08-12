@@ -22,6 +22,9 @@ graphics.OpenclCts.compiler_options_build_macro_existence:
 graphics.OpenclCts.compiler_options_include_directory:
   expectation: FAIL
   since_build: R126-15871.0.0
+graphics.OpenclCts.computeinfo_extended_versioning:
+  expectation: FAIL
+  since_build: R129-15982.0.0
 graphics.OpenclCts.half_roundtrip:
   expectation: FAIL
   since_build: R110-15241.0.0

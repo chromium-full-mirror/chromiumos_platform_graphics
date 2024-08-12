@@ -16,6 +16,9 @@ graphics.OpenclCts.c11_atomics_atomic_fetch_orand:
 graphics.OpenclCts.c11_atomics_atomic_fetch_xor2:
   expectation: FAIL
   since_build: R123-15760.0.0
+graphics.OpenclCts.computeinfo_extended_versioning:
+  expectation: FAIL
+  since_build: R129-15982.0.0
 graphics.OpenclCts.thread_dimensions_quick_2d_implicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0

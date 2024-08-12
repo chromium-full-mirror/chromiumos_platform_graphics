@@ -301,6 +301,9 @@ graphics.OpenclCts.cl_fill_images_2darray_cl_snorm_int8:
 graphics.OpenclCts.cl_fill_images_2darray_cl_unsigned_int8:
   expectation: FAIL
   since_build: R126-15871.0.0
+graphics.OpenclCts.computeinfo_extended_versioning:
+  expectation: FAIL
+  since_build: R129-15982.0.0
 graphics.OpenclCts.contractions_contractions_float_0:
   expectation: FAIL
   since_build: R109-15232.0.0
