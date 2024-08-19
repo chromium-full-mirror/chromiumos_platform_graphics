@@ -25,6 +25,7 @@ git read-tree upstream/"${RELEASE}"
 
 # Keep some downstream files we maintain.
 git add PRESUBMIT.cfg OWNERS
+find . -type f -name DIR_METADATA -exec git add {} +
 
 # Make the commit.
 git commit -m "CHROMIUM: Reset tree to upstream/${RELEASE}"
