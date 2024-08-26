@@ -1,0 +1,47 @@
+video.PlatformDecoding.v4l2_stateless_hevc_files_from_bugs_239819547:
+  expectation: FAIL
+  tickets:
+  - b/355665969
+  failure_pattern: "returned non-zero error code: exit status 1:"
+
+video.PlatformDecoding.v4l2_stateless_hevc_files_from_bugs_239927523:
+  expectation: FAIL
+  tickets:
+  - b/355665969
+  failure_pattern: "returned non-zero error code: exit status 1:"
+
+video.PlatformDecoding.v4l2_stateless_hevc_files_from_bugs_241731425:
+  expectation: FAIL
+  tickets:
+  - b/355665969
+  failure_pattern: "returned non-zero error code: exit status 1:"
+
+video.PlatformDecoding.v4l2_stateless_hevc_files_from_bugs_241731431:
+  expectation: FAIL
+  tickets:
+  - b/355665969
+  failure_pattern: "returned non-zero error code: exit status 1:"
+
+video.PlatformDecoding.v4l2_stateless_hevc_files_from_bugs_241733687:
+  expectation: FAIL
+  tickets:
+  - b/355665969
+  failure_pattern: "returned non-zero error code: exit status 1:"
+
+video.PlatformDecoding.v4l2_stateless_hevc_files_from_bugs_241772308:
+  expectation: FAIL
+  tickets:
+  - b/355665969
+  failure_pattern: "returned non-zero error code: exit status 1:"
+
+video.PlatformDecoding.v4l2_stateless_hevc_files_from_bugs_241775056:
+  expectation: FAIL
+  tickets:
+  - b/355665969
+  failure_pattern: "returned non-zero error code: exit status 1:"
+
+video.PlatformDecoding.v4l2_stateless_hevc_files_from_bugs_242708185:
+  expectation: FAIL
+  tickets:
+  - b/355665969
+  failure_pattern: "returned non-zero error code: exit status 1:"
