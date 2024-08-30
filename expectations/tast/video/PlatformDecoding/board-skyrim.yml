@@ -1,0 +1,130 @@
+video.PlatformDecoding.ffmpeg_vaapi_av1:
+  expectation: FAIL
+  tickets:
+  - b/356199665
+  since_build: R129-15966.0.0
+
+video.PlatformDecoding.vaapi_av1_files_from_bugs_346405213:
+  expectation: FAIL
+  tickets:
+  - b/352541577
+  since_build: R128-15942.0.0
+
+video.PlatformDecoding.ffmpeg_vaapi_hevc_files_from_bugs_241731425:
+  expectation: FAIL
+  tickets:
+  - b/241731425
+  comments: "For test-vectors RPS_C_ericcson_5.hevc & VPSSPSPPS_A_Mainconcept_1.hevc the decoder goes into an error state, because the requested SPS does not exist. When attempting to decode these streams with FFMPEG, it also gives the same error."
+  since_build: R108-15183.70.0
+
+video.PlatformDecoding.ffmpeg_vaapi_hevc_files_from_bugs_241733687:
+  expectation: FAIL
+  tickets:
+  - b/241733687
+  comments: "For the test-vector CONFWIN_A_Sony_1.hevc the decode-test binary fails to decode this stream, because the CHECK(gfx::Rect(pic->size()).Contains(pic->visible_rect()) assert is triggered in the H265VaapiWrapper l#441."
+  since_build: R108-15183.70.0
+
+video.PlatformDecoding.vaapi_hevc_files_from_bugs_239819547:
+  expectation: FAIL
+  tickets:
+  - b/239819547
+  comments: "For this bug, pictures that should be outputted are prematurely flushed from the DPB before being outputted. Essentially, DPB::Clear() will be called before H265Decoder::OutputPic() will be called for the frames shown below. This causes the picture to be flushed from the DPB before it is correctly outputted. When this bug occurs, it makes the video appear “choppy” as frames that should be outputted are missing."
+  since_build: R108-15183.70.0
+
+video.PlatformDecoding.vaapi_hevc_files_from_bugs_239927523:
+  expectation: FAIL
+  tickets:
+  - b/239927523
+  comments: "For the test-vectors listed below the decoder outputs frames that should not be outputted. In almost all cases, these frames have a NAL unit type of RASL_*. Additionally, when this bug occurs, there will be additional distorted frames outputted. We find that this distortion does not impact other frames."
+  since_build: R108-15183.70.0
+
+video.PlatformDecoding.vaapi_hevc_files_from_bugs_241727534:
+  expectation: FAIL
+  tickets:
+  - b/241727534
+  comments: "For the test-vector RPLM_B_qualcomm_4.hevc, the decode-test binary fails to decode this stream, because there is call to vaEndPicture that returns an error status."
+  since_build: R108-15183.70.0
+
+video.PlatformDecoding.vaapi_hevc_files_from_bugs_241731425:
+  expectation: FAIL
+  tickets:
+  - b/241731425
+  comments: "For test-vectors RPS_C_ericcson_5.hevc & VPSSPSPPS_A_Mainconcept_1.hevc the decoder goes into an error state, because the requested SPS does not exist. When attempting to decode these streams with FFMPEG, it also gives the same error."
+  since_build: R108-15183.70.0
+
+video.PlatformDecoding.vaapi_hevc_files_from_bugs_241731431:
+  expectation: FAIL
+  tickets:
+  - b/241731431
+  comments: "For the test-vector RPS_D_ericsson_6.hevc the decoder goes into an error state when decoding this stream. More investigation is needed to fully understand the root cause of this error."
+  since_build: R108-15183.70.0
+
+video.PlatformDecoding.vaapi_hevc_files_from_bugs_241733687:
+  expectation: FAIL
+  tickets:
+  - b/241733687
+  comments: "For the test-vector CONFWIN_A_Sony_1.hevc the decode-test binary fails to decode this stream, because the CHECK(gfx::Rect(pic->size()).Contains(pic->visible_rect()) assert is triggered in the H265VaapiWrapper l#441."
+  since_build: R108-15183.70.0
+
+video.PlatformDecoding.vaapi_hevc_files_from_bugs_241772308:
+  expectation: FAIL
+  tickets:
+  - b/241772308
+  comments: "For the test-vector NoOutPrior_A_Qualcomm_1.hevc the decode-test binary outputs 50 frames, but the expected output is 40 frames."
+  since_build: R108-15183.70.0
+
+video.PlatformDecoding.vaapi_hevc_files_from_bugs_241775056:
+  expectation: FAIL
+  tickets:
+  - b/241775056
+  comments: "For the test-vector POC_A_Bossen_3.hevc there are frames not being outputted in the correct order."
+  since_build: R108-15183.70.0
+
+video.PlatformDecoding.vaapi_hevc_files_from_bugs_242708185:
+  expectation: FAIL
+  tickets:
+  - b/242708185
+  comments: "For the test vector RPS_C_ericsson_5.hevc the decoder fails because the SPS with id 0 does not exist in the stream."
+  since_build: R108-15183.70.0
+
+video.PlatformDecoding.ffmpeg_vaapi_hevc_files_from_bugs_239927523:
+  expectation: FAIL
+  tickets:
+  - b/239927523
+  since_build: R128-15942.0.0
+
+video.PlatformDecoding.ffmpeg_vaapi_hevc_files_from_bugs_239936640:
+  expectation: FAIL
+  tickets:
+  - b/239936640
+  since_build: R128-15942.0.0
+
+video.PlatformDecoding.ffmpeg_vaapi_hevc_files_from_bugs_241727534:
+  expectation: FAIL
+  tickets:
+  - b/241727534
+  since_build: R128-15942.0.0
+
+video.PlatformDecoding.ffmpeg_vaapi_hevc_files_from_bugs_241731425:
+  expectation: FAIL
+  tickets:
+  - b/241731425
+  since_build: R128-15942.0.0
+
+video.PlatformDecoding.ffmpeg_vaapi_hevc_files_from_bugs_241733687:
+  expectation: FAIL
+  tickets:
+  - b/241733687
+  since_build: R128-15942.0.0
+
+video.PlatformDecoding.ffmpeg_vaapi_av1_files_from_bugs_346405213:
+  expectation: FAIL
+  tickets:
+  - b/346405213
+  since_build: R128-15942.0.0
+
+video.PlatformDecoding.ffmpeg_vaapi_h264_files_from_bugs_299320432:
+  expectation: FAIL
+  tickets:
+  - b/299320432
+  since_build: R128-15942.0.0
