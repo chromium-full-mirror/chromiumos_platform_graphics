@@ -205,9 +205,381 @@ graphics.OpenclCts.c11_atomics_atomic_load:
 graphics.OpenclCts.c11_atomics_atomic_store:
   expectation: FAIL
   since_build: R125-15847.0.0
-graphics.OpenclCts.computeinfo_extended_versioning:
+graphics.OpenclCts.commonfns_clamp:
   expectation: FAIL
-  since_build: R129-15982.0.0
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_degrees:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_fmax:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_fmaxf:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_fmin:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_fminf:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_max:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_maxf:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_min:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_minf:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_mix:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_mixf:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_radians:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_sign:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_smoothstep:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_smoothstepf:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_step:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.commonfns_stepf:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_async_build:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_compile_and_link_status_options_log:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_compiler_defines_for_extensions:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_execute_after_embedded_header_link:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_execute_after_included_header_link:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_execute_after_serialize_reload_library:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_execute_after_serialize_reload_object:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_execute_after_simple_compile_and_link:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_execute_after_simple_compile_and_link_no_device_info:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_execute_after_simple_compile_and_link_with_callbacks:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_execute_after_simple_compile_and_link_with_defines:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_execute_after_simple_library_with_link:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_execute_after_two_file_link:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_features_macro:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_get_program_build_info:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_large_compile:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_load_discreet_length_source:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_load_multistring_source:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_load_null_terminated_multi_line_source:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_load_null_terminated_partial_multi_line_source:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_load_null_terminated_source:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_load_two_kernel_source:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_multi_file_libraries:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_multiple_embedded_headers:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_multiple_files:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_multiple_files_multiple_libraries:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_multiple_libraries:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_options_build_macro:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_options_build_macro_existence:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_options_build_optimizations:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_options_include_directory:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_pragma_unroll:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_preprocessor_define_udef:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_preprocessor_include:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_preprocessor_pragma:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_program_binary_type:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_simple_embedded_header_link:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_simple_library_with_link:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_simple_link_only:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_two_file_link:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_two_file_regular_function_access:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_two_file_regular_struct_access:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_two_file_regular_variable_access:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_unload_build_info:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_unload_build_threaded:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_unload_build_unload_create_kernel:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_unload_compile_unload_link:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_unload_link_different:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_unload_program_binaries:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.compiler_unload_repeated:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_double_0:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_double_1:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_double_2:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_double_3:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_double_4:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_double_5:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_double_6:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_double_7:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_float_0:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_float_1:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_float_2:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_float_3:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_float_4:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_float_5:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_float_6:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.contractions_contractions_float_7:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_char:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_float:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_int:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_long:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rte_char:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rte_float:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rte_int:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rte_long:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rte_short:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rte_uchar:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rte_uint:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rte_ulong:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rte_ushort:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtn_char:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtn_float:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtn_int:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtn_long:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtn_short:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtn_uchar:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtn_uint:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtn_ulong:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtn_ushort:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtp_char:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtp_float:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtp_int:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtp_long:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtp_short:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtp_uchar:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtp_uint:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtp_ulong:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtp_ushort:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtz_char:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtz_float:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtz_int:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtz_long:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtz_short:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtz_uchar:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtz_uint:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtz_ulong:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_rtz_ushort:
+  expectation: FAIL
+  since_build: R130-16017.0.0
+graphics.OpenclCts.conversions_char_sat_char:
+  expectation: FAIL
+  since_build: R130-16017.0.0
 graphics.OpenclCts.events_callbacks:
   expectation: FAIL
   since_build: R125-15847.0.0

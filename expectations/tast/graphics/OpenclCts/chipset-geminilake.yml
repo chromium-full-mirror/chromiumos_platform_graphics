@@ -19,12 +19,21 @@ graphics.OpenclCts.c11_atomics_atomic_fetch_xor2:
 graphics.OpenclCts.cl_copy_images_1darray_cl_float:
   expectation: FAIL
   since_build: R129-15992.0.0
+graphics.OpenclCts.cl_copy_images_2d_cl_signed_int32:
+  expectation: FAIL
+  since_build: R130-16016.0.0
+graphics.OpenclCts.cl_copy_images_2d_cl_unsigned_int16:
+  expectation: FAIL
+  since_build: R130-16016.0.0
+graphics.OpenclCts.cl_copy_images_2dto3d_cl_half_float:
+  expectation: FAIL
+  since_build: R130-16016.0.0
 graphics.OpenclCts.cl_copy_images_3dto2darray_cl_half_float:
   expectation: FAIL
   since_build: R129-15992.0.0
-graphics.OpenclCts.computeinfo_extended_versioning:
+graphics.OpenclCts.cl_copy_images_3dto2darray_cl_unsigned_int16:
   expectation: FAIL
-  since_build: R129-15982.0.0
+  since_build: R130-16016.0.0
 graphics.OpenclCts.thread_dimensions_quick_2d_implicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0

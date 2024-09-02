@@ -1,6 +1,3 @@
 graphics.OpenclCts.c11_atomics_atomic_flag:
   expectation: FAIL
   since_build: R123-15755.0.0
-graphics.OpenclCts.computeinfo_extended_versioning:
-  expectation: FAIL
-  since_build: R129-15982.0.0

@@ -241,9 +241,6 @@ graphics.OpenclCts.cl_fill_images_3d_cl_unsigned_int32:
 graphics.OpenclCts.cl_fill_images_3d_cl_unsigned_int8:
   expectation: FAIL
   since_build: R123-15766.0.0
-graphics.OpenclCts.computeinfo_extended_versioning:
-  expectation: FAIL
-  since_build: R129-15982.0.0
 graphics.OpenclCts.contractions_contractions_float_0:
   expectation: FAIL
   since_build: R110-15241.0.0
