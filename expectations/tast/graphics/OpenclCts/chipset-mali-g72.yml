@@ -130,6 +130,9 @@ graphics.OpenclCts.cl_get_info_2darray_cl_signed_int16:
 graphics.OpenclCts.cl_get_info_2darray_cl_signed_int32:
   expectation: FAIL
   since_build: R125-15840.0.0
+graphics.OpenclCts.cl_get_info_2darray_cl_signed_int8:
+  expectation: FAIL
+  since_build: R130-16020.0.0
 graphics.OpenclCts.cl_get_info_2darray_cl_snorm_int16:
   expectation: FAIL
   since_build: R128-15956.0.0
