@@ -1,3 +1,9 @@
 # kabylake boards: atlas, eve fizz, kalista, nami, nautilus, nocturn, poppy, rammus, soraka
 # cometlake boards: drallion, hatch, puff
 # whiskeylake boards: sarien
+dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.color0.bgra8_ext,Fail
+dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.depth.bgra8_ext,Fail
+dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.stencil.bgra8_ext,Fail
+dEQP-GLES3.functional.fbo.completeness.renderable.renderbuffer.color0.bgra8_ext,Fail
+dEQP-GLES3.functional.fbo.completeness.renderable.renderbuffer.depth.bgra8_ext,Fail
+dEQP-GLES3.functional.fbo.completeness.renderable.renderbuffer.stencil.bgra8_ext,Fail
