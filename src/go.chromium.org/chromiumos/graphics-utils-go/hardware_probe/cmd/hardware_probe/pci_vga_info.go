@@ -153,5 +153,5 @@ func mapPCINameToGPUInfo(name, deviceID string) (GPUInfo, error) {
 		}
 		return GPUInfo{Family: gpuName, GPUVendor: vendorVmware}, nil
 	}
-	return GPUInfo{}, fmt.Errorf("Unrecognized PCI device name: %v", name)
+	return GPUInfo{}, fmt.Errorf("unrecognized PCI device name: %v", name)
 }

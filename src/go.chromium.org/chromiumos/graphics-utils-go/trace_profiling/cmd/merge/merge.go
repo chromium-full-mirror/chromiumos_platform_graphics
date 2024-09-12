@@ -75,12 +75,12 @@ func (reader *profileReader) close() {
 // data we're interested in.
 func (reader *profileReader) parseHeader() (err error) {
 	if !reader.scanner.Scan() {
-		return fmt.Errorf("ERROR: No header in profile <%s>", reader.filename)
+		return fmt.Errorf("error: no header in profile <%s>", reader.filename)
 	}
 
 	header := reader.scanner.Text()
 	if !strings.HasPrefix(header, "#") {
-		return fmt.Errorf("ERROR: header line doesn't start with # - \"%s\"", header)
+		return fmt.Errorf("error: header line doesn't start with # - \"%s\"", header)
 	}
 
 	var columns = strings.Split(strings.TrimLeft(header[1:], " "), " ")
@@ -104,7 +104,7 @@ func (reader *profileReader) parseHeader() (err error) {
 			// Ignore those columns.
 			continue
 		default:
-			err = fmt.Errorf("Error: unexpected column name in profile: %s", columnName)
+			err = fmt.Errorf("error: unexpected column name in profile: %s", columnName)
 			return
 		}
 
@@ -121,28 +121,28 @@ func (reader *profileReader) parseHeader() (err error) {
 // they must have the same column indices.
 func (reader *profileReader) checkCompatibility(r2 *profileReader) error {
 	if reader.idxColumnCallID != r2.idxColumnCallID {
-		return fmt.Errorf("Error: mismatched call-id column index")
+		return fmt.Errorf("error: mismatched call-id column index")
 	}
 	if reader.idxColumnProgramID != r2.idxColumnProgramID {
-		return fmt.Errorf("Error: mismatched program-id column index")
+		return fmt.Errorf("error: mismatched program-id column index")
 	}
 	if reader.idxColumnCallName != r2.idxColumnCallName {
-		return fmt.Errorf("Error: mismatched call-name column index")
+		return fmt.Errorf("error: mismatched call-name column index")
 	}
 	if reader.idxColumnCPUDuration != r2.idxColumnCPUDuration {
-		return fmt.Errorf("Error: mismatched cpu-duration column index")
+		return fmt.Errorf("error: mismatched cpu-duration column index")
 	}
 	if reader.idxColumnCPUStart != r2.idxColumnCPUStart {
-		return fmt.Errorf("Error: mismatched cpu-start column index")
+		return fmt.Errorf("error: mismatched cpu-start column index")
 	}
 	if reader.idxColumnGPUStart != r2.idxColumnGPUStart {
-		return fmt.Errorf("Error: mismatched gpu-start column index")
+		return fmt.Errorf("error: mismatched gpu-start column index")
 	}
 	if reader.idxColumnGPUDuration != r2.idxColumnGPUDuration {
-		return fmt.Errorf("Error: mismatched gpu-duration column index")
+		return fmt.Errorf("error: mismatched gpu-duration column index")
 	}
 	if reader.idxMax != r2.idxMax {
-		return fmt.Errorf("Error: mismatched number of columns")
+		return fmt.Errorf("error: mismatched number of columns")
 	}
 	return nil
 }
@@ -189,33 +189,33 @@ func mergeProfiles(prof1, prof2 string) (err error) {
 			switch {
 			case strings.HasPrefix(l1, "Rendered"):
 				if !strings.HasPrefix(l2, "Rendered") {
-					errOut <- fmt.Errorf("Error: mismatched lines:\n  %s\n  %s", l1, l2)
+					errOut <- fmt.Errorf("error: mismatched lines:\n  %s\n  %s", l1, l2)
 				}
 				lineOut <- fmt.Sprintf("%s\n", l1)
 				return
 			case strings.HasPrefix(l1, "#"):
 				if !strings.HasPrefix(l2, "#") {
-					errOut <- fmt.Errorf("Error: mismatched lines:\n  %s\n  %s", l1, l2)
+					errOut <- fmt.Errorf("error: mismatched lines:\n  %s\n  %s", l1, l2)
 					return
 				}
 				lineOut <- fmt.Sprintf("%s\n", l1)
 			case l1 == "frame_end":
 				if l2 != "frame_end" {
-					errOut <- fmt.Errorf("Error: mismatched lines:\n  %s\n  %s", l1, l2)
+					errOut <- fmt.Errorf("error: mismatched lines:\n  %s\n  %s", l1, l2)
 					return
 				}
 				lineOut <- fmt.Sprintf("%s\n", l1)
 			case strings.HasPrefix(l1, "call "):
 				mergeAndOutputLines(r1, l1, l2, lineOut)
 			default:
-				errOut <- fmt.Errorf("Error: unrecognized line in profile: %s", l1)
+				errOut <- fmt.Errorf("error: unrecognized line in profile: %s", l1)
 				return
 			}
 		}
 	}()
 
 	for l := range lineOut {
-		fmt.Printf(l)
+		fmt.Print(l)
 	}
 
 	select {
@@ -234,10 +234,10 @@ func mergeAndOutputLines(r *profileReader, lGPU, lCPU string, lineOut chan strin
 	var cpuTokens = strings.Split(strings.TrimRight(lCPU, "\r\n"), " ")
 
 	if len(gpuTokens) <= r.idxMax {
-		return fmt.Errorf("Error: not enough columns in GPU line: %s: ", lGPU)
+		return fmt.Errorf("error: not enough columns in GPU line: %s: ", lGPU)
 	}
 	if len(cpuTokens) <= r.idxMax {
-		return fmt.Errorf("Error: not enough columns in CPU line: %s: ", lCPU)
+		return fmt.Errorf("error: not enough columns in CPU line: %s: ", lCPU)
 	}
 
 	merged := ""
@@ -249,13 +249,13 @@ func mergeAndOutputLines(r *profileReader, lGPU, lCPU string, lineOut chan strin
 			merged = merged + cpuTokens[i] + " "
 		case r.idxColumnCallID:
 			if gpuTokens[i] != cpuTokens[i] {
-				err = fmt.Errorf("Error: mismatched call id %s, v.s. %s", gpuTokens[i], cpuTokens[i])
+				err = fmt.Errorf("error: mismatched call id %s, v.s. %s", gpuTokens[i], cpuTokens[i])
 				return
 			}
 			merged = merged + gpuTokens[i] + " "
 		case r.idxColumnCallName:
 			if gpuTokens[i] != cpuTokens[i] {
-				err = fmt.Errorf("Error: mismatched call name %s, v.s. %s", gpuTokens[i], cpuTokens[i])
+				err = fmt.Errorf("error: mismatched call name %s, v.s. %s", gpuTokens[i], cpuTokens[i])
 				return
 			}
 			merged = merged + gpuTokens[i] + " "
@@ -265,7 +265,7 @@ func mergeAndOutputLines(r *profileReader, lGPU, lCPU string, lineOut chan strin
 			merged = merged + gpuTokens[i] + " "
 		case r.idxColumnProgramID:
 			if gpuTokens[i] != cpuTokens[i] {
-				err = fmt.Errorf("Error: mismatched program id %s, v.s. %s", gpuTokens[i], cpuTokens[i])
+				err = fmt.Errorf("error: mismatched program id %s, v.s. %s", gpuTokens[i], cpuTokens[i])
 				return
 			}
 			merged = merged + gpuTokens[i] + " "

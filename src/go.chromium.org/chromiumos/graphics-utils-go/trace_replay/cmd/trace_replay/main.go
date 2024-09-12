@@ -245,7 +245,7 @@ func uploadFile(ctx context.Context, localFileName, serverURL, remoteFileName st
 	params := url.Values{}
 	params.Add("type", "upload")
 	uploadURL.RawQuery = params.Encode()
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, uploadURL.String(), &buffer)
+	request, _ := http.NewRequestWithContext(ctx, http.MethodPost, uploadURL.String(), &buffer)
 	request.Header.Set("Content-Type", writer.FormDataContentType())
 
 	httpClient := &http.Client{}
@@ -388,8 +388,8 @@ func exitWithError(err error) {
 
 func checkPackageInstalled(ctx context.Context, name string) error {
 	// Attempt to dpkg -l (for Debian/Ubuntu) and, if that fails, pacman -Q (for Arch).
-	if exitCode, _, stderr := runCommand(ctx, nil, "dpkg", "-l", name); exitCode != 0 {
-		if exitCode, _, stderr = runCommand(ctx, nil, "pacman", "-Q", name); exitCode != 0 {
+	if exitCode, _, _ := runCommand(ctx, nil, "dpkg", "-l", name); exitCode != 0 {
+		if exitCode, _, stderr := runCommand(ctx, nil, "pacman", "-Q", name); exitCode != 0 {
 			return errors.New("dpkg -l and pacman -Q for %s failed with exit code %d! %s", name, exitCode, stderr)
 		}
 	}
@@ -419,21 +419,6 @@ func replayTrace(ctx context.Context, config flags.ReplayAppConfig, traceFileNam
 		return nil, errors.New("Failed to replay trace file [%s]. Exit code: %d. %s", traceFileName, exitCode, stderr)
 	}
 	return parseReplayOutput(stdout, config.Postfix)
-}
-
-func listFiles(path string) (map[string]uint64, error) {
-	result := make(map[string]uint64)
-	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, file := range files {
-		if !file.IsDir() {
-			result[file.Name()] = uint64(file.Size())
-		}
-	}
-	return result, nil
 }
 
 // TODO(syedfaaiz) : Remove this copy once paths related issue is resolved.
@@ -481,7 +466,7 @@ func runReplayOnce(ctx context.Context, config *comm.TestGroupConfig, traceFileN
 		}
 		proton := contains([]string{comm.TestFlagD3DW32, comm.TestFlagD3DW64}, flag)
 		// Flush all pending filesistem pending i/o ops
-		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Syncing file system"))
+		logMsg(ctx, config.ProxyServer.URL, "Syncing file system")
 		exec.Command("sync").Run()
 		if proton {
 			logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file with Proton and %v binary", replayConfig.AppName))
@@ -562,7 +547,7 @@ func runReplayRepeatedly(ctx context.Context, config *comm.TestGroupConfig, trac
 func dumpTraceImages(ctx context.Context, config *comm.TestGroupConfig, traceFileName string, traceEntry *repo.TraceListEntry, outDir string) (map[uint32]string, error) {
 	res := make(map[uint32]string)
 	callsStr := ""
-	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Replaying the trace file to dump the reference images..."))
+	logMsg(ctx, config.ProxyServer.URL, "Replaying the trace file to dump the reference images...")
 	for idx, entry := range traceEntry.ReferenceFrames {
 		if idx != 0 {
 			callsStr += ","
@@ -644,9 +629,9 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	}
 
 	// Cool down and flush all pending filesistem pending i/o ops
-	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Syncing file system"))
+	logMsg(ctx, config.ProxyServer.URL, "Syncing file system")
 	exec.Command("sync").Run()
-	logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Syncing has finished"))
+	logMsg(ctx, config.ProxyServer.URL, "Syncing has finished")
 
 	// TODO(tutankhamen): save the trace file with meta information to the local cache
 
@@ -661,7 +646,7 @@ func runTest(ctx context.Context, config *comm.TestGroupConfig, traceEntry *repo
 	}
 	// Run the trace replay(s)
 	if config.ExtendedDuration > 0 || config.RepeatCount > 0 {
-		logMsg(ctx, config.ProxyServer.URL, fmt.Sprintf("Running trace replay in extended mode"))
+		logMsg(ctx, config.ProxyServer.URL, "Running trace replay in extended mode")
 		return runReplayRepeatedly(ctx, config, traceFileName, replayTimeout)
 	}
 	result, err := runReplayOnce(ctx, config, traceFileName, replayTimeout)

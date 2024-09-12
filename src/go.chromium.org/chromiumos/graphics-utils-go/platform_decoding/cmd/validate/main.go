@@ -20,9 +20,10 @@ import (
 // extractChecksumData extracts MD5 checksum data
 func extractChecksumData(input []string) []string {
 	var data []string
+	re := regexp.MustCompile("^[0-9a-fA-F]{32}$")
 	for i := range input {
 		// Checks to see if string is a MD5 checksum
-		if match, _ := regexp.MatchString("^[0-9a-fA-F]{32}$", input[i]); match == true {
+		if re.MatchString(input[i]) {
 			data = append(data, input[i])
 		}
 	}

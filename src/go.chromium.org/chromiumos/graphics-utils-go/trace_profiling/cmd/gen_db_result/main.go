@@ -28,7 +28,7 @@ func printUsage(subCommands []command) {
 		if i > 0 {
 			fmt.Printf(", ")
 		}
-		fmt.Printf(c.CmdName())
+		fmt.Print(c.CmdName())
 	}
 	fmt.Printf("\nAvailable options are:\n")
 	flag.PrintDefaults()

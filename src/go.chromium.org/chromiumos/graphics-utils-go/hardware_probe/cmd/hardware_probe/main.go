@@ -100,7 +100,7 @@ func getCPUArch() (CPUArch, error) {
 			}
 		}
 	}
-	return archUnknown, fmt.Errorf("Unsupported machine type %s", machineName)
+	return archUnknown, fmt.Errorf("unsupported machine type %s", machineName)
 }
 
 // getARMSOCFamilyFromCompatible returns the ARM SOC we're running on and its name based on 'compatible' property of the base node of devicetree.
@@ -117,7 +117,7 @@ func getARMSOCFamilyFromCompatible() (CPUSOCFamily, string, error) {
 	} else if match = listGrep(compatibles, `^rockchip,(\S+)`); match != nil {
 		return socRockchip, match[1], nil
 	}
-	return socUnknown, "", fmt.Errorf("Failed to determine ARM SOC from compatible: %v", compatibles)
+	return socUnknown, "", fmt.Errorf("failed to determine ARM SOC from compatible: %v", compatibles)
 }
 
 func getCPUSOCFamily() (CPUSOCFamily, error) {

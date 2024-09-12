@@ -125,7 +125,7 @@ func getWaffleInfo() (string, error) {
 			return "", errors.Wrap(err, "failed to get use flags")
 		}
 		for _, flag := range useFlags {
-			if "opengles" == flag {
+			if flag == "opengles" {
 				return "gles2", nil
 			}
 		}
