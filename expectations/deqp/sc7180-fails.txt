@@ -1,4 +1,5 @@
 # Board: trogdor, strongbad
-dEQP-VK.renderpass2.suballocation.multisample_resolve.layers_6.r32g32_sfloat.samples_4_resolve_level_4,Crash
-dEQP-VK.dynamic_rendering.primary_cmd_buff.basic.partial_binding_depth_stencil,Fail
+
+dEQP-GLES31.functional.texture.border_clamp.range_clamp.linear_float_color,Fail
 dEQP-VK.info.device_mandatory_features,Fail
+dEQP-VK.spirv_assembly.instruction.graphics.mixed_relaxed_precision_operands.mixedrelaxedprecisionoperands,Fail
