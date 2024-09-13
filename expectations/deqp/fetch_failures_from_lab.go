@@ -6,8 +6,11 @@
 // This tools utilize ../tast/create_expectations_from_stainless.go.
 // Read ../tast/README.md for requirement.
 //
-// Usage (Run inside chroot):
-// $ ~/chromiumos/src/platform/tast/tools/go.sh run fetch_failures_from_lab.go -h
+// Once outside of chroot get credentials
+// mkdir -p ~/cros/out/home/$USER/.config/gcloud/ && gcloud auth application-default login && cp ~/.config/gcloud/application_default_credentials.json ~/cros/out/home/$USER/.config/gcloud/
+//
+// Still outside of chroot query Testhaus
+// ~/cros/src/platform/graphics/expectations/deqp$ ~/cros/src/platform/tast/tools/go.sh run fetch_failures_from_lab.go -build="16028.0.0" -gpu_family=mali-g72 | tee g72.txt
 
 package main
 
