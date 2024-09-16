@@ -1,3 +1,1 @@
-graphics.OpenclCts.api_kernel_arg_changes:
-  expectation: FAIL
-  since_build: R120-15656.0.0
+{}

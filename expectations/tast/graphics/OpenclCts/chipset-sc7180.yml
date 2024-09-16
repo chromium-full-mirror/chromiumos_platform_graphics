@@ -580,16 +580,10 @@ graphics.OpenclCts.conversions_char_ushort:
 graphics.OpenclCts.conversions_float_char:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.conversions_float_int:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.conversions_float_long:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.conversions_float_rte_char:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.conversions_float_rte_int:
   expectation: FAIL
   since_build: R116-15488.0.0
 graphics.OpenclCts.conversions_float_rte_long:
@@ -601,9 +595,6 @@ graphics.OpenclCts.conversions_float_rte_short:
 graphics.OpenclCts.conversions_float_rte_uchar:
   expectation: FAIL
   since_build: R116-15488.0.0
-graphics.OpenclCts.conversions_float_rte_uint:
-  expectation: FAIL
-  since_build: R116-15488.0.0
 graphics.OpenclCts.conversions_float_rte_ulong:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -611,9 +602,6 @@ graphics.OpenclCts.conversions_float_rte_ushort:
   expectation: FAIL
   since_build: R116-15488.0.0
 graphics.OpenclCts.conversions_float_rtn_char:
-  expectation: FAIL
-  since_build: R116-15488.0.0
-graphics.OpenclCts.conversions_float_rtn_int:
   expectation: FAIL
   since_build: R116-15488.0.0
 graphics.OpenclCts.conversions_float_rtn_long:
@@ -625,9 +613,6 @@ graphics.OpenclCts.conversions_float_rtn_short:
 graphics.OpenclCts.conversions_float_rtn_uchar:
   expectation: FAIL
   since_build: R116-15488.0.0
-graphics.OpenclCts.conversions_float_rtn_uint:
-  expectation: FAIL
-  since_build: R117-15527.0.0
 graphics.OpenclCts.conversions_float_rtn_ulong:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -646,9 +631,6 @@ graphics.OpenclCts.conversions_float_rtp_short:
 graphics.OpenclCts.conversions_float_rtp_uchar:
   expectation: FAIL
   since_build: R116-15488.0.0
-graphics.OpenclCts.conversions_float_rtp_uint:
-  expectation: FAIL
-  since_build: R116-15488.0.0
 graphics.OpenclCts.conversions_float_rtp_ulong:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -658,9 +640,6 @@ graphics.OpenclCts.conversions_float_rtp_ushort:
 graphics.OpenclCts.conversions_float_rtz_char:
   expectation: FAIL
   since_build: R116-15488.0.0
-graphics.OpenclCts.conversions_float_rtz_int:
-  expectation: FAIL
-  since_build: R117-15527.0.0
 graphics.OpenclCts.conversions_float_rtz_long:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -670,9 +649,6 @@ graphics.OpenclCts.conversions_float_rtz_short:
 graphics.OpenclCts.conversions_float_rtz_uchar:
   expectation: FAIL
   since_build: R116-15488.0.0
-graphics.OpenclCts.conversions_float_rtz_uint:
-  expectation: FAIL
-  since_build: R117-15527.0.0
 graphics.OpenclCts.conversions_float_rtz_ulong:
   expectation: FAIL
   since_build: R116-15488.0.0
@@ -683,9 +659,6 @@ graphics.OpenclCts.conversions_float_short:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.conversions_float_uchar:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.conversions_float_uint:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.conversions_float_ulong:
