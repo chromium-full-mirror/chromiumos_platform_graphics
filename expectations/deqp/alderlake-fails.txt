@@ -1,9 +1,3 @@
 # alderlake-P boards: brask, brya, draco, skolas
 # alderlake-N boards: nissa
 # raptorlake boards: brox
-dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.color0.bgra8_ext,Fail
-dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.depth.bgra8_ext,Fail
-dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.stencil.bgra8_ext,Fail
-dEQP-GLES3.functional.fbo.completeness.renderable.renderbuffer.color0.bgra8_ext,Fail
-dEQP-GLES3.functional.fbo.completeness.renderable.renderbuffer.depth.bgra8_ext,Fail
-dEQP-GLES3.functional.fbo.completeness.renderable.renderbuffer.stencil.bgra8_ext,Fail
