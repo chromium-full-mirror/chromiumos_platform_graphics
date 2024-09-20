@@ -798,9 +798,6 @@ dEQP-VK.pipeline.monolithic.stencil.no_stencil_att.render_passes.dynamic_enable.
 dEQP-VK.pipeline.monolithic.timestamp.calibrated.calibration_test,Crash
 dEQP-VK.pipeline.monolithic.timestamp.calibrated.dev_domain_test,Crash
 dEQP-VK.pipeline.monolithic.timestamp.calibrated.host_domain_test,Crash
-dEQP-VK.spirv_assembly.instruction.compute.float_controls.fp16.input_args.modf_st_denorm_flush_to_zero,Fail
-dEQP-VK.spirv_assembly.instruction.compute.float_controls.fp16.input_args.modf_st_denorm_flush_to_zero_nostorage,Fail
-dEQP-VK.spirv_assembly.instruction.compute.float_controls.fp32.input_args.modf_st_denorm_flush_to_zero,Fail
 dEQP-VK.spirv_assembly.instruction.compute.image_sampler.imagefetch.combined_image_sampler.optypeimage_mismatch_r32i.depth_property.depth,Fail
 dEQP-VK.spirv_assembly.instruction.compute.image_sampler.imagefetch.combined_image_sampler.optypeimage_mismatch_r32i_nontemporal.depth_property.depth,Fail
 dEQP-VK.spirv_assembly.instruction.compute.image_sampler.imagefetch.combined_image_sampler.optypeimage_mismatch_r32ui.depth_property.depth,Fail
@@ -945,12 +942,6 @@ dEQP-VK.spirv_assembly.instruction.compute.image_sampler.imagesample.sampled_ima
 dEQP-VK.spirv_assembly.instruction.compute.image_sampler.imagesample.sampled_image.optypeimage_mismatch_rgba8i_nontemporal.depth_property.depth,Fail
 dEQP-VK.spirv_assembly.instruction.compute.image_sampler.imagesample.sampled_image.optypeimage_mismatch_rgba8ui.depth_property.depth,Fail
 dEQP-VK.spirv_assembly.instruction.compute.image_sampler.imagesample.sampled_image.optypeimage_mismatch_rgba8ui_nontemporal.depth_property.depth,Fail
-dEQP-VK.spirv_assembly.instruction.graphics.float_controls.fp16.input_args.modf_st_denorm_flush_to_zero_frag,Fail
-dEQP-VK.spirv_assembly.instruction.graphics.float_controls.fp16.input_args.modf_st_denorm_flush_to_zero_nostorage_frag,Fail
-dEQP-VK.spirv_assembly.instruction.graphics.float_controls.fp16.input_args.modf_st_denorm_flush_to_zero_nostorage_vert,Fail
-dEQP-VK.spirv_assembly.instruction.graphics.float_controls.fp16.input_args.modf_st_denorm_flush_to_zero_vert,Fail
-dEQP-VK.spirv_assembly.instruction.graphics.float_controls.fp32.input_args.modf_st_denorm_flush_to_zero_frag,Fail
-dEQP-VK.spirv_assembly.instruction.graphics.float_controls.fp32.input_args.modf_st_denorm_flush_to_zero_vert,Fail
 dEQP-VK.spirv_assembly.instruction.graphics.image_sampler.imagefetch.combined_image_sampler.optypeimage_mismatch.r32i.depth_property.depth.shader_frag,Fail
 dEQP-VK.spirv_assembly.instruction.graphics.image_sampler.imagefetch.combined_image_sampler.optypeimage_mismatch.r32ui.depth_property.depth.shader_frag,Fail
 dEQP-VK.spirv_assembly.instruction.graphics.image_sampler.imagefetch.combined_image_sampler.optypeimage_mismatch.rgba16i.depth_property.depth.shader_frag,Fail
