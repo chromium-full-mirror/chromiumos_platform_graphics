@@ -45,7 +45,7 @@ branch=${branch#mesa-}
 upstream_branch="${upstream_ref}/${branch}"
 
 # Find the last uprev
-last_uprev_sha=$(git log -1 --format=%H --grep="CHROMIUM: Reset tree to ")
+last_uprev_sha=$(git log -1 --format=%H --grep="^CHROMIUM: Reset tree to ")
 last_uprev_subject=$(git log -1 --format=%s "${last_uprev_sha}")
 
 einfo "Checking downstream commits on top of commit ${last_uprev_sha} (\"${last_uprev_subject}\")"
