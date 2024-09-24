@@ -2,5 +2,3 @@
 
 dEQP-VK.mesh_shader.ext.misc.clip_geom_and_task_shader_provoking_last,Fail
 dEQP-VK.mesh_shader.ext.misc.clip_geom_provoking_last,Fail
-dEQP-VK.subgroups.clustered.compute.subgroupclusteredmul_u64vec4_requiredsubgroupsize,Timeout
-dEQP-VK.subgroups.clustered.mesh.subgroupclusteredmul_u64vec4_requiredsubgroupsize_task,Timeout
