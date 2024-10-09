@@ -1,10 +1,5 @@
 # picasso boards: zork
 
-dEQP-VK.reconvergence.subgroup_uniform_control_flow_ballot.compute.nesting4.0.40,Crash
-dEQP-VK.reconvergence.subgroup_uniform_control_flow_elect.compute.nesting4.0.40,Crash
-dEQP-VK.reconvergence.workgroup_uniform_control_flow_ballot.compute.nesting4.0.40,Crash
-dEQP-VK.reconvergence.workgroup_uniform_control_flow_elect.compute.nesting4.0.40,Crash
-
 dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.color0.bgra,Fail
 dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.color0.bgra8_ext,Fail
 dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.depth.bgra,Fail
