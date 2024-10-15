@@ -184,6 +184,10 @@ func getGPUInfoFromFamilyAndVendor(family string, vendor gpuVendor) GPUInfo {
 // getGPUInfos returns the GPU family name for the host.
 // TODO(ddmail): Support returning multiple mali/Qualcomm GPUs.
 func getGPUInfos() ([]GPUInfo, error) {
+	cpuArch, err := getCPUArch()
+	if err != nil {
+		debug("Failed to get CPU arch type: %v", err)
+	}
 	// Check for mali or panfrost
 	hasMali, errMali := hasMaliGPUEnabled()
 	hasPanfrost, errPanfrost := hasPanfrostGPUEnabled()
@@ -201,7 +205,7 @@ func getGPUInfos() ([]GPUInfo, error) {
 		}
 		gpuFamily := strings.ToLower(renderer)
 		// Fill in GPU_Vendor for Qualcomm and Mediatek.
-		socFamily, err := getCPUSOCFamily()
+		socFamily, err := getCPUSOCFamily(cpuArch)
 		if err == nil {
 			if socFamily == socQualcomm {
 				return []GPUInfo{getGPUInfoFromFamilyAndVendor(gpuFamily, vendorQualcomm)}, nil
@@ -217,7 +221,7 @@ func getGPUInfos() ([]GPUInfo, error) {
 	}
 
 	// Check for Qualcomm, Rogue
-	socFamily, err := getCPUSOCFamily()
+	socFamily, err := getCPUSOCFamily(cpuArch)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to determine CPU SOC family")
 	}

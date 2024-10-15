@@ -120,11 +120,7 @@ func getARMSOCFamilyFromCompatible() (CPUSOCFamily, string, error) {
 	return socUnknown, "", fmt.Errorf("failed to determine ARM SOC from compatible: %v", compatibles)
 }
 
-func getCPUSOCFamily() (CPUSOCFamily, error) {
-	cpuArch, err := getCPUArch()
-	if err != nil {
-		return socUnknown, errors.Wrap(err, "failed to get cpu arch type")
-	}
+func getCPUSOCFamily(cpuArch CPUArch) (CPUSOCFamily, error) {
 	if cpuArch == archArm {
 		socFamily, _, err := getARMSOCFamilyFromCompatible()
 		return socFamily, err
@@ -212,6 +208,19 @@ func getLargestDisk() (Disk, error) {
 	}, nil
 }
 
+// DMI contains DMI information from the sysfs.
+type DMI struct {
+	ProductName string
+}
+
+func getDMI() (DMI, error) {
+	productBytes, err := os.ReadFile("/sys/class/dmi/id/product_name")
+	if err != nil {
+		return DMI{}, err
+	}
+	return DMI{strings.TrimSuffix(string(productBytes),"\n")}, nil
+}
+
 type labels struct {
 	LabelsReporting  interface{} `json:"LabelsReporting,omitempty"`
 	LabelsScheduling interface{} `json:"LabelsScheduling,omitempty"`
@@ -224,6 +233,7 @@ type hardwareResult struct {
 	Memory            Memory            `json:"Memory"`
 	VGADevices        []VGADevice       `json:"VGA_Devices,omitempty"`
 	ConnectedDisplays []display.Display `json:"ConnectedDisplays,omitempty"`
+	DMI               DMI               `json:"DMI,omitempty"`
 }
 
 type softwareResult struct {
@@ -287,7 +297,12 @@ func queryHardware() hardwareResult {
 		result.Disk = disk
 	}
 
-	cpuSocFamily, err := getCPUSOCFamily()
+	cpuArch, err := getCPUArch()
+	if err != nil {
+		debug("Failed to get CPU arch type: %v", err)
+	}
+
+	cpuSocFamily, err := getCPUSOCFamily(cpuArch)
 	if err != nil {
 		debug("Failed to determine CPU SOC family: %v", err)
 	} else {
@@ -313,6 +328,16 @@ func queryHardware() hardwareResult {
 		debug("Failed to get displays: %v", err)
 	} else {
 		result.ConnectedDisplays = displays
+	}
+
+	// DMI information does not apply to ARM.
+	if cpuArch != archArm {
+		dmi, err := getDMI()
+		if err != nil {
+			debug("Failed to get DMI info: %v", err)
+		} else {
+			result.DMI = dmi
+		}
 	}
 	return result
 }
