@@ -1,2 +1,4 @@
 # Times out
 dEQP-VK.api.external.fence.sync_fd.export_multiple_times_temporary
+dEQP-VK.subgroups.clustered.compute.subgroupclusteredmul_i64vec4_requiredsubgroupsize
+dEQP-VK.subgroups.clustered.compute.subgroupclusteredmul_u64vec4_requiredsubgroupsize

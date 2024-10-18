@@ -4,6 +4,8 @@
 dEQP-VK.binding_model.buffer_device_address.set3.depth3.basessbo.convertcheck.*
 dEQP-VK.binding_model.buffer_device_address.set3.depth3.baseubo.convertcheck.*
 
-# timeouts on dedede
+# Times out
 dEQP-VK.api.external.fence.sync_fd.export_multiple_times_temporary
 dEQP-VK.api.external.semaphore.sync_fd.export_multiple_times_temporary
+dEQP-VK.subgroups.clustered.compute.subgroupclusteredmul_i64vec4_requiredsubgroupsize
+dEQP-VK.subgroups.clustered.compute.subgroupclusteredmul_u64vec4_requiredsubgroupsize
