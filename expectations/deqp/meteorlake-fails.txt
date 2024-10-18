@@ -1,4 +1,1 @@
 # MeteorLake-U boards: rex
-
-dEQP-VK.mesh_shader.ext.misc.clip_geom_and_task_shader_provoking_last,Fail
-dEQP-VK.mesh_shader.ext.misc.clip_geom_provoking_last,Fail
