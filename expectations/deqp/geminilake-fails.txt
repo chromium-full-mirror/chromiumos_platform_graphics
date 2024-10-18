@@ -1,9 +1,2 @@
 # geminilake boards: octopus
 # apollolake boards: coral, reef
-
-dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.color0.bgra8_ext,Fail
-dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.depth.bgra8_ext,Fail
-dEQP-GLES2.functional.fbo.completeness.renderable.renderbuffer.stencil.bgra8_ext,Fail
-dEQP-GLES3.functional.fbo.completeness.renderable.renderbuffer.color0.bgra8_ext,Fail
-dEQP-GLES3.functional.fbo.completeness.renderable.renderbuffer.depth.bgra8_ext,Fail
-dEQP-GLES3.functional.fbo.completeness.renderable.renderbuffer.stencil.bgra8_ext,Fail
