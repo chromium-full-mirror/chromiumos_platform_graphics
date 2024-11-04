@@ -18,6 +18,7 @@ chipsets=(
     "mali-g72"
     # Intel
     "alderlake"
+    "apollolake"
     "cometlake"
     "geminilake"
     "jasperlake"
