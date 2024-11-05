@@ -104,6 +104,8 @@ def add_subparser(subparsers):
                            help='input plan filename')
     subparser.add_argument('--noparallel', dest='parallel', action='store_false',
                            help='do not test in parallel')
+    subparser.add_argument('--noflash', dest='skip_flash', action='store_true', default=False,
+                           help='do not flash image to DUT')
     subparser.add_argument('--parallel-flash-max', dest='parallel_flash_max',
                            type=int,
                            help='max number of devices to flash in parallel')
@@ -605,9 +607,9 @@ def run(args):
                 datefmt=common.LOGGING_DATE_FORMAT))
         logging.getLogger().addHandler(fh)
 
-    execute(plan, args.output, args.parallel, args.retry)
+    execute(plan, args.output, args.parallel, args.retry, args.skip_flash)
 
-def execute(plan, output_dir, parallel=False, retry=1):
+def execute(plan, output_dir, parallel=False, retry=1, skip_flash=False):
     """Execute a plan."""
     logging.info('executing plan, writing job results to %s', output_dir)
 
@@ -655,7 +657,8 @@ def execute(plan, output_dir, parallel=False, retry=1):
         def wrapper(device_pb):
             """Wrapper to report exceptions immediately."""
             try:
-                execute_device(plan, param_combinations, device_pb, job, job_info.copy(), retry)
+                execute_device(plan, param_combinations, device_pb, job,
+                               job_info.copy(), retry, skip_flash)
             except Exception:  # pylint: disable=broad-except
                 logging.exception('exception raised during execution for device %s:',
                                   json_format.MessageToDict(device_pb))
@@ -668,7 +671,7 @@ def execute(plan, output_dir, parallel=False, retry=1):
 
     logging.info('%d total runs -> run label: %s', len(results), run_label)
 
-def execute_device(plan, param_combinations, device_pb, job, job_info, retry):
+def execute_device(plan, param_combinations, device_pb, job, job_info, retry, skip_flash):
     """Execute the plan for a given device."""
     _ = Device(device_pb, job_info)
 
@@ -686,7 +689,7 @@ def execute_device(plan, param_combinations, device_pb, job, job_info, retry):
         )
     for build_pb in plan.builds:
         results.extend(execute_build(plan, param_combinations,
-                                     build_pb, job, job_info.copy(), machine, retry))
+                                     build_pb, job, job_info.copy(), machine, retry, skip_flash))
 
     # Gather all the results in a format suitable for uploading.
     result_list = result_pb2.ResultList()
@@ -697,12 +700,15 @@ def execute_device(plan, param_combinations, device_pb, job, job_info, retry):
     logging.debug('< device %s', job_info.make_id())
     return results
 
-def execute_build(plan, param_combinations, build_pb, job, job_info, machine, retry):
+def execute_build(plan, param_combinations, build_pb, job, job_info, machine, retry, skip_flash):
     """Execute the plan for a given build."""
     build = Build(build_pb, job_info)
     logging.debug('>> build %s', job_info.make_id())
 
-    build.flash(job_info.make_args())
+    if not skip_flash:
+        build.flash(job_info.make_args())
+    else:
+        logging.info('--noflash argument passed, skipping flashing')
     software_config = job.get_software_config(job_info)
 
     # There is a bit of inversion with the parameter order and workloads.
