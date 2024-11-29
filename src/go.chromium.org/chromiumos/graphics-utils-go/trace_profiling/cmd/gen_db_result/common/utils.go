@@ -15,9 +15,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
-	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Package-global vars.
@@ -60,12 +60,12 @@ func WriteProtobuf(protobuf proto.Message, outputFile string) error {
 	}
 
 	if generateJSON {
-		marshaler := jsonpb.Marshaler{Indent: "  "}
-		err = marshaler.Marshal(file, protobuf)
+		marshaler := protojson.MarshalOptions{Indent: "  "}
+		jsonData, err := marshaler.Marshal(protobuf)
 
-		// Finish output with a newline.
+		// Write output finishing with a newline.
 		if err == nil {
-			file.Write([]byte("\n"))
+			file.Write(append(jsonData, []byte("\n")...))
 		}
 	} else {
 		data, err := proto.Marshal(protobuf)
@@ -99,13 +99,12 @@ func readProtoFromBin(filename string, p proto.Message) error {
 
 // Read a protobuf object from a JSON file.
 func readProtoFromJSON(filename string, p proto.Message) error {
-	file, err := os.Open(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
-	return jsonpb.Unmarshal(file, p)
+	return protojson.Unmarshal(data, p)
 }
 
 // Create a return a Timestamp protobuf object with the given time.

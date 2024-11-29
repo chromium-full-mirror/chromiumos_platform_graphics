@@ -12,7 +12,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/pkg/errors"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -105,7 +104,7 @@ func getCPUArch() (CPUArch, error) {
 
 // getARMSOCFamilyFromCompatible returns the ARM SOC we're running on and its name based on 'compatible' property of the base node of devicetree.
 func getARMSOCFamilyFromCompatible() (CPUSOCFamily, string, error) {
-	out, err := ioutil.ReadFile("/sys/firmware/devicetree/base/compatible")
+	out, err := os.ReadFile("/sys/firmware/devicetree/base/compatible")
 	if err != nil {
 		return socUnknown, "", errors.Wrap(err, "failed to read compatible file")
 	}
@@ -127,7 +126,7 @@ func getCPUSOCFamily(cpuArch CPUArch) (CPUSOCFamily, error) {
 	}
 	if cpuArch == archX86 || cpuArch == archX64 {
 		// Use cpuinfo to figure out AMD
-		out, err := ioutil.ReadFile("/proc/cpuinfo")
+		out, err := os.ReadFile("/proc/cpuinfo")
 		if err != nil {
 			return socUnknown, errors.Wrap(err, "failed to read /proc/cpuinfo")
 		}
@@ -144,7 +143,7 @@ type Memory int64
 
 func getMemory() (Memory, error) {
 	memoryBytes, err := func() (int64, error) {
-		b, err := ioutil.ReadFile("/proc/meminfo")
+		b, err := os.ReadFile("/proc/meminfo")
 		if err != nil {
 			return 0, err
 		}

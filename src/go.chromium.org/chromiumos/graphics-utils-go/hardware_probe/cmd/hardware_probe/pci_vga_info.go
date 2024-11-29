@@ -7,7 +7,7 @@ package main
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"io/ioutil"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -34,7 +34,7 @@ var (
 
 func readPCIDevice(bdf string, file string) (string, error) {
 	filePath := fmt.Sprintf("/sys/bus/pci/devices/%s/%s", bdf, file)
-	out, err := ioutil.ReadFile(filePath)
+	out, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to read %v", filePath)
 	}

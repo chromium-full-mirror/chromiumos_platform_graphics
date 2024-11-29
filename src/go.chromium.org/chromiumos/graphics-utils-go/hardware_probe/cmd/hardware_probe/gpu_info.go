@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/pkg/errors"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -105,7 +104,7 @@ func hasPanfrostGPUEnabled() (bool, error) {
 func getWaffleInfo() (string, error) {
 	getUseFlags := func() ([]string, error) {
 		flags := []string{}
-		out, err := ioutil.ReadFile("/etc/ui_use_flags.txt")
+		out, err := os.ReadFile("/etc/ui_use_flags.txt")
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to read ui_use_flags")
 		}

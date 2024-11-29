@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -33,7 +32,7 @@ func extractChecksumData(input []string) []string {
 
 // readMetadata reads metadata from metadata json.
 func readMetadata(metadataPath string) (map[string]interface{}, error) {
-	metadataJSONBytes, err := ioutil.ReadFile(metadataPath)
+	metadataJSONBytes, err := os.ReadFile(metadataPath)
 	if err != nil {
 		return nil, fmt.Errorf("%w: failed to read metadata file at %s", err, metadataPath)
 	}

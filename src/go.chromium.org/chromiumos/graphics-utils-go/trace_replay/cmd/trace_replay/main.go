@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -320,7 +319,7 @@ func getTraceList(ctx context.Context, config *comm.TestGroupConfig) (*repo.Trac
 	}
 	defer file.Close()
 
-	bytes, _ := ioutil.ReadAll(file)
+	bytes, _ := io.ReadAll(file)
 	var traceList repo.TraceList
 	err = json.Unmarshal(bytes, &traceList)
 	if err != nil {

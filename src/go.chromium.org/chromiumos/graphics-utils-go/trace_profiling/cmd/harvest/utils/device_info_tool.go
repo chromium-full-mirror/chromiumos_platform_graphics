@@ -5,6 +5,7 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,10 +16,10 @@ import (
 	"go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/harvest/config"
 	remote "go.chromium.org/chromiumos/graphics-utils-go/trace_profiling/cmd/profile/remote"
 
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	db "go.chromium.org/chromiumos/config/go/api/test/results/v1"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -292,9 +293,9 @@ func (dit *DeviceInfoTool) checkIfMachineInfoHasChanged(
 
 	// PB struct have internal fields that make deep-comparisons difficult. Instead,
 	// convert both PBs to string and compare the strings.
-	str1 := proto.MarshalTextString(machinePb)
-	str2 := proto.MarshalTextString(&pbFromFile)
-	eq := (str1 == str2)
+	str1, _ := proto.Marshal(machinePb)
+	str2, _ := proto.Marshal(&pbFromFile)
+	eq := bytes.Equal(str1, str2)
 
 	if !eq {
 		fmt.Printf("\n\n Machine info changed:\n\n%s\n\n%s\n\n", str1, str2)
@@ -340,9 +341,9 @@ func (dit *DeviceInfoTool) checkIfSoftwareInfoHasChanged(
 
 	// PB struct have internal fields that make deep-comparisons difficult. Instead,
 	// convert both PBs to string and compare the strings.
-	str1 := proto.MarshalTextString(newSoftwarePb)
-	str2 := proto.MarshalTextString(oldSoftwarePb)
-	eq := (str1 == str2)
+	str1, _ := proto.Marshal(newSoftwarePb)
+	str2, _ := proto.Marshal(oldSoftwarePb)
+	eq := bytes.Equal(str1, str2)
 
 	// Restore the zero-out fields in the input PB.
 	newSoftwarePb.CreateTime = newTimeStamp
@@ -418,7 +419,7 @@ func (dit *DeviceInfoTool) collectMachineInfo() (*db.Machine, error) {
 	// Take output from running the tool, which should be JSON, and create a
 	// machine-info protobuf.
 	machineInfo := db.Machine{}
-	err = jsonpb.Unmarshal(strings.NewReader(output), &machineInfo)
+	err = protojson.Unmarshal([]byte(output), &machineInfo)
 	return &machineInfo, err
 }
 
@@ -482,7 +483,7 @@ func (dit *DeviceInfoTool) collectSoftwareInfoFromSSHTarget(
 	// Load output from running the tool, which should be in JSON form, into a
 	// protobuf object.
 	softwareInfo := db.SoftwareConfig{}
-	err = jsonpb.Unmarshal(strings.NewReader(output), &softwareInfo)
+	err = protojson.Unmarshal([]byte(output), &softwareInfo)
 	return &softwareInfo, err
 }
 
