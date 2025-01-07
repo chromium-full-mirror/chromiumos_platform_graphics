@@ -298,5 +298,18 @@ func getIntelPCIIDMap() map[string]string {
 		"0xa7ab": "raptorlake",
 		"0xa7ac": "raptorlake",
 		"0xa7ad": "raptorlake",
+		"0xb080": "pantherlake",
+		"0xb081": "pantherlake",
+		"0xb082": "pantherlake",
+		"0xb083": "pantherlake",
+		"0xb08f": "pantherlake",
+		"0xb090": "pantherlake",
+		"0xb091": "pantherlake",
+		"0xb092": "pantherlake",
+		"0xb0a0": "pantherlake",
+		"0xb0a1": "pantherlake",
+		"0xb0a2": "pantherlake",
+		"0xb0b0": "pantherlake",
+		"0xb0ff": "pantherlake",
 	}
 }
