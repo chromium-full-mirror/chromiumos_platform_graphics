@@ -16,6 +16,7 @@ chipsets=(
     "mali-g57"
     "mali-g52"
     "mali-g72"
+    "mali-g925-immortalis"
     # Intel
     "alderlake"
     "apollolake"

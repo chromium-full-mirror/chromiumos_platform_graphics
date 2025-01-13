@@ -1,0 +1,195 @@
+graphics.OpenclCts.basic_enqueue_map_image:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.basic_local_kernel_scope:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.c11_atomics_atomic_fence:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_1d_cl_signed_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_1d_cl_unorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_1darray_cl_float:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_1darray_cl_signed_int32:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_1darray_cl_signed_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_1darray_cl_snorm_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_1darray_cl_snorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_1darray_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_1darray_cl_unorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_2d_cl_signed_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_3dto2darray_cl_snorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_copy_images_3dto2darray_cl_unsigned_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_1d_cl_signed_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_1d_cl_signed_int32:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_1d_cl_snorm_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_1d_cl_unorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_1d_cl_unsigned_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_1darray_cl_snorm_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_1darray_cl_snorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_1darray_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_1darray_cl_unorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_1darray_cl_unsigned_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_1darray_cl_unsigned_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_signed_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_signed_int32:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_signed_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_snorm_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_snorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_unorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int32:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2darray_cl_snorm_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_2darray_cl_unorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_3d_cl_signed_int32:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_3d_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_3d_cl_unsigned_int32:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.cl_fill_images_3d_cl_unsigned_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.contractions_contractions_float_0:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.contractions_contractions_float_1:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.contractions_contractions_float_2:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.contractions_contractions_float_3:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.contractions_contractions_float_4:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.contractions_contractions_float_5:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.contractions_contractions_float_6:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.contractions_contractions_float_7:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_float:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_half_float:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_signed_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_signed_int32:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_signed_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_snorm_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_snorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_unorm_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_unorm_short_565:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_unsigned_int16:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_unsigned_int32:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.image_streams_2darray_cl_unsigned_int8:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_1d_basic:
+  expectation: FAIL
+  since_build: R134-16153.0.0
+graphics.OpenclCts.non_uniform_work_group_non_uniform_2d_basic:
+  expectation: FAIL
+  since_build: R134-16153.0.0
