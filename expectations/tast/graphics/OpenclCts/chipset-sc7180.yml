@@ -2773,9 +2773,6 @@ graphics.OpenclCts.non_uniform_work_group_non_uniform_other_barriers:
 graphics.OpenclCts.non_uniform_work_group_non_uniform_other_basic:
   expectation: FAIL
   since_build: R123-15755.0.0
-graphics.OpenclCts.printf_address_space_4:
-  expectation: FAIL
-  since_build: R116-15488.0.0
 graphics.OpenclCts.profiling_copy_image:
   expectation: FAIL
   since_build: R110-15241.0.0
