@@ -1,3 +1,12 @@
+graphics.OpenclCts.api_consistency_requirements_fp64:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.api_kernel_local_memory_size:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.bruteforce_erfc:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.cl_copy_images_1d_cl_snorm_int8:
   expectation: FAIL
   since_build: R129-15970.0.0
@@ -16,15 +25,6 @@ graphics.OpenclCts.cl_copy_images_1darray_cl_signed_int32:
 graphics.OpenclCts.cl_copy_images_1darray_cl_snorm_int16:
   expectation: FAIL
   since_build: R132-16082.0.0
-graphics.OpenclCts.cl_copy_images_1darray_cl_unorm_int16:
-  expectation: FAIL
-  since_build: R129-15992.0.0
-graphics.OpenclCts.cl_copy_images_1darray_cl_snorm_int16:
-  expectation: FAIL
-  since_build: R132-16082.0.0
-graphics.OpenclCts.cl_copy_images_1darray_cl_unsigned_int32:
-  expectation: FAIL
-  since_build: R129-15992.0.0
 graphics.OpenclCts.cl_copy_images_1darray_cl_unsigned_int8:
   expectation: FAIL
   since_build: R129-15970.0.0
@@ -34,9 +34,6 @@ graphics.OpenclCts.cl_copy_images_2darrayto2d_cl_unsigned_int16:
 graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_float:
   expectation: FAIL
   since_build: R129-15970.0.0
-graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_signed_int32:
-  expectation: FAIL
-  since_build: R130-16015.0.0
 graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_signed_int16:
   expectation: FAIL
   since_build: R132-16082.0.0
@@ -52,13 +49,7 @@ graphics.OpenclCts.cl_copy_images_2dto3d_cl_signed_int32:
 graphics.OpenclCts.cl_copy_images_2dto3d_cl_unsigned_int32:
   expectation: FAIL
   since_build: R129-15992.0.0
-graphics.OpenclCts.cl_copy_images_3dto2darray_cl_snorm_int8:
-  expectation: FAIL
-  since_build: R130-16015.0.0
 graphics.OpenclCts.cl_fill_images_2d_cl_unorm_int8:
-  expectation: FAIL
-  since_build: R130-16015.0.0
-graphics.OpenclCts.cl_fill_images_2darray_cl_signed_int16:
   expectation: FAIL
   since_build: R130-16015.0.0
 graphics.OpenclCts.cl_fill_images_2darray_cl_signed_int8:
@@ -70,3 +61,21 @@ graphics.OpenclCts.cl_fill_images_2darray_cl_snorm_int8:
 graphics.OpenclCts.cl_fill_images_2darray_cl_unorm_int8:
   expectation: FAIL
   since_build: R132-16082.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image_to_buffer:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_khr_command_buffer_fill_image:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.conversions_half_rtz_float:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.profiling_execute_multipass:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.profiling_profiling_timebase:
+  expectation: FAIL
+  since_build: R134-16165.0.0

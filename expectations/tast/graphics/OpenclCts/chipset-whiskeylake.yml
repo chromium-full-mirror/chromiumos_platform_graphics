@@ -34,12 +34,18 @@ graphics.OpenclCts.allocations_single_1_image2d_write:
 graphics.OpenclCts.allocations_single_1_image2d_write_non_blocking:
   expectation: FAIL
   since_build: R125-15847.0.0
+graphics.OpenclCts.api_consistency_requirements_fp64:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.api_kernel_arg_changes:
   expectation: FAIL
   since_build: R125-15847.0.0
 graphics.OpenclCts.api_kernel_arg_multi_setup_random:
   expectation: FAIL
   since_build: R125-15847.0.0
+graphics.OpenclCts.api_kernel_local_memory_size:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.api_sub_group_dispatch:
   expectation: FAIL
   since_build: R125-15847.0.0
@@ -121,6 +127,9 @@ graphics.OpenclCts.basic_prefetch:
 graphics.OpenclCts.basic_wg_barrier:
   expectation: FAIL
   since_build: R125-15847.0.0
+graphics.OpenclCts.bruteforce_erfc:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R125-15847.0.0
@@ -205,6 +214,18 @@ graphics.OpenclCts.c11_atomics_atomic_load:
 graphics.OpenclCts.c11_atomics_atomic_store:
   expectation: FAIL
   since_build: R125-15847.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image_to_buffer:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_khr_command_buffer_fill_image:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.conversions_half_rtz_float:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.events_callbacks:
   expectation: FAIL
   since_build: R125-15847.0.0
@@ -292,3 +313,9 @@ graphics.OpenclCts.non_uniform_work_group_non_uniform_3d_barriers:
 graphics.OpenclCts.non_uniform_work_group_non_uniform_3d_basic:
   expectation: FAIL
   since_build: R125-15847.0.0
+graphics.OpenclCts.profiling_execute_multipass:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.profiling_profiling_timebase:
+  expectation: FAIL
+  since_build: R134-16165.0.0

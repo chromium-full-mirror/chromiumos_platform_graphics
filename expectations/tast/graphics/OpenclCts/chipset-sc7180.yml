@@ -4,21 +4,15 @@ graphics.OpenclCts.allocations_multiple_1_buffer:
 graphics.OpenclCts.allocations_multiple_1_buffer_non_blocking:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.allocations_multiple_1_image2d_read:
-  expectation: FAIL
-  since_build: R124-15808.0.0
 graphics.OpenclCts.allocations_single_1_buffer:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.allocations_single_1_buffer_non_blocking:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.allocations_single_1_image2d_read:
+graphics.OpenclCts.api_consistency_requirements_fp16:
   expectation: FAIL
-  since_build: R120-15656.0.0
-graphics.OpenclCts.allocations_single_1_image2d_read_non_blocking:
-  expectation: FAIL
-  since_build: R124-15808.0.0
+  since_build: R134-16165.0.0
 graphics.OpenclCts.api_get_kernel_arg_info:
   expectation: FAIL
   tickets:
@@ -26,6 +20,9 @@ graphics.OpenclCts.api_get_kernel_arg_info:
 graphics.OpenclCts.api_kernel_arg_multi_setup_random:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.api_kernel_local_memory_size:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.api_min_max_parameter_size:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -36,6 +33,15 @@ graphics.OpenclCts.api_null_buffer_arg:
 graphics.OpenclCts.api_sub_group_dispatch:
   expectation: FAIL
   since_build: R123-15755.0.0
+graphics.OpenclCts.api_work_group_suggested_local_size_1d:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.api_work_group_suggested_local_size_2d:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.api_work_group_suggested_local_size_3d:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.basic_astype:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -154,6 +160,9 @@ graphics.OpenclCts.basic_writeimage_fp32:
 graphics.OpenclCts.basic_writeimage_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_erfc:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.buffers_buffer_fill_char:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -304,6 +313,48 @@ graphics.OpenclCts.buffers_sub_buffers_overlapping:
 graphics.OpenclCts.buffers_sub_buffers_read_write:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_half_float:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_signed_int8:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_snorm_int8:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_unorm_int8:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_unsigned_int8:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_half_float:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_signed_int8:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_snorm_int8:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_unorm_int8:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_unsigned_int8:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_khr_command_buffer_basic_printf:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image_to_buffer:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_khr_command_buffer_fill_image:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.compiler_features_macro:
   expectation: FAIL
   since_build: R123-15755.0.0
@@ -2773,9 +2824,15 @@ graphics.OpenclCts.non_uniform_work_group_non_uniform_other_barriers:
 graphics.OpenclCts.non_uniform_work_group_non_uniform_other_basic:
   expectation: FAIL
   since_build: R123-15755.0.0
+graphics.OpenclCts.printf_address_space:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.profiling_copy_image:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.profiling_execute_multipass:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.profiling_read_array_char:
   expectation: FAIL
   since_build: R110-15241.0.0

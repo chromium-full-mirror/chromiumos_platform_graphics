@@ -1,3 +1,21 @@
+graphics.OpenclCts.api_consistency_requirements_fp16:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.api_consistency_requirements_fp64:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.api_get_image1d_array_info:
+  expectation: FAIL
+  since_build: R134-16161.0.0
+graphics.OpenclCts.api_get_image2d_array_info:
+  expectation: FAIL
+  since_build: R134-16161.0.0
+graphics.OpenclCts.api_kernel_local_memory_size:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.bruteforce_erfc:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.bruteforce_fmax:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -13,6 +31,24 @@ graphics.OpenclCts.bruteforce_minmag:
 graphics.OpenclCts.c11_atomics_atomic_flag:
   expectation: FAIL
   since_build: R123-15755.0.0
+graphics.OpenclCts.cl_get_info_2darray_cl_snorm_int16:
+  expectation: FAIL
+  since_build: R134-16161.0.0
+graphics.OpenclCts.cl_get_info_2darray_cl_unsigned_int32:
+  expectation: FAIL
+  since_build: R134-16161.0.0
+graphics.OpenclCts.cl_get_info_2darray_cl_unsigned_int8:
+  expectation: FAIL
+  since_build: R134-16161.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image_to_buffer:
+  expectation: FAIL
+  since_build: R134-16165.0.0
+graphics.OpenclCts.cl_khr_command_buffer_fill_image:
+  expectation: FAIL
+  since_build: R134-16165.0.0
 graphics.OpenclCts.half_roundtrip:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -208,12 +244,9 @@ graphics.OpenclCts.integer_ops_ulong_math:
 graphics.OpenclCts.kernel_image_methods_2d_cl_snorm_int16:
   expectation: FAIL
   since_build: R134-16153.0.0
-graphics.OpenclCts.multiples_context_multiple_contexts_same_device:
+graphics.OpenclCts.profiling_execute_multipass:
   expectation: FAIL
-  since_build: R133-16145.0.0
-graphics.OpenclCts.non_uniform_work_group_non_uniform_3d_barriers:
+  since_build: R134-16165.0.0
+graphics.OpenclCts.profiling_profiling_timebase:
   expectation: FAIL
-  since_build: R130-16020.0.0
-graphics.OpenclCts.non_uniform_work_group_non_uniform_3d_basic:
-  expectation: FAIL
-  since_build: R132-16084.0.0
+  since_build: R134-16165.0.0
