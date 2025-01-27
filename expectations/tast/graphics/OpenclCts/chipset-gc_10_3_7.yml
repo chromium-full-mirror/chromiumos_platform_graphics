@@ -10,6 +10,9 @@ graphics.OpenclCts.api_get_image1d_info:
 graphics.OpenclCts.api_get_image2d_array_info:
   expectation: FAIL
   since_build: R134-16165.0.0
+graphics.OpenclCts.api_get_image2d_info:
+  expectation: FAIL
+  since_build: R134-16168.0.0
 graphics.OpenclCts.api_get_image3d_info:
   expectation: FAIL
   since_build: R134-16165.0.0
@@ -52,6 +55,9 @@ graphics.OpenclCts.cl_get_info_1darray_cl_snorm_int16:
 graphics.OpenclCts.cl_get_info_1darray_cl_snorm_int8:
   expectation: FAIL
   since_build: R134-16165.0.0
+graphics.OpenclCts.cl_get_info_1darray_cl_unorm_int16:
+  expectation: FAIL
+  since_build: R134-16168.0.0
 graphics.OpenclCts.cl_get_info_1darray_cl_unorm_int8:
   expectation: FAIL
   since_build: R134-16165.0.0
