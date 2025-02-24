@@ -1,27 +1,12 @@
+graphics.OpenclCts.api_consistency_requirements_fp16:
+  expectation: FAIL
+  since_build: R135-16197.0.0
 graphics.OpenclCts.api_kernel_local_memory_size:
   expectation: FAIL
   since_build: R134-16165.0.0
-graphics.OpenclCts.bruteforce_asin:
-  expectation: FAIL
-  since_build: R134-16168.0.0
-graphics.OpenclCts.bruteforce_asinpi:
-  expectation: FAIL
-  since_build: R134-16168.0.0
-graphics.OpenclCts.bruteforce_atan2:
-  expectation: FAIL
-  since_build: R134-16168.0.0
-graphics.OpenclCts.bruteforce_atan2pi:
-  expectation: FAIL
-  since_build: R134-16168.0.0
-graphics.OpenclCts.bruteforce_divide:
-  expectation: FAIL
-  since_build: R134-16168.0.0
 graphics.OpenclCts.bruteforce_erfc:
   expectation: FAIL
   since_build: R134-16165.0.0
-graphics.OpenclCts.bruteforce_fma:
-  expectation: FAIL
-  since_build: R134-16168.0.0
 graphics.OpenclCts.cl_khr_command_buffer_copy_image:
   expectation: FAIL
   since_build: R134-16165.0.0
@@ -29,14 +14,5 @@ graphics.OpenclCts.cl_khr_command_buffer_copy_image_to_buffer:
   expectation: FAIL
   since_build: R134-16165.0.0
 graphics.OpenclCts.cl_khr_command_buffer_fill_image:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.conversions_half_rtz_float:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.profiling_execute_multipass:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.profiling_profiling_timebase:
   expectation: FAIL
   since_build: R134-16165.0.0

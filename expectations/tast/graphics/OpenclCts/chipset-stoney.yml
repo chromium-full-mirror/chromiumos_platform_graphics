@@ -226,6 +226,9 @@ graphics.OpenclCts.integer_ops_ulong_logic:
 graphics.OpenclCts.integer_ops_ulong_math:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.integer_ops_ulong_shift:
+  expectation: FAIL
+  since_build: R135-16194.0.0
 graphics.OpenclCts.integer_ops_ushort_math:
   expectation: FAIL
   since_build: R134-16168.0.0
