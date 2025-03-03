@@ -7,21 +7,45 @@ graphics.OpenclCts.api_kernel_local_memory_size:
 graphics.OpenclCts.api_min_max_image_buffer_size:
   expectation: FAIL
   since_build: R134-16168.0.0
+graphics.OpenclCts.bruteforce_cos:
+  expectation: FAIL
+  since_build: R135-16203.0.0
 graphics.OpenclCts.bruteforce_erfc:
   expectation: FAIL
   since_build: R134-16165.0.0
+graphics.OpenclCts.bruteforce_fma:
+  expectation: FAIL
+  since_build: R135-16203.0.0
 graphics.OpenclCts.bruteforce_fmax:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.bruteforce_fmin:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_half_cos:
+  expectation: FAIL
+  since_build: R135-16203.0.0
+graphics.OpenclCts.bruteforce_half_sin:
+  expectation: FAIL
+  since_build: R135-16203.0.0
+graphics.OpenclCts.bruteforce_half_tan:
+  expectation: FAIL
+  since_build: R135-16203.0.0
 graphics.OpenclCts.bruteforce_maxmag:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.bruteforce_minmag:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_sin:
+  expectation: FAIL
+  since_build: R135-16203.0.0
+graphics.OpenclCts.bruteforce_sincos:
+  expectation: FAIL
+  since_build: R135-16203.0.0
+graphics.OpenclCts.bruteforce_tan:
+  expectation: FAIL
+  since_build: R135-16203.0.0
 graphics.OpenclCts.c11_atomics_atomic_flag:
   expectation: FAIL
   since_build: R123-15755.0.0
