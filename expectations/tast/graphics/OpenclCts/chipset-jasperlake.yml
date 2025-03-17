@@ -214,15 +214,6 @@ graphics.OpenclCts.c11_atomics_atomic_load:
 graphics.OpenclCts.c11_atomics_atomic_store:
   expectation: FAIL
   since_build: R123-15774.0.0
-graphics.OpenclCts.cl_khr_command_buffer_copy_image:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_khr_command_buffer_copy_image_to_buffer:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_khr_command_buffer_fill_image:
-  expectation: FAIL
-  since_build: R134-16165.0.0
 graphics.OpenclCts.events_callbacks:
   expectation: FAIL
   since_build: R125-15829.0.0

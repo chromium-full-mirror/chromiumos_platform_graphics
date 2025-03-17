@@ -160,9 +160,48 @@ graphics.OpenclCts.basic_writeimage_fp32:
 graphics.OpenclCts.basic_writeimage_int16:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_cos:
+  expectation: FAIL
+  since_build: R136-16222.0.0
 graphics.OpenclCts.bruteforce_erfc:
   expectation: FAIL
   since_build: R134-16165.0.0
+graphics.OpenclCts.bruteforce_exp10:
+  expectation: FAIL
+  since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_fma:
+  expectation: FAIL
+  since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_half_cos:
+  expectation: FAIL
+  since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_half_sin:
+  expectation: FAIL
+  since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_half_tan:
+  expectation: FAIL
+  since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_pow:
+  expectation: FAIL
+  since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_pown:
+  expectation: FAIL
+  since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_powr:
+  expectation: FAIL
+  since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_rootn:
+  expectation: FAIL
+  since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_sin:
+  expectation: FAIL
+  since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_sincos:
+  expectation: FAIL
+  since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_tan:
+  expectation: FAIL
+  since_build: R136-16222.0.0
 graphics.OpenclCts.buffers_buffer_fill_char:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -313,46 +352,7 @@ graphics.OpenclCts.buffers_sub_buffers_overlapping:
 graphics.OpenclCts.buffers_sub_buffers_read_write:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_half_float:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_signed_int8:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_snorm_int8:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_unorm_int8:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_unsigned_int8:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_half_float:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_signed_int8:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_snorm_int8:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_unorm_int8:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_unsigned_int8:
-  expectation: FAIL
-  since_build: R134-16165.0.0
 graphics.OpenclCts.cl_khr_command_buffer_basic_printf:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_khr_command_buffer_copy_image:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_khr_command_buffer_copy_image_to_buffer:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_khr_command_buffer_fill_image:
   expectation: FAIL
   since_build: R134-16165.0.0
 graphics.OpenclCts.compiler_features_macro:
@@ -2500,9 +2500,6 @@ graphics.OpenclCts.image_streams_1darray_cl_unorm_int16:
 graphics.OpenclCts.image_streams_1darray_cl_unorm_int8:
   expectation: FAIL
   since_build: R123-15755.0.0
-graphics.OpenclCts.image_streams_1darray_cl_unorm_short_565:
-  expectation: FAIL
-  since_build: R123-15755.0.0
 graphics.OpenclCts.image_streams_1darray_cl_unsigned_int16:
   expectation: FAIL
   since_build: R123-15755.0.0
@@ -2537,9 +2534,6 @@ graphics.OpenclCts.image_streams_2darray_cl_unorm_int16:
   expectation: FAIL
   since_build: R123-15755.0.0
 graphics.OpenclCts.image_streams_2darray_cl_unorm_int8:
-  expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.image_streams_2darray_cl_unorm_short_565:
   expectation: FAIL
   since_build: R123-15755.0.0
 graphics.OpenclCts.image_streams_2darray_cl_unsigned_int16:

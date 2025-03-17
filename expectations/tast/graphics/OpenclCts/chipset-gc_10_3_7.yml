@@ -10,15 +10,3 @@ graphics.OpenclCts.api_min_max_image_buffer_size:
 graphics.OpenclCts.bruteforce_erfc:
   expectation: FAIL
   since_build: R134-16165.0.0
-graphics.OpenclCts.cl_khr_command_buffer_copy_image:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_khr_command_buffer_copy_image_to_buffer:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_khr_command_buffer_fill_image:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.compiler_features_macro:
-  expectation: FAIL
-  since_build: R134-16175.0.0
