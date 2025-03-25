@@ -1,4 +1,3 @@
-dEQP-VK.api.device_init.create_instance_device_intentional_alloc_fail.basic,Timeout
 dEQP-VK.glsl.texture_functions.texturegradoffset.mirrored_repeat.isampler2d_fragment,Fail
 dEQP-VK.glsl.texture_functions.texturegradoffset.mirrored_repeat.isampler2d_vertex,Fail
 dEQP-VK.glsl.texture_functions.texturegradoffset.mirrored_repeat.isampler2darray_fragment,Fail
@@ -252,6 +251,5 @@ dEQP-VK.glsl.texture_functions.textureprojoffset.mirrored_repeat.usampler3d_bias
 dEQP-VK.glsl.texture_functions.textureprojoffset.mirrored_repeat.usampler3d_fragment,Fail
 dEQP-VK.glsl.texture_functions.textureprojoffset.mirrored_repeat.usampler3d_vertex,Fail
 dEQP-VK.protected_memory.stack.stacksize_1024,Fail
-dEQP-VK.protected_memory.stack.stacksize_256,Fail
 dEQP-VK.protected_memory.stack.stacksize_512,Fail
 dEQP-VK.spirv_assembly.instruction.graphics.mixed_relaxed_precision_operands.mixedrelaxedprecisionoperands,Fail
