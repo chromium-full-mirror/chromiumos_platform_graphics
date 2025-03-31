@@ -4,9 +4,6 @@ graphics.OpenclCts.api_consistency_requirements_fp16:
 graphics.OpenclCts.api_kernel_local_memory_size:
   expectation: FAIL
   since_build: R134-16165.0.0
-graphics.OpenclCts.api_min_max_image_buffer_size:
-  expectation: FAIL
-  since_build: R134-16168.0.0
 graphics.OpenclCts.bruteforce_cos:
   expectation: FAIL
   since_build: R135-16203.0.0
@@ -238,9 +235,3 @@ graphics.OpenclCts.integer_ops_ulong_math:
 graphics.OpenclCts.integer_ops_ulong_shift:
   expectation: FAIL
   since_build: R135-16194.0.0
-graphics.OpenclCts.integer_ops_ushort_math:
-  expectation: FAIL
-  since_build: R134-16168.0.0
-graphics.OpenclCts.kernel_image_methods_2d_cl_snorm_int16:
-  expectation: FAIL
-  since_build: R134-16153.0.0

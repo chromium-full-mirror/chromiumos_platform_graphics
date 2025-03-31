@@ -4,9 +4,6 @@ graphics.OpenclCts.api_consistency_requirements_fp16:
 graphics.OpenclCts.api_kernel_local_memory_size:
   expectation: FAIL
   since_build: R134-16165.0.0
-graphics.OpenclCts.api_min_max_image_buffer_size:
-  expectation: FAIL
-  since_build: R134-16165.0.0
 graphics.OpenclCts.bruteforce_erfc:
   expectation: FAIL
   since_build: R134-16165.0.0
