@@ -1,12 +1,6 @@
-graphics.OpenclCts.api_consistency_requirements_fp16:
-  expectation: FAIL
-  since_build: R134-16175.0.0
 graphics.OpenclCts.api_kernel_arg_changes:
   expectation: FAIL
   since_build: R134-16165.0.0
-graphics.OpenclCts.api_kernel_local_memory_size:
+graphics.OpenclCts.bruteforce_frexp:
   expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.bruteforce_erfc:
-  expectation: FAIL
-  since_build: R134-16165.0.0
+  since_build: R137-16244.0.0

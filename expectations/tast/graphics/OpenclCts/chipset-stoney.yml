@@ -1,16 +1,4 @@
-graphics.OpenclCts.api_consistency_requirements_fp16:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.api_kernel_local_memory_size:
-  expectation: FAIL
-  since_build: R134-16165.0.0
 graphics.OpenclCts.bruteforce_cos:
-  expectation: FAIL
-  since_build: R135-16203.0.0
-graphics.OpenclCts.bruteforce_erfc:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.bruteforce_fma:
   expectation: FAIL
   since_build: R135-16203.0.0
 graphics.OpenclCts.bruteforce_fmax:
@@ -232,6 +220,6 @@ graphics.OpenclCts.integer_ops_ulong_logic:
 graphics.OpenclCts.integer_ops_ulong_math:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.integer_ops_ulong_shift:
+graphics.OpenclCts.integer_ops_ushort_compare:
   expectation: FAIL
-  since_build: R135-16194.0.0
+  since_build: R137-16244.0.0

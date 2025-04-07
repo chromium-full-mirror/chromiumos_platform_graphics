@@ -34,18 +34,12 @@ graphics.OpenclCts.allocations_single_1_image2d_write:
 graphics.OpenclCts.allocations_single_1_image2d_write_non_blocking:
   expectation: FAIL
   since_build: R125-15847.0.0
-graphics.OpenclCts.api_consistency_requirements_fp16:
-  expectation: FAIL
-  since_build: R134-16175.0.0
 graphics.OpenclCts.api_kernel_arg_changes:
   expectation: FAIL
   since_build: R125-15847.0.0
 graphics.OpenclCts.api_kernel_arg_multi_setup_random:
   expectation: FAIL
   since_build: R125-15847.0.0
-graphics.OpenclCts.api_kernel_local_memory_size:
-  expectation: FAIL
-  since_build: R134-16165.0.0
 graphics.OpenclCts.api_sub_group_dispatch:
   expectation: FAIL
   since_build: R125-15847.0.0
@@ -127,9 +121,9 @@ graphics.OpenclCts.basic_prefetch:
 graphics.OpenclCts.basic_wg_barrier:
   expectation: FAIL
   since_build: R125-15847.0.0
-graphics.OpenclCts.bruteforce_erfc:
+graphics.OpenclCts.bruteforce_frexp:
   expectation: FAIL
-  since_build: R134-16165.0.0
+  since_build: R137-16244.0.0
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R125-15847.0.0

@@ -1,27 +1,12 @@
-graphics.OpenclCts.api_consistency_requirements_fp16:
+graphics.OpenclCts.bruteforce_frexp:
   expectation: FAIL
-  since_build: R135-16197.0.0
-graphics.OpenclCts.api_kernel_local_memory_size:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.bruteforce_erfc:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.cl_copy_images_1darray_cl_signed_int32:
-  expectation: FAIL
-  since_build: R129-15992.0.0
-graphics.OpenclCts.cl_copy_images_1darray_cl_unsigned_int8:
-  expectation: FAIL
-  since_build: R129-15970.0.0
+  since_build: R137-16242.0.0
 graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_unsigned_int32:
   expectation: FAIL
   since_build: R129-15970.0.0
 graphics.OpenclCts.cl_copy_images_2dto3d_cl_signed_int32:
   expectation: FAIL
   since_build: R129-15970.0.0
-graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int16:
-  expectation: FAIL
-  since_build: R136-16220.0.0
 graphics.OpenclCts.cl_fill_images_2darray_cl_snorm_int8:
   expectation: FAIL
   since_build: R129-15992.0.0
