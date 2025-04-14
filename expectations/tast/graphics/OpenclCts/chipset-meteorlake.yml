@@ -13,6 +13,9 @@ graphics.OpenclCts.cl_fill_images_2darray_cl_snorm_int8:
 graphics.OpenclCts.cl_fill_images_2darray_cl_unorm_int8:
   expectation: FAIL
   since_build: R132-16082.0.0
+graphics.OpenclCts.cl_fill_images_2darray_cl_unsigned_int16:
+  expectation: FAIL
+  since_build: R137-16249.0.0
 graphics.OpenclCts.cl_fill_images_3d_cl_signed_int16:
   expectation: FAIL
   since_build: R134-16174.0.0
