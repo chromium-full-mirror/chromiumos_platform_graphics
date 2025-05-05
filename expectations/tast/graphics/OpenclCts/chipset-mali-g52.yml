@@ -121,9 +121,6 @@ graphics.OpenclCts.cl_copy_images_2darrayto2d_cl_snorm_int16:
 graphics.OpenclCts.cl_copy_images_2darrayto2d_cl_unsigned_int32:
   expectation: FAIL
   since_build: R129-15992.0.0
-graphics.OpenclCts.cl_copy_images_3dto2d_cl_float:
-  expectation: FAIL
-  since_build: R125-15847.0.0
 graphics.OpenclCts.cl_copy_images_3dto2d_cl_half_float:
   expectation: FAIL
   since_build: R126-15855.0.0

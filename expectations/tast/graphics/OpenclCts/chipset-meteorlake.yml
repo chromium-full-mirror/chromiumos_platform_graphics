@@ -1,6 +1,3 @@
-graphics.OpenclCts.bruteforce_frexp:
-  expectation: FAIL
-  since_build: R137-16242.0.0
 graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_unsigned_int32:
   expectation: FAIL
   since_build: R129-15970.0.0
@@ -17,8 +14,5 @@ graphics.OpenclCts.cl_fill_images_2darray_cl_unsigned_int16:
   expectation: FAIL
   since_build: R137-16249.0.0
 graphics.OpenclCts.cl_fill_images_3d_cl_signed_int16:
-  expectation: FAIL
-  since_build: R134-16174.0.0
-graphics.OpenclCts.cl_fill_images_3d_cl_unorm_int8:
   expectation: FAIL
   since_build: R134-16174.0.0

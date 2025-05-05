@@ -121,9 +121,6 @@ graphics.OpenclCts.basic_prefetch:
 graphics.OpenclCts.basic_wg_barrier:
   expectation: FAIL
   since_build: R123-15774.0.0
-graphics.OpenclCts.bruteforce_frexp:
-  expectation: FAIL
-  since_build: R137-16244.0.0
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R114-15432.0.0

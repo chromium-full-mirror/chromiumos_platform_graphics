@@ -1,3 +1,1 @@
-graphics.OpenclCts.bruteforce_frexp:
-  expectation: FAIL
-  since_build: R137-16244.0.0
+{}

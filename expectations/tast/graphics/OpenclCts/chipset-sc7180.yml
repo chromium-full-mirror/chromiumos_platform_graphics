@@ -160,12 +160,9 @@ graphics.OpenclCts.bruteforce_cos:
 graphics.OpenclCts.bruteforce_exp10:
   expectation: FAIL
   since_build: R136-16222.0.0
-graphics.OpenclCts.bruteforce_fma:
+graphics.OpenclCts.bruteforce_expm1:
   expectation: FAIL
-  since_build: R136-16222.0.0
-graphics.OpenclCts.bruteforce_frexp:
-  expectation: FAIL
-  since_build: R137-16244.0.0
+  since_build: R138-16273.0.0
 graphics.OpenclCts.bruteforce_half_cos:
   expectation: FAIL
   since_build: R136-16222.0.0
