@@ -1,5 +1,0 @@
-graphics.Clvk.api_tests:
-  expectation: FAIL
-  tickets:
-  - b/253557330
-  comments: Passed 35 tests, failed 1 tests ([WithCommandQueue.SimpleImage])
