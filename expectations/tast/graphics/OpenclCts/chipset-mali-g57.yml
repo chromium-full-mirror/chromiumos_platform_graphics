@@ -4,33 +4,9 @@ graphics.OpenclCts.basic_enqueue_map_image:
 graphics.OpenclCts.basic_imagedim_non_pow2:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.basic_local_kernel_scope:
-  expectation: FAIL
-  since_build: R123-15784.0.0
-graphics.OpenclCts.bruteforce_cos:
-  expectation: FAIL
-  since_build: R136-16222.0.0
 graphics.OpenclCts.bruteforce_erfc:
   expectation: FAIL
   since_build: R135-16197.0.0
-graphics.OpenclCts.bruteforce_half_cos:
-  expectation: FAIL
-  since_build: R136-16222.0.0
-graphics.OpenclCts.bruteforce_half_sin:
-  expectation: FAIL
-  since_build: R136-16222.0.0
-graphics.OpenclCts.bruteforce_half_tan:
-  expectation: FAIL
-  since_build: R136-16222.0.0
-graphics.OpenclCts.bruteforce_sin:
-  expectation: FAIL
-  since_build: R136-16222.0.0
-graphics.OpenclCts.bruteforce_sincos:
-  expectation: FAIL
-  since_build: R136-16222.0.0
-graphics.OpenclCts.bruteforce_tan:
-  expectation: FAIL
-  since_build: R136-16222.0.0
 graphics.OpenclCts.cl_copy_images_1d_cl_signed_int16:
   expectation: FAIL
   since_build: R124-15805.0.0
@@ -61,9 +37,6 @@ graphics.OpenclCts.cl_copy_images_2d_cl_snorm_int8:
 graphics.OpenclCts.cl_copy_images_2d_cl_unorm_int16:
   expectation: FAIL
   since_build: R124-15805.0.0
-graphics.OpenclCts.cl_copy_images_2darrayto2d_cl_float:
-  expectation: FAIL
-  since_build: R138-16273.0.0
 graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_float:
   expectation: FAIL
   since_build: R137-16251.0.0
@@ -268,15 +241,6 @@ graphics.OpenclCts.cl_fill_images_3d_cl_unsigned_int32:
 graphics.OpenclCts.cl_fill_images_3d_cl_unsigned_int8:
   expectation: FAIL
   since_build: R123-15766.0.0
-graphics.OpenclCts.cl_khr_command_buffer_copy_image:
-  expectation: FAIL
-  since_build: R135-16197.0.0
-graphics.OpenclCts.cl_khr_command_buffer_copy_image_to_buffer:
-  expectation: FAIL
-  since_build: R135-16197.0.0
-graphics.OpenclCts.cl_khr_command_buffer_fill_image:
-  expectation: FAIL
-  since_build: R135-16197.0.0
 graphics.OpenclCts.contractions_contractions_float_0:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -338,14 +302,5 @@ graphics.OpenclCts.image_streams_2darray_cl_unsigned_int32:
   expectation: FAIL
   since_build: R123-15755.0.0
 graphics.OpenclCts.image_streams_2darray_cl_unsigned_int8:
-  expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.non_uniform_work_group_non_uniform_1d_basic:
-  expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.non_uniform_work_group_non_uniform_2d_basic:
-  expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.non_uniform_work_group_non_uniform_3d_basic:
   expectation: FAIL
   since_build: R123-15755.0.0

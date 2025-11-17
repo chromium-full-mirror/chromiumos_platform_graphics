@@ -24,9 +24,6 @@ graphics.OpenclCts.api_null_buffer_arg:
   expectation: FAIL
   tickets:
   - b/227134903
-graphics.OpenclCts.api_sub_group_dispatch:
-  expectation: FAIL
-  since_build: R123-15755.0.0
 graphics.OpenclCts.api_work_group_suggested_local_size_1d:
   expectation: FAIL
   since_build: R134-16165.0.0
@@ -343,9 +340,6 @@ graphics.OpenclCts.buffers_sub_buffers_overlapping:
 graphics.OpenclCts.buffers_sub_buffers_read_write:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.cl_khr_command_buffer_basic_printf:
-  expectation: FAIL
-  since_build: R134-16165.0.0
 graphics.OpenclCts.compiler_features_macro:
   expectation: FAIL
   since_build: R123-15755.0.0
@@ -2491,6 +2485,9 @@ graphics.OpenclCts.image_streams_1darray_cl_unorm_int16:
 graphics.OpenclCts.image_streams_1darray_cl_unorm_int8:
   expectation: FAIL
   since_build: R123-15755.0.0
+graphics.OpenclCts.image_streams_1darray_cl_unorm_short_565:
+  expectation: FAIL
+  since_build: R144-16480.0.0
 graphics.OpenclCts.image_streams_1darray_cl_unsigned_int16:
   expectation: FAIL
   since_build: R123-15755.0.0
@@ -2527,6 +2524,9 @@ graphics.OpenclCts.image_streams_2darray_cl_unorm_int16:
 graphics.OpenclCts.image_streams_2darray_cl_unorm_int8:
   expectation: FAIL
   since_build: R123-15755.0.0
+graphics.OpenclCts.image_streams_2darray_cl_unorm_short_565:
+  expectation: FAIL
+  since_build: R144-16480.0.0
 graphics.OpenclCts.image_streams_2darray_cl_unsigned_int16:
   expectation: FAIL
   since_build: R123-15755.0.0
