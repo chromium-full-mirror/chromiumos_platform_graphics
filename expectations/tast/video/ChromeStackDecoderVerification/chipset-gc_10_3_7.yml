@@ -53,7 +53,7 @@ video.ChromeStackDecoderVerification.hevc_files_from_bugs_242708185:
   - b/242708185
   failure_pattern: "failed to validate: \\[RPS_C_ericsson_5.hevc\\]"
 
-tast.video.ChromeStackDecoderVerification.av1_files_from_bugs_346405213:
+video.ChromeStackDecoderVerification.av1_files_from_bugs_346405213:
   expectation: FAIL
   tickets:
   - b/477358641
