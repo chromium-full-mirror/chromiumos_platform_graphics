@@ -1,6 +1,1 @@
-graphics.OpenclCts.api_kernel_arg_changes:
-  expectation: FAIL
-  since_build: R134-16165.0.0
-graphics.OpenclCts.basic_imagedim_non_pow2:
-  expectation: FAIL
-  since_build: R137-16251.0.0
+{}
