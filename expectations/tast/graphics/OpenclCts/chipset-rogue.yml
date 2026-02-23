@@ -306,6 +306,9 @@ graphics.OpenclCts.bruteforce_reciprocal:
 graphics.OpenclCts.bruteforce_remainder:
   expectation: FAIL
   since_build: R121-15668.0.0
+graphics.OpenclCts.bruteforce_remquo:
+  expectation: FAIL
+  since_build: R147-16590.0.0
 graphics.OpenclCts.bruteforce_rint:
   expectation: FAIL
   since_build: R116-15488.0.0

@@ -178,6 +178,9 @@ graphics.OpenclCts.bruteforce_pown:
 graphics.OpenclCts.bruteforce_powr:
   expectation: FAIL
   since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_remquo:
+  expectation: FAIL
+  since_build: R147-16590.0.0
 graphics.OpenclCts.bruteforce_rootn:
   expectation: FAIL
   since_build: R136-16222.0.0

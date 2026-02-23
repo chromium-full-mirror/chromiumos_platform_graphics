@@ -1,15 +1,12 @@
 graphics.OpenclCts.api_consistency_subgroups:
   expectation: FAIL
   since_build: R144-16479.0.0
-graphics.OpenclCts.basic_local_arg_def:
-  expectation: FAIL
-  since_build: R123-15783.0.0
-graphics.OpenclCts.basic_local_kernel_def:
-  expectation: FAIL
-  since_build: R144-16479.0.0
 graphics.OpenclCts.bruteforce_erfc:
   expectation: FAIL
   since_build: R135-16197.0.0
+graphics.OpenclCts.bruteforce_remquo:
+  expectation: FAIL
+  since_build: R147-16590.0.0
 graphics.OpenclCts.cl_copy_images_1d_cl_float:
   expectation: FAIL
   since_build: R135-16197.0.0

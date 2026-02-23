@@ -1,15 +1,12 @@
 graphics.OpenclCts.basic_enqueue_map_image:
   expectation: FAIL
   since_build: R125-15847.0.0
-graphics.OpenclCts.basic_local_arg_def:
-  expectation: FAIL
-  since_build: R123-15784.0.0
-graphics.OpenclCts.basic_local_kernel_def:
-  expectation: FAIL
-  since_build: R144-16480.0.0
 graphics.OpenclCts.bruteforce_erfc:
   expectation: FAIL
   since_build: R135-16197.0.0
+graphics.OpenclCts.bruteforce_remquo:
+  expectation: FAIL
+  since_build: R147-16590.0.0
 graphics.OpenclCts.cl_copy_images_1d_cl_float:
   expectation: FAIL
   since_build: R125-15847.0.0

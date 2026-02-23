@@ -10,6 +10,9 @@ graphics.OpenclCts.bruteforce_half_sin:
 graphics.OpenclCts.bruteforce_half_tan:
   expectation: FAIL
   since_build: R135-16203.0.0
+graphics.OpenclCts.bruteforce_remquo:
+  expectation: FAIL
+  since_build: R147-16590.0.0
 graphics.OpenclCts.bruteforce_sin:
   expectation: FAIL
   since_build: R135-16203.0.0

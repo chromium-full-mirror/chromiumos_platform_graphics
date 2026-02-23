@@ -22,6 +22,9 @@ graphics.OpenclCts.bruteforce_maxmag:
 graphics.OpenclCts.bruteforce_minmag:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_remquo:
+  expectation: FAIL
+  since_build: R147-16590.0.0
 graphics.OpenclCts.bruteforce_sin:
   expectation: FAIL
   since_build: R135-16203.0.0
