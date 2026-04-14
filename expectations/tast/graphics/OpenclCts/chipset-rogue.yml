@@ -367,9 +367,6 @@ graphics.OpenclCts.c11_atomics_atomic_compare_exchange_strong:
 graphics.OpenclCts.c11_atomics_atomic_compare_exchange_weak:
   expectation: FAIL
   since_build: R123-15766.0.0
-graphics.OpenclCts.c11_atomics_atomic_fence:
-  expectation: FAIL
-  since_build: R123-15766.0.0
 graphics.OpenclCts.c11_atomics_atomic_fetch_orand:
   expectation: FAIL
   since_build: R123-15766.0.0

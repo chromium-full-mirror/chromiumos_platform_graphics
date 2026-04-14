@@ -7,9 +7,6 @@ graphics.OpenclCts.basic_local_kernel_scope:
 graphics.OpenclCts.bruteforce_erfc:
   expectation: FAIL
   since_build: R134-16165.0.0
-graphics.OpenclCts.c11_atomics_atomic_fence:
-  expectation: FAIL
-  since_build: R134-16153.0.0
 graphics.OpenclCts.cl_copy_images_1d_cl_half_float:
   expectation: FAIL
   since_build: R138-16273.0.0
