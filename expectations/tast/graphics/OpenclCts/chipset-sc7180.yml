@@ -20,6 +20,9 @@ graphics.OpenclCts.api_kernel_arg_multi_setup_random:
 graphics.OpenclCts.api_min_max_parameter_size:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.api_negative_invalid_arg_size:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.api_null_buffer_arg:
   expectation: FAIL
   tickets:
@@ -154,6 +157,12 @@ graphics.OpenclCts.basic_writeimage_int16:
 graphics.OpenclCts.bruteforce_cos:
   expectation: FAIL
   since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_erf:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_erfc:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_exp10:
   expectation: FAIL
   since_build: R136-16222.0.0
@@ -178,12 +187,12 @@ graphics.OpenclCts.bruteforce_pown:
 graphics.OpenclCts.bruteforce_powr:
   expectation: FAIL
   since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_remainder:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_remquo:
   expectation: FAIL
   since_build: R147-16590.0.0
-graphics.OpenclCts.bruteforce_rootn:
-  expectation: FAIL
-  since_build: R136-16222.0.0
 graphics.OpenclCts.bruteforce_sin:
   expectation: FAIL
   since_build: R136-16222.0.0
@@ -343,6 +352,12 @@ graphics.OpenclCts.buffers_sub_buffers_overlapping:
 graphics.OpenclCts.buffers_sub_buffers_read_write:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.cl_khr_command_buffer_command_null_required_work_group_size:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.compiler_features_macro:
   expectation: FAIL
   since_build: R123-15755.0.0
@@ -2938,6 +2953,18 @@ graphics.OpenclCts.select_select_ushort_short:
 graphics.OpenclCts.select_select_ushort_ushort:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_ballot:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_core:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_non_uniform_vote:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_shuffle:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.thread_dimensions_full_1d_explicit_local:
   expectation: FAIL
   since_build: R110-15241.0.0

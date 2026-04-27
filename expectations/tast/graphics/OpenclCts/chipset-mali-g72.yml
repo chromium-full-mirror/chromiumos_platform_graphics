@@ -1,12 +1,30 @@
 graphics.OpenclCts.api_consistency_subgroups:
   expectation: FAIL
   since_build: R144-16479.0.0
-graphics.OpenclCts.bruteforce_erfc:
+graphics.OpenclCts.bruteforce_erf:
   expectation: FAIL
-  since_build: R135-16197.0.0
-graphics.OpenclCts.bruteforce_remquo:
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_fdim:
   expectation: FAIL
-  since_build: R147-16590.0.0
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_fract:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_half_powr:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_logb:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_pow:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_powr:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_tanh:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.cl_copy_images_1d_cl_float:
   expectation: FAIL
   since_build: R135-16197.0.0
@@ -130,6 +148,18 @@ graphics.OpenclCts.cl_fill_images_2d_cl_unorm_int8:
 graphics.OpenclCts.cl_fill_images_2d_cl_unsigned_int8:
   expectation: FAIL
   since_build: R123-15766.0.0
+graphics.OpenclCts.cl_khr_command_buffer_command_null_required_work_group_size:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image_to_buffer:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.cl_khr_command_buffer_fill_image:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.contractions_contractions_float_0:
   expectation: FAIL
   since_build: R110-15241.0.0

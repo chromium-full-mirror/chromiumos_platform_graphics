@@ -1,6 +1,15 @@
 graphics.OpenclCts.bruteforce_cos:
   expectation: FAIL
   since_build: R135-16203.0.0
+graphics.OpenclCts.bruteforce_erf:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_erfc:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_expm1:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_fmax:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -22,6 +31,18 @@ graphics.OpenclCts.bruteforce_maxmag:
 graphics.OpenclCts.bruteforce_minmag:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.bruteforce_pow:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_pown:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_powr:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_remainder:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_remquo:
   expectation: FAIL
   since_build: R147-16590.0.0
@@ -37,6 +58,9 @@ graphics.OpenclCts.bruteforce_tan:
 graphics.OpenclCts.c11_atomics_atomic_flag:
   expectation: FAIL
   since_build: R123-15755.0.0
+graphics.OpenclCts.cl_khr_command_buffer_command_null_required_work_group_size:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.half_roundtrip:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -226,3 +250,12 @@ graphics.OpenclCts.integer_ops_ulong_math:
 graphics.OpenclCts.integer_ops_ushort_compare:
   expectation: FAIL
   since_build: R137-16244.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_ballot:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_non_uniform_vote:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_rotate:
+  expectation: FAIL
+  since_build: R149-16654.0.0

@@ -121,9 +121,36 @@ graphics.OpenclCts.basic_prefetch:
 graphics.OpenclCts.basic_wg_barrier:
   expectation: FAIL
   since_build: R123-15774.0.0
+graphics.OpenclCts.bruteforce_cos:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_expm1:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_fdim:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_half_cos:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R114-15432.0.0
+graphics.OpenclCts.bruteforce_half_sin:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_half_tan:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_sin:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_sincos:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_tan:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.buffers_buffer_map_read_char:
   expectation: FAIL
   since_build: R123-15774.0.0
@@ -202,6 +229,12 @@ graphics.OpenclCts.c11_atomics_atomic_load:
 graphics.OpenclCts.c11_atomics_atomic_store:
   expectation: FAIL
   since_build: R123-15774.0.0
+graphics.OpenclCts.cl_khr_command_buffer_command_null_required_work_group_size:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.events_callbacks:
   expectation: FAIL
   since_build: R125-15829.0.0
@@ -436,3 +469,12 @@ graphics.OpenclCts.non_uniform_work_group_non_uniform_3d_basic:
 graphics.OpenclCts.profiling_execute_multipass:
   expectation: FAIL
   since_build: R134-16165.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_ballot:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_non_uniform_vote:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_rotate:
+  expectation: FAIL
+  since_build: R149-16654.0.0

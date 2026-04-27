@@ -1,6 +1,30 @@
-graphics.OpenclCts.cl_copy_images_2darrayto3d_cl_unsigned_int32:
+graphics.OpenclCts.bruteforce_cos:
   expectation: FAIL
-  since_build: R129-15970.0.0
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_expm1:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_fdim:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_half_cos:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_half_sin:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_half_tan:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_sin:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_sincos:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_tan:
+  expectation: FAIL
+  since_build: R149-16654.0.0
 graphics.OpenclCts.cl_copy_images_2dto3d_cl_signed_int32:
   expectation: FAIL
   since_build: R129-15970.0.0
@@ -16,3 +40,15 @@ graphics.OpenclCts.cl_fill_images_2darray_cl_unsigned_int16:
 graphics.OpenclCts.cl_fill_images_3d_cl_signed_int16:
   expectation: FAIL
   since_build: R134-16174.0.0
+graphics.OpenclCts.cl_khr_command_buffer_command_null_required_work_group_size:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_ballot:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_non_uniform_vote:
+  expectation: FAIL
+  since_build: R149-16654.0.0
+graphics.OpenclCts.subgroups_subgroup_functions_rotate:
+  expectation: FAIL
+  since_build: R149-16654.0.0
