@@ -46,13 +46,7 @@ graphics.OpenclCts.bruteforce_tan:
 graphics.OpenclCts.c11_atomics_atomic_flag:
   expectation: FAIL
   since_build: R123-15755.0.0
-graphics.OpenclCts.cl_khr_command_buffer_command_null_required_work_group_size:
-  expectation: FAIL
-  since_build: R149-16658.0.0
 graphics.OpenclCts.subgroups_subgroup_functions_ballot:
-  expectation: FAIL
-  since_build: R149-16658.0.0
-graphics.OpenclCts.subgroups_subgroup_functions_non_uniform_vote:
   expectation: FAIL
   since_build: R149-16658.0.0
 graphics.OpenclCts.subgroups_subgroup_functions_rotate:

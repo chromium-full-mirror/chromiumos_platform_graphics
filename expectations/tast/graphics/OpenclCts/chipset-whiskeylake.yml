@@ -229,9 +229,6 @@ graphics.OpenclCts.c11_atomics_atomic_load:
 graphics.OpenclCts.c11_atomics_atomic_store:
   expectation: FAIL
   since_build: R125-15847.0.0
-graphics.OpenclCts.cl_khr_command_buffer_command_null_required_work_group_size:
-  expectation: FAIL
-  since_build: R149-16654.0.0
 graphics.OpenclCts.cl_khr_command_buffer_copy_image:
   expectation: FAIL
   since_build: R149-16654.0.0
@@ -470,9 +467,6 @@ graphics.OpenclCts.profiling_execute_multipass:
   expectation: FAIL
   since_build: R134-16165.0.0
 graphics.OpenclCts.subgroups_subgroup_functions_ballot:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.subgroups_subgroup_functions_non_uniform_vote:
   expectation: FAIL
   since_build: R149-16654.0.0
 graphics.OpenclCts.subgroups_subgroup_functions_rotate:
