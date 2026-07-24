@@ -16,6 +16,7 @@ include /OWNERS.mesa_amd
 include /OWNERS.mesa_freedreno
 include /OWNERS.mesa_iris
 include /OWNERS.mesa_panfrost
+include /OWNERS.mesa_reven
 include /OWNERS.minigbm
 include /OWNERS.nvidia
 include /OWNERS.tast_graphics
