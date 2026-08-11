@@ -1,24 +1,48 @@
-graphics.OpenclCts.bruteforce_cos:
-  expectation: FAIL
-  since_build: R135-16203.0.0
 graphics.OpenclCts.bruteforce_erf:
   expectation: FAIL
   since_build: R149-16658.0.0
 graphics.OpenclCts.bruteforce_erfc:
   expectation: FAIL
   since_build: R149-16658.0.0
+graphics.OpenclCts.bruteforce_exp:
+  expectation: FAIL
+  since_build: R153-16771.0.0
+graphics.OpenclCts.bruteforce_exp2:
+  expectation: FAIL
+  since_build: R153-16771.0.0
 graphics.OpenclCts.bruteforce_expm1:
   expectation: FAIL
   since_build: R149-16658.0.0
-graphics.OpenclCts.bruteforce_half_cos:
+graphics.OpenclCts.bruteforce_fma:
   expectation: FAIL
-  since_build: R135-16203.0.0
-graphics.OpenclCts.bruteforce_half_sin:
+  since_build: R153-16771.0.0
+graphics.OpenclCts.bruteforce_fmod:
   expectation: FAIL
-  since_build: R135-16203.0.0
-graphics.OpenclCts.bruteforce_half_tan:
+  since_build: R153-16771.0.0
+graphics.OpenclCts.bruteforce_half_log:
   expectation: FAIL
-  since_build: R135-16203.0.0
+  since_build: R153-16771.0.0
+graphics.OpenclCts.bruteforce_half_log10:
+  expectation: FAIL
+  since_build: R153-16771.0.0
+graphics.OpenclCts.bruteforce_half_log2:
+  expectation: FAIL
+  since_build: R153-16771.0.0
+graphics.OpenclCts.bruteforce_half_powr:
+  expectation: FAIL
+  since_build: R153-16771.0.0
+graphics.OpenclCts.bruteforce_log:
+  expectation: FAIL
+  since_build: R153-16771.0.0
+graphics.OpenclCts.bruteforce_log10:
+  expectation: FAIL
+  since_build: R153-16771.0.0
+graphics.OpenclCts.bruteforce_log2:
+  expectation: FAIL
+  since_build: R153-16771.0.0
+graphics.OpenclCts.bruteforce_nextafter:
+  expectation: FAIL
+  since_build: R153-16771.0.0
 graphics.OpenclCts.bruteforce_pow:
   expectation: FAIL
   since_build: R149-16658.0.0
@@ -34,6 +58,9 @@ graphics.OpenclCts.bruteforce_remainder:
 graphics.OpenclCts.bruteforce_remquo:
   expectation: FAIL
   since_build: R147-16590.0.0
+graphics.OpenclCts.bruteforce_rootn:
+  expectation: FAIL
+  since_build: R153-16771.0.0
 graphics.OpenclCts.bruteforce_sin:
   expectation: FAIL
   since_build: R135-16203.0.0
@@ -46,6 +73,15 @@ graphics.OpenclCts.bruteforce_tan:
 graphics.OpenclCts.c11_atomics_atomic_flag:
   expectation: FAIL
   since_build: R123-15755.0.0
+graphics.OpenclCts.cl_khr_command_buffer_copy_image:
+  expectation: FAIL
+  since_build: R153-16771.0.0
+graphics.OpenclCts.compiler_options_denorm_cache:
+  expectation: FAIL
+  since_build: R153-16771.0.0
+graphics.OpenclCts.geometrics_geom_normalize:
+  expectation: FAIL
+  since_build: R153-16771.0.0
 graphics.OpenclCts.subgroups_subgroup_functions_ballot:
   expectation: FAIL
   since_build: R149-16658.0.0

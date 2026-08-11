@@ -169,9 +169,15 @@ graphics.OpenclCts.bruteforce_exp10:
 graphics.OpenclCts.bruteforce_expm1:
   expectation: FAIL
   since_build: R138-16273.0.0
+graphics.OpenclCts.bruteforce_fma:
+  expectation: FAIL
+  since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_half_cos:
   expectation: FAIL
   since_build: R136-16222.0.0
+graphics.OpenclCts.bruteforce_half_powr:
+  expectation: FAIL
+  since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_half_sin:
   expectation: FAIL
   since_build: R136-16222.0.0
@@ -193,6 +199,9 @@ graphics.OpenclCts.bruteforce_remainder:
 graphics.OpenclCts.bruteforce_remquo:
   expectation: FAIL
   since_build: R147-16590.0.0
+graphics.OpenclCts.bruteforce_rootn:
+  expectation: FAIL
+  since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_sin:
   expectation: FAIL
   since_build: R136-16222.0.0

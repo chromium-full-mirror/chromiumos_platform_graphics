@@ -124,12 +124,21 @@ graphics.OpenclCts.basic_wg_barrier:
 graphics.OpenclCts.bruteforce_cos:
   expectation: FAIL
   since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_erfc:
+  expectation: FAIL
+  since_build: R153-16775.0.0
+graphics.OpenclCts.bruteforce_exp:
+  expectation: FAIL
+  since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_expm1:
   expectation: FAIL
   since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_fdim:
   expectation: FAIL
   since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_fmod:
+  expectation: FAIL
+  since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_half_cos:
   expectation: FAIL
   since_build: R149-16654.0.0
@@ -142,6 +151,33 @@ graphics.OpenclCts.bruteforce_half_sin:
 graphics.OpenclCts.bruteforce_half_tan:
   expectation: FAIL
   since_build: R149-16654.0.0
+graphics.OpenclCts.bruteforce_hypot:
+  expectation: FAIL
+  since_build: R153-16775.0.0
+graphics.OpenclCts.bruteforce_ldexp:
+  expectation: FAIL
+  since_build: R153-16775.0.0
+graphics.OpenclCts.bruteforce_nextafter:
+  expectation: FAIL
+  since_build: R153-16775.0.0
+graphics.OpenclCts.bruteforce_pow:
+  expectation: FAIL
+  since_build: R153-16775.0.0
+graphics.OpenclCts.bruteforce_pown:
+  expectation: FAIL
+  since_build: R153-16775.0.0
+graphics.OpenclCts.bruteforce_powr:
+  expectation: FAIL
+  since_build: R153-16775.0.0
+graphics.OpenclCts.bruteforce_remainder:
+  expectation: FAIL
+  since_build: R153-16775.0.0
+graphics.OpenclCts.bruteforce_remquo:
+  expectation: FAIL
+  since_build: R153-16775.0.0
+graphics.OpenclCts.bruteforce_rootn:
+  expectation: FAIL
+  since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_sin:
   expectation: FAIL
   since_build: R149-16654.0.0
@@ -232,6 +268,9 @@ graphics.OpenclCts.c11_atomics_atomic_store:
 graphics.OpenclCts.cl_khr_command_buffer_copy_image:
   expectation: FAIL
   since_build: R149-16654.0.0
+graphics.OpenclCts.compiler_options_denorm_cache:
+  expectation: FAIL
+  since_build: R153-16775.0.0
 graphics.OpenclCts.events_callbacks:
   expectation: FAIL
   since_build: R125-15847.0.0
