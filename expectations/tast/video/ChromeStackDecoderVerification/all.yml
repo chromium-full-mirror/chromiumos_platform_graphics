@@ -34,12 +34,6 @@ video.ChromeStackDecoderVerification.hevc_files_from_bugs_241733687:
   - b/241733687
   failure_pattern: "failed to validate: \\[CONFWIN_A_Sony_1.hevc\\]"
 
-video.ChromeStackDecoderVerification.hevc_files_from_bugs_241772308:
-  expectation: FAIL
-  tickets:
-  - b/241772308
-  failure_pattern: "failed to validate: \\[NoOutPrior_A_Qualcomm_1.hevc\\]"
-
 video.ChromeStackDecoderVerification.hevc_files_from_bugs_241775056:
   expectation: FAIL
   tickets:
