@@ -1,37 +1,13 @@
-graphics.OpenclCts.bruteforce_cos:
-  expectation: FAIL
-  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_erfc:
   expectation: FAIL
   since_build: R153-16771.0.0
 graphics.OpenclCts.bruteforce_exp:
   expectation: FAIL
   since_build: R153-16771.0.0
-graphics.OpenclCts.bruteforce_expm1:
-  expectation: FAIL
-  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_fdim:
   expectation: FAIL
   since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_fmod:
-  expectation: FAIL
-  since_build: R153-16771.0.0
-graphics.OpenclCts.bruteforce_half_cos:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_half_sin:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_half_tan:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_hypot:
-  expectation: FAIL
-  since_build: R153-16771.0.0
 graphics.OpenclCts.bruteforce_ldexp:
-  expectation: FAIL
-  since_build: R153-16771.0.0
-graphics.OpenclCts.bruteforce_nextafter:
   expectation: FAIL
   since_build: R153-16771.0.0
 graphics.OpenclCts.bruteforce_pow:
@@ -43,33 +19,18 @@ graphics.OpenclCts.bruteforce_pown:
 graphics.OpenclCts.bruteforce_powr:
   expectation: FAIL
   since_build: R153-16771.0.0
-graphics.OpenclCts.bruteforce_remainder:
-  expectation: FAIL
-  since_build: R153-16771.0.0
-graphics.OpenclCts.bruteforce_remquo:
-  expectation: FAIL
-  since_build: R153-16771.0.0
 graphics.OpenclCts.bruteforce_rootn:
   expectation: FAIL
   since_build: R153-16771.0.0
-graphics.OpenclCts.bruteforce_sin:
+graphics.OpenclCts.cl_fill_images_1darray_cl_snorm_int16:
   expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_sincos:
+  since_build: R158-16858.0.0
+graphics.OpenclCts.cl_fill_images_2darray_cl_half_float:
   expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_tan:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.cl_copy_images_2dto3d_cl_signed_int32:
-  expectation: FAIL
-  since_build: R129-15970.0.0
+  since_build: R158-16858.0.0
 graphics.OpenclCts.cl_fill_images_2darray_cl_unorm_int8:
   expectation: FAIL
   since_build: R132-16082.0.0
-graphics.OpenclCts.cl_fill_images_2darray_cl_unsigned_int16:
-  expectation: FAIL
-  since_build: R137-16249.0.0
 graphics.OpenclCts.cl_fill_images_3d_cl_signed_int16:
   expectation: FAIL
   since_build: R134-16174.0.0
@@ -83,8 +44,5 @@ graphics.OpenclCts.geometrics_geom_normalize:
   expectation: FAIL
   since_build: R153-16771.0.0
 graphics.OpenclCts.subgroups_subgroup_functions_ballot:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.subgroups_subgroup_functions_rotate:
   expectation: FAIL
   since_build: R149-16654.0.0

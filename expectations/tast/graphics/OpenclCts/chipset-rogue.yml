@@ -33,6 +33,9 @@ graphics.OpenclCts.api_min_max_write_image_args:
 graphics.OpenclCts.api_negative_set_read_write_image_arg:
   expectation: FAIL
   since_build: R149-16654.0.0
+graphics.OpenclCts.atomics_atomic_cmpxchg:
+  expectation: FAIL
+  since_build: R158-16858.0.0
 graphics.OpenclCts.basic_enqueue_map_image:
   expectation: FAIL
   since_build: R123-15766.0.0
@@ -216,9 +219,6 @@ graphics.OpenclCts.bruteforce_half_tan:
 graphics.OpenclCts.bruteforce_hypot:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.bruteforce_ilogb:
-  expectation: FAIL
-  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_isequal:
   expectation: FAIL
   since_build: R117-15527.0.0
@@ -331,10 +331,6 @@ graphics.OpenclCts.bruteforce_sin:
   expectation: FAIL
   tickets:
   - b/227133190
-graphics.OpenclCts.bruteforce_sincos:
-  expectation: FAIL
-  tickets:
-  - b/227133190
 graphics.OpenclCts.bruteforce_sinh:
   expectation: FAIL
   tickets:
@@ -439,6 +435,9 @@ graphics.OpenclCts.cl_copy_images_1darray_cl_unorm_int16:
 graphics.OpenclCts.cl_copy_images_1darray_cl_unorm_int8:
   expectation: FAIL
   since_build: R123-15766.0.0
+graphics.OpenclCts.cl_copy_images_1darray_cl_unorm_short_565:
+  expectation: FAIL
+  since_build: R158-16858.0.0
 graphics.OpenclCts.cl_copy_images_1darray_cl_unsigned_int16:
   expectation: FAIL
   since_build: R123-15766.0.0
@@ -448,18 +447,21 @@ graphics.OpenclCts.cl_copy_images_1darray_cl_unsigned_int32:
 graphics.OpenclCts.cl_copy_images_1darray_cl_unsigned_int8:
   expectation: FAIL
   since_build: R123-15783.0.0
-graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_float:
+graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_signed_int8:
   expectation: FAIL
-  since_build: R135-16197.0.0
-graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_signed_int16:
+  since_build: R158-16858.0.0
+graphics.OpenclCts.cl_copy_images_1dbufferto1d_cl_snorm_int16:
   expectation: FAIL
-  since_build: R144-16487.0.0
-graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_signed_int32:
+  since_build: R158-16858.0.0
+graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_snorm_int16:
   expectation: FAIL
-  since_build: R135-16197.0.0
-graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_unorm_int8:
+  since_build: R158-16858.0.0
+graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_snorm_int8:
   expectation: FAIL
-  since_build: R144-16480.0.0
+  since_build: R158-16858.0.0
+graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_unsigned_int16:
+  expectation: FAIL
+  since_build: R158-16858.0.0
 graphics.OpenclCts.cl_copy_images_1dto1dbuffer_cl_unsigned_int32:
   expectation: FAIL
   since_build: R135-16197.0.0
@@ -748,6 +750,9 @@ graphics.OpenclCts.cl_copy_images_3dto2d_cl_unorm_int16:
 graphics.OpenclCts.cl_copy_images_3dto2d_cl_unorm_int8:
   expectation: FAIL
   since_build: R144-16487.0.0
+graphics.OpenclCts.cl_copy_images_3dto2d_cl_unorm_short_565:
+  expectation: FAIL
+  since_build: R158-16858.0.0
 graphics.OpenclCts.cl_copy_images_3dto2d_cl_unsigned_int16:
   expectation: FAIL
   since_build: R127-15893.0.0
@@ -1327,6 +1332,9 @@ graphics.OpenclCts.integer_ops_long_shift:
 graphics.OpenclCts.integer_ops_popcount:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.integer_ops_quick_uchar_math:
+  expectation: FAIL
+  since_build: R158-16858.0.0
 graphics.OpenclCts.integer_ops_quick_ulong_logic:
   expectation: FAIL
   since_build: R153-16775.0.0
@@ -1390,9 +1398,6 @@ graphics.OpenclCts.integer_ops_ushort_math:
 graphics.OpenclCts.integer_ops_ushort_shift:
   expectation: FAIL
   since_build: R111-15291.0.0
-graphics.OpenclCts.non_uniform_work_group_non_uniform_2d_atomics:
-  expectation: FAIL
-  since_build: R144-16487.0.0
 graphics.OpenclCts.profiling_copy_image:
   expectation: FAIL
   since_build: R110-15241.0.0
@@ -1407,9 +1412,6 @@ graphics.OpenclCts.profiling_read_image_float:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.profiling_read_image_uchar:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.relationals_relational_islessgreater:
   expectation: FAIL
   since_build: R110-15241.0.0
 graphics.OpenclCts.thread_dimensions_full_2d_explicit_local:

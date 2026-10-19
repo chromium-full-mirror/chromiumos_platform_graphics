@@ -16,31 +16,13 @@ graphics.OpenclCts.bruteforce_exp2:
 graphics.OpenclCts.bruteforce_expm1:
   expectation: FAIL
   since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_fdim:
-  expectation: FAIL
-  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_fma:
   expectation: FAIL
   since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_fmod:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_fract:
-  expectation: FAIL
-  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_hypot:
-  expectation: FAIL
-  since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_ldexp:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_logb:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_nextafter:
   expectation: FAIL
   since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_pow:
@@ -52,30 +34,12 @@ graphics.OpenclCts.bruteforce_pown:
 graphics.OpenclCts.bruteforce_powr:
   expectation: FAIL
   since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_remainder:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_remquo:
-  expectation: FAIL
-  since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_rootn:
   expectation: FAIL
   since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_rsqrt:
   expectation: FAIL
   since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_sin:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_sincos:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_tan:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_tanh:
-  expectation: FAIL
-  since_build: R149-16654.0.0
 graphics.OpenclCts.cl_copy_images_1d_cl_float:
   expectation: FAIL
   since_build: R125-15847.0.0
@@ -259,18 +223,9 @@ graphics.OpenclCts.cl_khr_command_buffer_copy_image:
 graphics.OpenclCts.compiler_options_denorm_cache:
   expectation: FAIL
   since_build: R153-16775.0.0
-graphics.OpenclCts.contractions_contractions_float_5:
-  expectation: FAIL
-  since_build: R109-15232.0.0
-graphics.OpenclCts.contractions_contractions_float_7:
-  expectation: FAIL
-  since_build: R109-15232.0.0
 graphics.OpenclCts.geometrics_geom_normalize:
   expectation: FAIL
   since_build: R153-16775.0.0
 graphics.OpenclCts.image_streams_3d_cl_unorm_short_565:
   expectation: FAIL
   since_build: R109-15232.0.0
-graphics.OpenclCts.subgroups_subgroup_functions_rotate:
-  expectation: FAIL
-  since_build: R149-16654.0.0

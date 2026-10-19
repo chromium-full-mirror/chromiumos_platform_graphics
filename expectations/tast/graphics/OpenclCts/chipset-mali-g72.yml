@@ -16,31 +16,13 @@ graphics.OpenclCts.bruteforce_exp2:
 graphics.OpenclCts.bruteforce_expm1:
   expectation: FAIL
   since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_fdim:
-  expectation: FAIL
-  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_fma:
   expectation: FAIL
   since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_fmod:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_fract:
-  expectation: FAIL
-  since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_hypot:
-  expectation: FAIL
-  since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_ldexp:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_logb:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_nextafter:
   expectation: FAIL
   since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_pow:
@@ -52,33 +34,18 @@ graphics.OpenclCts.bruteforce_pown:
 graphics.OpenclCts.bruteforce_powr:
   expectation: FAIL
   since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_remainder:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_remquo:
-  expectation: FAIL
-  since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_rootn:
   expectation: FAIL
   since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_rsqrt:
   expectation: FAIL
   since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_sin:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_sincos:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_tan:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_tanh:
-  expectation: FAIL
-  since_build: R149-16654.0.0
 graphics.OpenclCts.cl_copy_images_1d_cl_float:
   expectation: FAIL
   since_build: R135-16197.0.0
+graphics.OpenclCts.cl_copy_images_1d_cl_snorm_int8:
+  expectation: FAIL
+  since_build: R158-16858.0.0
 graphics.OpenclCts.cl_copy_images_1darray_cl_float:
   expectation: FAIL
   since_build: R123-15766.0.0
@@ -166,6 +133,9 @@ graphics.OpenclCts.cl_fill_images_1d_cl_signed_int32:
 graphics.OpenclCts.cl_fill_images_1d_cl_unsigned_int32:
   expectation: FAIL
   since_build: R127-15896.0.0
+graphics.OpenclCts.cl_fill_images_1darray_cl_float:
+  expectation: FAIL
+  since_build: R158-16858.0.0
 graphics.OpenclCts.cl_fill_images_1darray_cl_half_float:
   expectation: FAIL
   since_build: R136-16232.0.0
@@ -217,12 +187,6 @@ graphics.OpenclCts.cl_khr_command_buffer_copy_image:
 graphics.OpenclCts.compiler_options_denorm_cache:
   expectation: FAIL
   since_build: R153-16775.0.0
-graphics.OpenclCts.contractions_contractions_float_5:
-  expectation: FAIL
-  since_build: R110-15241.0.0
-graphics.OpenclCts.contractions_contractions_float_7:
-  expectation: FAIL
-  since_build: R110-15241.0.0
 graphics.OpenclCts.geometrics_geom_normalize:
   expectation: FAIL
   since_build: R153-16775.0.0
