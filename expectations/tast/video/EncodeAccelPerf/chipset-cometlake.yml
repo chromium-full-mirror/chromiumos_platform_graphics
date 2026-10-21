@@ -1,0 +1,6 @@
+video.EncodeAccelPerf.vp8_1080p_l1t2_life_of_process:
+  expectation: FAIL
+  tickets:
+  - b/572007096
+  comments: i965 Gen9 VP8 L1T2 CBR encoder produces corrupt P-frames at frame 561
+  since_build: R153-16779.0.0
