@@ -1,22 +1,4 @@
-graphics.OpenclCts.bruteforce_erf:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_erfc:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_exp:
-  expectation: FAIL
-  since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_exp2:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_expm1:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_fma:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_fmod:
   expectation: FAIL
   since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_half_log:
@@ -38,48 +20,6 @@ graphics.OpenclCts.bruteforce_log10:
   expectation: FAIL
   since_build: R153-16775.0.0
 graphics.OpenclCts.bruteforce_log2:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_nextafter:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_pow:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_pown:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_powr:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_remainder:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.bruteforce_remquo:
-  expectation: FAIL
-  since_build: R147-16590.0.0
-graphics.OpenclCts.bruteforce_rootn:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.bruteforce_sin:
-  expectation: FAIL
-  since_build: R135-16203.0.0
-graphics.OpenclCts.bruteforce_sincos:
-  expectation: FAIL
-  since_build: R135-16203.0.0
-graphics.OpenclCts.bruteforce_tan:
-  expectation: FAIL
-  since_build: R135-16203.0.0
-graphics.OpenclCts.c11_atomics_atomic_flag:
-  expectation: FAIL
-  since_build: R123-15755.0.0
-graphics.OpenclCts.cl_khr_command_buffer_copy_image:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.compiler_options_denorm_cache:
-  expectation: FAIL
-  since_build: R153-16775.0.0
-graphics.OpenclCts.geometrics_geom_normalize:
   expectation: FAIL
   since_build: R153-16775.0.0
 graphics.OpenclCts.half_roundtrip:
@@ -268,12 +208,12 @@ graphics.OpenclCts.integer_ops_ulong_logic:
 graphics.OpenclCts.integer_ops_ulong_math:
   expectation: FAIL
   since_build: R110-15241.0.0
+graphics.OpenclCts.integer_ops_ulong_shift:
+  expectation: FAIL
+  since_build: R160-16896.0.0
 graphics.OpenclCts.integer_ops_ushort_compare:
   expectation: FAIL
   since_build: R137-16244.0.0
 graphics.OpenclCts.subgroups_subgroup_functions_ballot:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.subgroups_subgroup_functions_rotate:
   expectation: FAIL
   since_build: R149-16654.0.0

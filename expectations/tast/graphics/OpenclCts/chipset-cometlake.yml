@@ -1,39 +1,24 @@
-graphics.OpenclCts.bruteforce_erfc:
-  expectation: FAIL
-  since_build: R153-16771.0.0
-graphics.OpenclCts.bruteforce_exp:
-  expectation: FAIL
-  since_build: R153-16771.0.0
 graphics.OpenclCts.bruteforce_fdim:
   expectation: FAIL
   since_build: R149-16654.0.0
 graphics.OpenclCts.bruteforce_half_powr:
   expectation: FAIL
   since_build: R114-15432.0.0
-graphics.OpenclCts.bruteforce_ldexp:
+graphics.OpenclCts.half_vstore_half:
   expectation: FAIL
-  since_build: R153-16771.0.0
-graphics.OpenclCts.bruteforce_pow:
+  since_build: R160-16896.0.0
+graphics.OpenclCts.half_vstore_half_rte:
   expectation: FAIL
-  since_build: R153-16771.0.0
-graphics.OpenclCts.bruteforce_pown:
+  since_build: R160-16896.0.0
+graphics.OpenclCts.half_vstore_half_rtn:
   expectation: FAIL
-  since_build: R153-16771.0.0
-graphics.OpenclCts.bruteforce_powr:
+  since_build: R160-16896.0.0
+graphics.OpenclCts.half_vstore_half_rtp:
   expectation: FAIL
-  since_build: R153-16771.0.0
-graphics.OpenclCts.bruteforce_rootn:
+  since_build: R160-16896.0.0
+graphics.OpenclCts.half_vstore_half_rtz:
   expectation: FAIL
-  since_build: R153-16771.0.0
-graphics.OpenclCts.cl_khr_command_buffer_copy_image:
-  expectation: FAIL
-  since_build: R149-16654.0.0
-graphics.OpenclCts.compiler_options_denorm_cache:
-  expectation: FAIL
-  since_build: R153-16771.0.0
-graphics.OpenclCts.geometrics_geom_normalize:
-  expectation: FAIL
-  since_build: R153-16771.0.0
+  since_build: R160-16896.0.0
 graphics.OpenclCts.image_streams_1d_cl_float:
   expectation: FAIL
   since_build: R134-16168.0.0

@@ -202,6 +202,9 @@ graphics.OpenclCts.bruteforce_remquo:
 graphics.OpenclCts.bruteforce_rootn:
   expectation: FAIL
   since_build: R153-16775.0.0
+graphics.OpenclCts.bruteforce_rsqrt:
+  expectation: FAIL
+  since_build: R160-16896.0.0
 graphics.OpenclCts.bruteforce_sin:
   expectation: FAIL
   since_build: R136-16222.0.0
@@ -361,9 +364,6 @@ graphics.OpenclCts.buffers_sub_buffers_overlapping:
 graphics.OpenclCts.buffers_sub_buffers_read_write:
   expectation: FAIL
   since_build: R110-15241.0.0
-graphics.OpenclCts.cl_khr_command_buffer_copy_image:
-  expectation: FAIL
-  since_build: R149-16654.0.0
 graphics.OpenclCts.compiler_features_macro:
   expectation: FAIL
   since_build: R123-15755.0.0
